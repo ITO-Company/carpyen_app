@@ -19,11 +19,18 @@ class Diseno extends Model
         'aprovado',
         'fecha_aprovacion',
         'comentario',
+        'proyecto_id',
+        'descripcion',
+        'estado',
+        'fecha_inicio',
+        'fecha_fin',
     ];
 
     protected $casts = [
         'aprovado' => 'boolean',
         'fecha_aprovacion' => 'date',
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
     ];
 
     /**
@@ -34,6 +41,12 @@ class Diseno extends Model
     public function cotizacion()
     {
         return $this->belongsTo(Cotizacion::class);
+    }
+
+    // Un diseño pertenece a un proyecto
+    public function proyecto()
+    {
+        return $this->belongsTo(Proyecto::class);
     }
 
     // Un diseño pertenece a un diseñador (usuario)
