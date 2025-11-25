@@ -15,9 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ejecutar seeder de usuarios
+        // Ejecutar seeders en orden
         $this->call([
             UserSeeder::class,
+            DataSeeder::class,
         ]);
     }
 }

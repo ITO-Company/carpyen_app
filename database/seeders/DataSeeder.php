@@ -75,18 +75,19 @@ class DataSeeder extends Seeder
 
         // Crear Proveedores
         $proveedores = [
-            ['nombre' => 'Maderas del Norte', 'contacto' => 'Juan Pérez', 'telefono' => '3-3456789', 'direccion' => 'Zona Norte, Santa Cruz'],
-            ['nombre' => 'Herrajes Industriales', 'contacto' => 'Pedro Sánchez', 'telefono' => '3-3567890', 'direccion' => 'Parque Industrial, Santa Cruz'],
-            ['nombre' => 'Pinturas y Acabados', 'contacto' => 'Laura Gómez', 'telefono' => '3-3678901', 'direccion' => 'Av. Santos Dumont, Santa Cruz'],
+            ['nombre' => 'Maderas del Norte', 'contacto' => 'Juan Pérez', 'telefono' => '3-3456789', 'email' => 'info@maderarodelnorte.com', 'ubicacion' => 'Zona Norte, Santa Cruz'],
+            ['nombre' => 'Herrajes Industriales', 'contacto' => 'Pedro Sánchez', 'telefono' => '3-3567890', 'email' => 'contacto@herrajesindustriales.com', 'ubicacion' => 'Parque Industrial, Santa Cruz'],
+            ['nombre' => 'Pinturas y Acabados', 'contacto' => 'Laura Gómez', 'telefono' => '3-3678901', 'email' => 'ventas@pinturasacabados.com', 'ubicacion' => 'Av. Santos Dumont, Santa Cruz'],
         ];
 
         foreach ($proveedores as $proveedorData) {
             Proveedor::create($proveedorData);
         }
 
-        // Obtener vendedor
+        // Obtener usuarios por rol
         $vendedor = User::where('rol', 'VENDEDOR')->first();
         $disenador = User::where('rol', 'DISEÑADOR')->first();
+        $instalador = User::where('rol', 'INSTALADOR')->first();
 
         // Crear Proyectos
         $proyectos = [
@@ -130,12 +131,14 @@ class DataSeeder extends Seeder
             // Crear Cotización para cada proyecto
             $cotizacion = Cotizacion::create([
                 'proyecto_id' => $proyecto->id,
-                'detalles' => json_encode([
-                    ['item' => 'Materiales', 'cantidad' => 1, 'precio' => 5000],
-                    ['item' => 'Mano de obra', 'cantidad' => 1, 'precio' => 3000],
-                ]),
+                'hipo_metro' => 50.00,
+                'costo_metro' => 150.00,
+                'cantidad_metro' => 10,
+                'costo_mueble' => 3000.00,
+                'mueble_numero' => 2,
                 'total' => 8000.00,
-                'estado' => 'aprobada'
+                'estado' => 'aprobada',
+                'comentario' => 'Cotización para ' . $proyecto->nombre
             ]);
 
             // Crear Diseño
@@ -143,9 +146,11 @@ class DataSeeder extends Seeder
                 Diseno::create([
                     'cotizacion_id' => $cotizacion->id,
                     'user_id' => $disenador->id,
-                    'descripcion' => 'Diseño 3D del proyecto ' . $proyecto->nombre,
-                    'archivo_url' => '/diseños/proyecto_' . $proyecto->id . '.pdf',
-                    'estado' => 'aprobado'
+                    'url_render' => '/diseños/proyecto_' . $proyecto->id . '.jpg',
+                    'plano_iluminador' => '/planos/proyecto_' . $proyecto->id . '.pdf',
+                    'aprovado' => true,
+                    'fecha_aprovacion' => now()->subDays(7),
+                    'comentario' => 'Diseño 3D aprobado para ' . $proyecto->nombre
                 ]);
             }
 
@@ -154,8 +159,9 @@ class DataSeeder extends Seeder
                 'proyecto_id' => $proyecto->id,
                 'deuda_total' => 8000.00,
                 'pagado_total' => $proyecto->estado === 'completado' ? 8000.00 : 4000.00,
+                'numero_deudas' => 2,
                 'numero_pagos' => $proyecto->estado === 'completado' ? 2 : 1,
-                'estado' => $proyecto->estado === 'completado' ? 'completado' : 'pendiente'
+                'estado' => $proyecto->estado === 'completado' ? 'completado' : 'activo'
             ]);
 
             // Crear Pagos
@@ -183,18 +189,16 @@ class DataSeeder extends Seeder
                     'proyecto_id' => $proyecto->id,
                     'fecha_inicio' => now()->subDays(15),
                     'fecha_fin' => now()->addDays(15),
-                    'estado' => $proyecto->estado === 'completado' ? 'completado' : 'en_proceso'
+                    'dias_estimados' => 30,
+                    'estado' => $proyecto->estado === 'completado' ? 'completado' : 'en_curso'
                 ]);
 
-                // Crear Tareas
-                $instalador = User::where('rol', 'INSTALADOR')->first();
-                
                 Tarea::create([
                     'cronograma_id' => $cronograma->id,
                     'user_id' => $instalador ? $instalador->id : null,
                     'descripcion' => 'Corte de materiales',
-                    'fecha_asignacion' => now()->subDays(14),
-                    'fecha_completado' => now()->subDays(12),
+                    'hora_inicio' => '08:00',
+                    'hora_fin' => '12:00',
                     'estado' => 'completada'
                 ]);
 
@@ -202,8 +206,8 @@ class DataSeeder extends Seeder
                     'cronograma_id' => $cronograma->id,
                     'user_id' => $instalador ? $instalador->id : null,
                     'descripcion' => 'Ensamblaje',
-                    'fecha_asignacion' => now()->subDays(11),
-                    'fecha_completado' => $proyecto->estado === 'completado' ? now()->subDays(5) : null,
+                    'hora_inicio' => '13:00',
+                    'hora_fin' => '17:00',
                     'estado' => $proyecto->estado === 'completado' ? 'completada' : 'en_proceso'
                 ]);
 
@@ -212,8 +216,8 @@ class DataSeeder extends Seeder
                         'cronograma_id' => $cronograma->id,
                         'user_id' => $instalador ? $instalador->id : null,
                         'descripcion' => 'Acabados finales',
-                        'fecha_asignacion' => now()->subDays(4),
-                        'fecha_completado' => null,
+                        'hora_inicio' => '08:00',
+                        'hora_fin' => '12:00',
                         'estado' => 'pendiente'
                     ]);
                 }
