@@ -55,10 +55,10 @@ defineProps({
                             <tbody>
                                 <tr v-for="cliente in clientes.data" :key="cliente.id">
                                     <td>{{ cliente.id }}</td>
-                                    <td class="font-medium">{{ cliente.nombre }}</td>
-                                    <td>{{ cliente.email }}</td>
-                                    <td>{{ cliente.telefono }}</td>
-                                    <td>{{ cliente.direccion }}</td>
+                                    <td class="font-medium">{{ cliente.nombre || '-' }}</td>
+                                    <td>{{ cliente.email || '-' }}</td>
+                                    <td>{{ cliente.telefono || '-' }}</td>
+                                    <td>{{ cliente.direccion || '-' }}</td>
                                     <td>
                                         <div class="flex gap-2">
                                             <Link 
@@ -98,9 +98,10 @@ defineProps({
                             <Link
                                 v-for="link in clientes.links"
                                 :key="link.label"
-                                :href="link.url"
-                                :class="['btn', link.active ? 'btn-primary' : 'btn-secondary']"
-                                v-html="link.label"
+                                :href="link.url || '#'"
+                                :class="['btn', link.active ? 'btn-primary' : 'btn-secondary', !link.url && 'btn-disabled']"
+                                @click.prevent="link.url && $inertia.visit(link.url)"
+                                v-text="link.label"
                             />
                         </div>
                     </div>

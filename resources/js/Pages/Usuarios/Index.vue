@@ -58,9 +58,9 @@ defineProps({
                                 >
                                     <td>{{ usuario.id }}</td>
                                     <td class="font-medium">
-                                        {{ usuario.name }}
+                                        {{ usuario.name || '-' }}
                                     </td>
-                                    <td>{{ usuario.email }}</td>
+                                    <td>{{ usuario.email || '-' }}</td>
                                     <td>
                                         <span
                                             class="badge"
@@ -79,7 +79,7 @@ defineProps({
                                                     'INSTALADOR',
                                             }"
                                         >
-                                            {{ usuario.rol }}
+                                            {{ usuario.rol || 'Sin rol' }}
                                         </span>
                                     </td>
                                     <td>
@@ -155,14 +155,16 @@ defineProps({
                             <Link
                                 v-for="link in usuarios.links"
                                 :key="link.label"
-                                :href="link.url"
+                                :href="link.url || '#'"
                                 :class="[
                                     'btn',
                                     link.active
                                         ? 'btn-primary'
                                         : 'btn-secondary',
+                                    !link.url && 'btn-disabled',
                                 ]"
-                                v-html="link.label"
+                                @click.prevent="link.url && $inertia.visit(link.url)"
+                                v-text="link.label"
                             />
                         </div>
                     </div>

@@ -45,13 +45,13 @@ defineProps({
                             <tbody>
                                 <tr v-for="producto in productos.data" :key="producto.id">
                                     <td>{{ producto.id }}</td>
-                                    <td class="font-medium">{{ producto.nombre }}</td>
+                                    <td class="font-medium">{{ producto.nombre || '-' }}</td>
                                     <td>{{ producto.tipo || '-' }}</td>
-                                    <td>{{ producto.unidad_medida }}</td>
-                                    <td>Bs. {{ Number(producto.precio_unitario).toFixed(2) }}</td>
+                                    <td>{{ producto.unidad_medida || '-' }}</td>
+                                    <td>Bs. {{ Number(producto.precio_unitario || 0).toFixed(2) }}</td>
                                     <td>
-                                        <span :class="['badge', producto.stock < 10 ? 'badge-warning' : 'badge-success']">
-                                            {{ producto.stock }}
+                                        <span :class="['badge', (producto.stock || 0) < 10 ? 'badge-warning' : 'badge-success']">
+                                            {{ producto.stock || 0 }}
                                         </span>
                                     </td>
                                     <td>

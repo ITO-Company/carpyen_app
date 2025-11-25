@@ -52,6 +52,19 @@ class User extends Authenticatable
     }
 
     /**
+     * Accessor para obtener el nombre del primer rol del usuario
+     */
+    public function getRolAttribute()
+    {
+        // Si tiene el atributo 'rol' en la BD, devolverlo
+        if ($this->attributes['rol'] ?? null) {
+            return $this->attributes['rol'];
+        }
+        // Si no, obtener del primer rol de Spatie
+        return $this->roles()->first()?->name ?? 'Sin rol';
+    }
+
+    /**
      * Relaciones
      */
     
