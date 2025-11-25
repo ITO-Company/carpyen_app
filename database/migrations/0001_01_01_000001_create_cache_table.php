@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,17 +12,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cache', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->mediumText('value');
-            $table->integer('expiration');
-        });
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS cache (
+                key varchar(255) PRIMARY KEY,
+                value text NOT NULL,
+                expiration integer NOT NULL
+            );
+        ');
 
-        Schema::create('cache_locks', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->string('owner');
-            $table->integer('expiration');
-        });
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS cache_locks (
+                key varchar(255) PRIMARY KEY,
+                owner varchar(255) NOT NULL,
+                expiration integer NOT NULL
+            );
+        ');
+
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                email varchar(255) PRIMARY KEY,
+                token varchar(255) NOT NULL,
+                created_at timestamp(0) without time zone NULL
+            );
+        ');
     }
 
     /**
@@ -29,6 +42,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('cache_locks');
     }

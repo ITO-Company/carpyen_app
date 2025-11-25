@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,38 +12,60 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('queue')->index();
-            $table->longText('payload');
-            $table->unsignedTinyInteger('attempts');
-            $table->unsignedInteger('reserved_at')->nullable();
-            $table->unsignedInteger('available_at');
-            $table->unsignedInteger('created_at');
-        });
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS jobs (
+                id bigserial PRIMARY KEY,
+                queue varchar(255) NOT NULL,
+                payload text NOT NULL,
+                attempts smallint NOT NULL,
+                reserved_at integer NULL,
+                available_at integer NOT NULL,
+                created_at integer NOT NULL
+            );
+        ');
 
-        Schema::create('job_batches', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('name');
-            $table->integer('total_jobs');
-            $table->integer('pending_jobs');
-            $table->integer('failed_jobs');
-            $table->longText('failed_job_ids');
-            $table->mediumText('options')->nullable();
-            $table->integer('cancelled_at')->nullable();
-            $table->integer('created_at');
-            $table->integer('finished_at')->nullable();
-        });
+        DB::unprepared('CREATE INDEX IF NOT EXISTS jobs_queue_index ON jobs(queue);');
 
-        Schema::create('failed_jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('uuid')->unique();
-            $table->text('connection');
-            $table->text('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
-        });
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS job_batches (
+                id varchar(255) PRIMARY KEY,
+                name varchar(255) NOT NULL,
+                total_jobs integer NOT NULL,
+                pending_jobs integer NOT NULL,
+                failed_jobs integer NOT NULL,
+                failed_job_ids text NOT NULL,
+                options text NULL,
+                cancelled_at integer NULL,
+                created_at integer NOT NULL,
+                finished_at integer NULL
+            );
+        ');
+
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS failed_jobs (
+                id bigserial PRIMARY KEY,
+                uuid varchar(255) NOT NULL UNIQUE,
+                connection text NOT NULL,
+                queue text NOT NULL,
+                payload text NOT NULL,
+                exception text NOT NULL,
+                failed_at timestamp(0) without time zone DEFAULT CURRENT_TIMESTAMP
+            );
+        ');
+
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS sessions (
+                id varchar(255) PRIMARY KEY,
+                user_id bigint NULL,
+                ip_address varchar(45) NULL,
+                user_agent text NULL,
+                payload text NOT NULL,
+                last_activity integer NOT NULL
+            );
+        ');
+
+        DB::unprepared('CREATE INDEX IF NOT EXISTS sessions_user_id_index ON sessions(user_id);');
+        DB::unprepared('CREATE INDEX IF NOT EXISTS sessions_last_activity_index ON sessions(last_activity);');
     }
 
     /**
@@ -50,6 +73,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('sessions');
         Schema::dropIfExists('jobs');
         Schema::dropIfExists('job_batches');
         Schema::dropIfExists('failed_jobs');
