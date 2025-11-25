@@ -57,8 +57,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Gestión de Productos (CU3)
     Route::resource('productos', ProductoController::class);
 
-    // Gestión de Inventario
-    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
+    // Gestión de Inventario (redirige a Productos)
+    Route::get('/inventario', function() {
+        return redirect()->route('productos.index');
+    })->name('inventario.index');
 
     // Gestión de Diseños (CU4)
     Route::resource('disenos', DisenoController::class);

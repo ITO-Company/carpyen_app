@@ -5,6 +5,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 defineProps({
     productos: Object
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 </script>
 
 <template>
@@ -13,11 +19,22 @@ defineProps({
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                <h2
+                    class="font-semibold text-xl leading-tight"
+                    style="color: var(--theme-text-primary)"
+                >
                     Gestión de Productos
                 </h2>
                 <Link :href="route('productos.create')" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
@@ -43,40 +60,84 @@ defineProps({
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="producto in productos.data" :key="producto.id">
+                                <tr
+                                    v-for="producto in productos.data"
+                                    :key="producto.id"
+                                >
                                     <td>{{ producto.id }}</td>
-                                    <td class="font-medium">{{ producto.nombre || '-' }}</td>
-                                    <td>{{ producto.tipo || '-' }}</td>
-                                    <td>{{ producto.unidad_medida || '-' }}</td>
-                                    <td>Bs. {{ Number(producto.precio_unitario || 0).toFixed(2) }}</td>
+                                    <td class="font-medium">
+                                        {{ producto.nombre || "-" }}
+                                    </td>
+                                    <td>{{ producto.tipo || "-" }}</td>
+                                    <td>{{ producto.unidad_medida || "-" }}</td>
                                     <td>
-                                        <span :class="['badge', (producto.stock || 0) < 10 ? 'badge-warning' : 'badge-success']">
+                                        Bs.
+                                        {{
+                                            Number(
+                                                producto.precio_unitario || 0
+                                            ).toFixed(2)
+                                        }}
+                                    </td>
+                                    <td>
+                                        <span
+                                            :class="[
+                                                'badge',
+                                                (producto.stock || 0) < 10
+                                                    ? 'badge-warning'
+                                                    : 'badge-success',
+                                            ]"
+                                        >
                                             {{ producto.stock || 0 }}
                                         </span>
                                     </td>
                                     <td>
                                         <div class="flex gap-2">
-                                            <Link 
-                                                :href="route('productos.edit', producto.id)" 
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        'productos.edit',
+                                                        producto.id
+                                                    )
+                                                "
                                                 class="text-primary hover:underline"
-                                                style="color: var(--theme-primary)"
+                                                style="
+                                                    color: var(--theme-primary);
+                                                "
                                             >
                                                 Editar
                                             </Link>
-                                            <Link 
-                                                :href="route('productos.destroy', producto.id)" 
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        'productos.destroy',
+                                                        producto.id
+                                                    )
+                                                "
                                                 method="delete"
                                                 as="button"
                                                 class="text-error hover:underline"
-                                                style="color: var(--theme-error)"
+                                                style="
+                                                    color: var(--theme-error);
+                                                "
                                             >
                                                 Eliminar
                                             </Link>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr v-if="!productos.data || productos.data.length === 0">
-                                    <td colspan="7" class="text-center py-8" style="color: var(--theme-text-secondary)">
+                                <tr
+                                    v-if="
+                                        !productos.data ||
+                                        productos.data.length === 0
+                                    "
+                                >
+                                    <td
+                                        colspan="7"
+                                        class="text-center py-8"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
                                         No hay productos registrados
                                     </td>
                                 </tr>
@@ -85,17 +146,36 @@ defineProps({
                     </div>
 
                     <!-- Paginación -->
-                    <div v-if="productos.links" class="mt-6 flex justify-between items-center">
-                        <div style="color: var(--theme-text-secondary); font-size: var(--font-size-sm)">
-                            Mostrando {{ productos.from }} a {{ productos.to }} de {{ productos.total }} resultados
+                    <div
+                        v-if="productos.links"
+                        class="mt-6 flex justify-between items-center"
+                    >
+                        <div
+                            style="
+                                color: var(--theme-text-secondary);
+                                font-size: var(--font-size-sm);
+                            "
+                        >
+                            Mostrando {{ productos.from }} a
+                            {{ productos.to }} de
+                            {{ productos.total }} resultados
                         </div>
                         <div class="flex gap-2">
                             <Link
                                 v-for="link in productos.links"
                                 :key="link.label"
-                                :href="link.url"
-                                :class="['btn', link.active ? 'btn-primary' : 'btn-secondary']"
-                                v-html="link.label"
+                                :href="link.url || '#'"
+                                :class="[
+                                    'btn',
+                                    link.active
+                                        ? 'btn-primary'
+                                        : 'btn-secondary',
+                                    !link.url && 'btn-disabled',
+                                ]"
+                                @click.prevent="
+                                    link.url && $inertia.visit(link.url)
+                                "
+                                v-text="link.label"
                             />
                         </div>
                     </div>

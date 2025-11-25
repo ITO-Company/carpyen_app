@@ -5,6 +5,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 defineProps({
     pagos: Object,
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 </script>
 
 <template>
@@ -73,15 +79,17 @@ defineProps({
                                             class="badge"
                                             :class="{
                                                 'badge-warning':
-                                                    pago.estado === 'pendiente',
+                                                    (pago.estado ?? null) ===
+                                                    'pendiente',
                                                 'badge-success':
-                                                    pago.estado ===
+                                                    (pago.estado ?? null) ===
                                                     'completado',
                                                 'badge-error':
-                                                    pago.estado === 'cancelado',
+                                                    (pago.estado ?? null) ===
+                                                    'cancelado',
                                             }"
                                         >
-                                            {{ pago.estado }}
+                                            {{ pago.estado || "-" }}
                                         </span>
                                     </td>
                                     <td>
@@ -156,11 +164,15 @@ defineProps({
                                 :href="link.url"
                                 :class="[
                                     'btn',
-                                    link.active
+                                    !link.url
+                                        ? 'btn-disabled'
+                                        : link.active
                                         ? 'btn-primary'
                                         : 'btn-secondary',
                                 ]"
-                                v-html="link.label"
+                                :disabled="!link.url"
+                                @click.prevent="!link.url"
+                                v-text="paginationLabel(link.label)"
                             />
                         </div>
                     </div>

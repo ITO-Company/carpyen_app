@@ -5,6 +5,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 defineProps({
     clientes: Object
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 </script>
 
 <template>
@@ -13,11 +19,22 @@ defineProps({
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                <h2
+                    class="font-semibold text-xl leading-tight"
+                    style="color: var(--theme-text-primary)"
+                >
                     Gestión de Clientes
                 </h2>
                 <Link :href="route('clientes.create')" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
@@ -31,11 +48,11 @@ defineProps({
                 <div class="card fade-in">
                     <!-- Barra de búsqueda -->
                     <div class="mb-6">
-                        <input 
-                            type="text" 
-                            placeholder="Buscar clientes..." 
+                        <input
+                            type="text"
+                            placeholder="Buscar clientes..."
                             class="input"
-                            style="max-width: 400px;"
+                            style="max-width: 400px"
                         />
                     </div>
 
@@ -53,35 +70,65 @@ defineProps({
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="cliente in clientes.data" :key="cliente.id">
+                                <tr
+                                    v-for="cliente in clientes.data"
+                                    :key="cliente.id"
+                                >
                                     <td>{{ cliente.id }}</td>
-                                    <td class="font-medium">{{ cliente.nombre || '-' }}</td>
-                                    <td>{{ cliente.email || '-' }}</td>
-                                    <td>{{ cliente.telefono || '-' }}</td>
-                                    <td>{{ cliente.direccion || '-' }}</td>
+                                    <td class="font-medium">
+                                        {{ cliente.nombre || "-" }}
+                                    </td>
+                                    <td>{{ cliente.email || "-" }}</td>
+                                    <td>{{ cliente.telefono || "-" }}</td>
+                                    <td>{{ cliente.direccion || "-" }}</td>
                                     <td>
                                         <div class="flex gap-2">
-                                            <Link 
-                                                :href="route('clientes.edit', cliente.id)" 
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        'clientes.edit',
+                                                        cliente.id
+                                                    )
+                                                "
                                                 class="text-primary hover:underline"
-                                                style="color: var(--theme-primary)"
+                                                style="
+                                                    color: var(--theme-primary);
+                                                "
                                             >
                                                 Editar
                                             </Link>
-                                            <Link 
-                                                :href="route('clientes.destroy', cliente.id)" 
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        'clientes.destroy',
+                                                        cliente.id
+                                                    )
+                                                "
                                                 method="delete"
                                                 as="button"
                                                 class="text-error hover:underline"
-                                                style="color: var(--theme-error)"
+                                                style="
+                                                    color: var(--theme-error);
+                                                "
                                             >
                                                 Eliminar
                                             </Link>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr v-if="!clientes.data || clientes.data.length === 0">
-                                    <td colspan="6" class="text-center py-8" style="color: var(--theme-text-secondary)">
+                                <tr
+                                    v-if="
+                                        !clientes.data ||
+                                        clientes.data.length === 0
+                                    "
+                                >
+                                    <td
+                                        colspan="6"
+                                        class="text-center py-8"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
                                         No hay clientes registrados
                                     </td>
                                 </tr>
@@ -90,17 +137,34 @@ defineProps({
                     </div>
 
                     <!-- Paginación -->
-                    <div v-if="clientes.links" class="mt-6 flex justify-between items-center">
-                        <div style="color: var(--theme-text-secondary); font-size: var(--font-size-sm)">
-                            Mostrando {{ clientes.from }} a {{ clientes.to }} de {{ clientes.total }} resultados
+                    <div
+                        v-if="clientes.links"
+                        class="mt-6 flex justify-between items-center"
+                    >
+                        <div
+                            style="
+                                color: var(--theme-text-secondary);
+                                font-size: var(--font-size-sm);
+                            "
+                        >
+                            Mostrando {{ clientes.from }} a {{ clientes.to }} de
+                            {{ clientes.total }} resultados
                         </div>
                         <div class="flex gap-2">
                             <Link
                                 v-for="link in clientes.links"
                                 :key="link.label"
                                 :href="link.url || '#'"
-                                :class="['btn', link.active ? 'btn-primary' : 'btn-secondary', !link.url && 'btn-disabled']"
-                                @click.prevent="link.url && $inertia.visit(link.url)"
+                                :class="[
+                                    'btn',
+                                    link.active
+                                        ? 'btn-primary'
+                                        : 'btn-secondary',
+                                    !link.url && 'btn-disabled',
+                                ]"
+                                @click.prevent="
+                                    link.url && $inertia.visit(link.url)
+                                "
                                 v-text="link.label"
                             />
                         </div>

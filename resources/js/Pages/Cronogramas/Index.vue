@@ -5,6 +5,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 defineProps({
     cronogramas: Object,
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 </script>
 
 <template>
@@ -146,11 +152,15 @@ defineProps({
                                 :href="link.url"
                                 :class="[
                                     'btn',
-                                    link.active
+                                    !link.url
+                                        ? 'btn-disabled'
+                                        : link.active
                                         ? 'btn-primary'
                                         : 'btn-secondary',
                                 ]"
-                                v-html="link.label"
+                                :disabled="!link.url"
+                                @click.prevent="!link.url"
+                                v-text="paginationLabel(link.label)"
                             />
                         </div>
                     </div>

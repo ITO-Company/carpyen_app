@@ -1,10 +1,16 @@
 <script setup>
-import { Head, Link } from "@inertiajs/vue3";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Head, Link } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 defineProps({
-    proyectos: Object,
+    proyectos: Object
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 
 const estadoColors = {
     pendiente: "badge-warning",
@@ -90,12 +96,18 @@ const estadoLabels = {
                                         <span
                                             :class="[
                                                 'badge',
-                                                estadoColors[proyecto.estado] ||
+                                                (proyecto.estado &&
+                                                    estadoColors[
+                                                        proyecto.estado
+                                                    ]) ||
                                                     'badge-secondary',
                                             ]"
                                         >
                                             {{
-                                                estadoLabels[proyecto.estado] ||
+                                                (proyecto.estado &&
+                                                    estadoLabels[
+                                                        proyecto.estado
+                                                    ]) ||
                                                 proyecto.estado ||
                                                 "Desconocido"
                                             }}
@@ -171,14 +183,18 @@ const estadoLabels = {
                             <Link
                                 v-for="link in proyectos.links"
                                 :key="link.label"
-                                :href="link.url"
+                                :href="link.url || '#'"
                                 :class="[
                                     'btn',
                                     link.active
                                         ? 'btn-primary'
                                         : 'btn-secondary',
+                                    !link.url && 'btn-disabled',
                                 ]"
-                                v-html="link.label"
+                                @click.prevent="
+                                    link.url && $inertia.visit(link.url)
+                                "
+                                v-text="paginationLabel(link.label)"
                             />
                         </div>
                     </div>

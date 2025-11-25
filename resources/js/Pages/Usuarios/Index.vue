@@ -5,6 +5,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 defineProps({
     usuarios: Object,
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 </script>
 
 <template>
@@ -58,9 +64,9 @@ defineProps({
                                 >
                                     <td>{{ usuario.id }}</td>
                                     <td class="font-medium">
-                                        {{ usuario.name || '-' }}
+                                        {{ usuario.name || "-" }}
                                     </td>
-                                    <td>{{ usuario.email || '-' }}</td>
+                                    <td>{{ usuario.email || "-" }}</td>
                                     <td>
                                         <span
                                             class="badge"
@@ -79,7 +85,7 @@ defineProps({
                                                     'INSTALADOR',
                                             }"
                                         >
-                                            {{ usuario.rol || 'Sin rol' }}
+                                            {{ usuario.rol || "Sin rol" }}
                                         </span>
                                     </td>
                                     <td>
@@ -163,8 +169,10 @@ defineProps({
                                         : 'btn-secondary',
                                     !link.url && 'btn-disabled',
                                 ]"
-                                @click.prevent="link.url && $inertia.visit(link.url)"
-                                v-text="link.label"
+                                @click.prevent="
+                                    link.url && $inertia.visit(link.url)
+                                "
+                                v-text="paginationLabel(link.label)"
                             />
                         </div>
                     </div>

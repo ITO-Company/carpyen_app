@@ -5,6 +5,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 defineProps({
     disenos: Object,
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 </script>
 
 <template>
@@ -68,20 +74,20 @@ defineProps({
                                             class="badge"
                                             :class="{
                                                 'badge-warning':
-                                                    diseno.estado ===
+                                                    (diseno.estado ?? null) ===
                                                     'pendiente',
                                                 'badge-info':
-                                                    diseno.estado ===
+                                                    (diseno.estado ?? null) ===
                                                     'en_proceso',
                                                 'badge-success':
-                                                    diseno.estado ===
+                                                    (diseno.estado ?? null) ===
                                                     'completado',
                                                 'badge-error':
-                                                    diseno.estado ===
+                                                    (diseno.estado ?? null) ===
                                                     'rechazado',
                                             }"
                                         >
-                                            {{ diseno.estado }}
+                                            {{ diseno.estado || "-" }}
                                         </span>
                                     </td>
                                     <td>{{ diseno.fecha_inicio || "-" }}</td>
@@ -162,11 +168,15 @@ defineProps({
                                 :href="link.url"
                                 :class="[
                                     'btn',
-                                    link.active
+                                    !link.url
+                                        ? 'btn-disabled'
+                                        : link.active
                                         ? 'btn-primary'
                                         : 'btn-secondary',
                                 ]"
-                                v-html="link.label"
+                                :disabled="!link.url"
+                                @click.prevent="!link.url"
+                                v-text="paginationLabel(link.label)"
                             />
                         </div>
                     </div>

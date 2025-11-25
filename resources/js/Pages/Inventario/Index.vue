@@ -5,6 +5,12 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 defineProps({
     productos: Object,
 });
+
+const paginationLabel = (label) => {
+    if (label.includes("Previous")) return "← Anterior";
+    if (label.includes("Next")) return "Siguiente →";
+    return label;
+};
 </script>
 
 <template>
@@ -158,14 +164,18 @@ defineProps({
                             <Link
                                 v-for="link in productos.links"
                                 :key="link.label"
-                                :href="link.url"
+                                :href="link.url || '#'"
                                 :class="[
                                     'btn',
                                     link.active
                                         ? 'btn-primary'
                                         : 'btn-secondary',
+                                    !link.url && 'btn-disabled',
                                 ]"
-                                v-html="link.label"
+                                @click.prevent="
+                                    link.url && $inertia.visit(link.url)
+                                "
+                                v-text="paginationLabel(link.label)"
                             />
                         </div>
                     </div>
