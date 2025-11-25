@@ -81,7 +81,7 @@ class MenuSeeder extends Seeder
 
         // Gestión de Productos (CU3)
         $productos = Menu::create([
-            'nombre' => 'Inventario',
+            'nombre' => 'Cotizaciones',
             'icono' => 'package',
             'ruta' => null,
             'orden' => 4,

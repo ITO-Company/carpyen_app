@@ -61,7 +61,7 @@ return new class extends Migration
         DB::unprepared('
             CREATE TABLE IF NOT EXISTS disenos (
                 id BIGSERIAL PRIMARY KEY,
-                cotizacion_id BIGINT NOT NULL REFERENCES cotizaciones(id) ON DELETE CASCADE,
+                cotizacion_id BIGINT NULL REFERENCES cotizaciones(id) ON DELETE CASCADE,
                 proyecto_id BIGINT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
                 user_id BIGINT NULL REFERENCES users(id) ON DELETE SET NULL,
                 url_render VARCHAR(500) NULL,
