@@ -3,26 +3,12 @@ import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 defineProps({
-    proyectos: Object,
+    productos: Object,
 });
-
-const estadoColors = {
-    pendiente: "badge-warning",
-    en_proceso: "badge-primary",
-    completado: "badge-success",
-    cancelado: "badge-error",
-};
-
-const estadoLabels = {
-    pendiente: "Pendiente",
-    en_proceso: "En Proceso",
-    completado: "Completado",
-    cancelado: "Cancelado",
-};
 </script>
 
 <template>
-    <Head title="Proyectos" />
+    <Head title="Inventario" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -31,9 +17,9 @@ const estadoLabels = {
                     class="font-semibold text-xl leading-tight"
                     style="color: var(--theme-text-primary)"
                 >
-                    Gestión de Proyectos
+                    Gestión de Inventario
                 </h2>
-                <Link :href="route('proyectos.create')" class="btn btn-primary">
+                <Link :href="route('productos.create')" class="btn btn-primary">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="16"
@@ -46,7 +32,7 @@ const estadoLabels = {
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Nuevo Proyecto
+                    Nuevo Producto
                 </Link>
             </div>
         </template>
@@ -60,45 +46,42 @@ const estadoLabels = {
                                 <tr>
                                     <th>ID</th>
                                     <th>Nombre</th>
-                                    <th>Cliente</th>
-                                    <th>Vendedor</th>
-                                    <th>Ubicación</th>
-                                    <th>Estado</th>
+                                    <th>Tipo</th>
+                                    <th>Unidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Stock</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="proyecto in proyectos.data"
-                                    :key="proyecto.id"
+                                    v-for="producto in productos.data"
+                                    :key="producto.id"
                                 >
-                                    <td>{{ proyecto.id }}</td>
+                                    <td>{{ producto.id }}</td>
                                     <td class="font-medium">
-                                        {{ proyecto.nombre || "-" }}
+                                        {{ producto.nombre || "-" }}
                                     </td>
+                                    <td>{{ producto.tipo || "-" }}</td>
+                                    <td>{{ producto.unidad_medida || "-" }}</td>
                                     <td>
-                                        {{ proyecto.cliente?.nombre || "-" }}
-                                    </td>
-                                    <td>
+                                        Bs.
                                         {{
-                                            proyecto.vendedor?.name ||
-                                            "Sin asignar"
+                                            Number(
+                                                producto.precio_unitario || 0
+                                            ).toFixed(2)
                                         }}
                                     </td>
-                                    <td>{{ proyecto.ubicacion || "-" }}</td>
                                     <td>
                                         <span
                                             :class="[
                                                 'badge',
-                                                estadoColors[proyecto.estado] ||
-                                                    'badge-secondary',
+                                                producto.stock < 10
+                                                    ? 'badge-warning'
+                                                    : 'badge-success',
                                             ]"
                                         >
-                                            {{
-                                                estadoLabels[proyecto.estado] ||
-                                                proyecto.estado ||
-                                                "Desconocido"
-                                            }}
+                                            {{ producto.stock || 0 }}
                                         </span>
                                     </td>
                                     <td>
@@ -106,20 +89,8 @@ const estadoLabels = {
                                             <Link
                                                 :href="
                                                     route(
-                                                        'proyectos.show',
-                                                        proyecto.id
-                                                    )
-                                                "
-                                                class="text-primary hover:underline"
-                                                style="color: var(--theme-info)"
-                                            >
-                                                Ver
-                                            </Link>
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'proyectos.edit',
-                                                        proyecto.id
+                                                        'productos.edit',
+                                                        producto.id
                                                     )
                                                 "
                                                 class="text-primary hover:underline"
@@ -129,13 +100,29 @@ const estadoLabels = {
                                             >
                                                 Editar
                                             </Link>
+                                            <Link
+                                                :href="
+                                                    route(
+                                                        'productos.destroy',
+                                                        producto.id
+                                                    )
+                                                "
+                                                method="delete"
+                                                as="button"
+                                                class="text-error hover:underline"
+                                                style="
+                                                    color: var(--theme-error);
+                                                "
+                                            >
+                                                Eliminar
+                                            </Link>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr
                                     v-if="
-                                        !proyectos.data ||
-                                        proyectos.data.length === 0
+                                        !productos.data ||
+                                        productos.data.length === 0
                                     "
                                 >
                                     <td
@@ -145,7 +132,7 @@ const estadoLabels = {
                                             color: var(--theme-text-secondary);
                                         "
                                     >
-                                        No hay proyectos registrados
+                                        No hay productos en inventario
                                     </td>
                                 </tr>
                             </tbody>
@@ -154,7 +141,7 @@ const estadoLabels = {
 
                     <!-- Paginación -->
                     <div
-                        v-if="proyectos.links"
+                        v-if="productos.links"
                         class="mt-6 flex justify-between items-center"
                     >
                         <div
@@ -163,13 +150,13 @@ const estadoLabels = {
                                 font-size: var(--font-size-sm);
                             "
                         >
-                            Mostrando {{ proyectos.from }} a
-                            {{ proyectos.to }} de
-                            {{ proyectos.total }} resultados
+                            Mostrando {{ productos.from }} a
+                            {{ productos.to }} de
+                            {{ productos.total }} resultados
                         </div>
                         <div class="flex gap-2">
                             <Link
-                                v-for="link in proyectos.links"
+                                v-for="link in productos.links"
                                 :key="link.label"
                                 :href="link.url"
                                 :class="[

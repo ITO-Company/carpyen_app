@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\CronogramaController;
 use App\Http\Controllers\PagoController;
@@ -55,6 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gestión de Productos (CU3)
     Route::resource('productos', ProductoController::class);
+
+    // Gestión de Inventario
+    Route::get('/inventario', [InventarioController::class, 'index'])->name('inventario.index');
 
     // Gestión de Diseños (CU4)
     Route::resource('disenos', DisenoController::class);
