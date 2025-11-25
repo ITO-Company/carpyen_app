@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class UsuarioController extends Controller
 {
@@ -12,7 +13,11 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        //
+        $usuarios = User::latest()->paginate(15);
+        
+        return Inertia::render('Usuarios/Index', [
+            'usuarios' => $usuarios
+        ]);
     }
 
     /**
@@ -20,7 +25,7 @@ class UsuarioController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Usuarios/Create');
     }
 
     /**
@@ -28,7 +33,19 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'rol' => 'required|in:ADMIN,VENDEDOR,JEFE_INSTALADOR,DISEÑADOR,INSTALADOR',
+        ]);
+
+        $validated['password'] = bcrypt($validated['password']);
+        
+        User::create($validated);
+
+        return redirect()->route('usuarios.index')
+            ->with('success', 'Usuario creado exitosamente');
     }
 
     /**
@@ -36,7 +53,10 @@ class UsuarioController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $usuario = User::findOrFail($id);
+        return Inertia::render('Usuarios/Show', [
+            'usuario' => $usuario
+        ]);
     }
 
     /**
@@ -44,7 +64,10 @@ class UsuarioController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $usuario = User::findOrFail($id);
+        return Inertia::render('Usuarios/Edit', [
+            'usuario' => $usuario
+        ]);
     }
 
     /**
@@ -52,7 +75,22 @@ class UsuarioController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $usuario = User::findOrFail($id);
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $usuario->id,
+            'rol' => 'required|in:ADMIN,VENDEDOR,JEFE_INSTALADOR,DISEÑADOR,INSTALADOR',
+        ]);
+
+        if ($request->filled('password')) {
+            $validated['password'] = bcrypt($request->input('password'));
+        }
+
+        $usuario->update($validated);
+
+        return redirect()->route('usuarios.index')
+            ->with('success', 'Usuario actualizado exitosamente');
     }
 
     /**
@@ -60,6 +98,10 @@ class UsuarioController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $usuario = User::findOrFail($id);
+        $usuario->delete();
+
+        return redirect()->route('usuarios.index')
+            ->with('success', 'Usuario eliminado exitosamente');
     }
 }

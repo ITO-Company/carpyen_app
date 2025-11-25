@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\Cronograma;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CronogramaController extends Controller
 {
@@ -12,7 +14,11 @@ class CronogramaController extends Controller
      */
     public function index()
     {
-        //
+        $cronogramas = Cronograma::with('proyecto')->latest()->paginate(15);
+        
+        return Inertia::render('Cronogramas/Index', [
+            'cronogramas' => $cronogramas
+        ]);
     }
 
     /**
@@ -20,7 +26,11 @@ class CronogramaController extends Controller
      */
     public function create()
     {
-        //
+        $proyectos = Proyecto::all();
+        
+        return Inertia::render('Cronogramas/Create', [
+            'proyectos' => $proyectos
+        ]);
     }
 
     /**
@@ -28,7 +38,17 @@ class CronogramaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'proyecto_id' => 'required|exists:proyectos,id',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after:fecha_inicio',
+            'descripcion' => 'nullable|string',
+        ]);
+
+        Cronograma::create($validated);
+
+        return redirect()->route('cronogramas.index')
+            ->with('success', 'Cronograma creado exitosamente');
     }
 
     /**
@@ -36,7 +56,10 @@ class CronogramaController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $cronograma = Cronograma::with('proyecto', 'tareas')->findOrFail($id);
+        return Inertia::render('Cronogramas/Show', [
+            'cronograma' => $cronograma
+        ]);
     }
 
     /**
@@ -44,7 +67,13 @@ class CronogramaController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $cronograma = Cronograma::findOrFail($id);
+        $proyectos = Proyecto::all();
+        
+        return Inertia::render('Cronogramas/Edit', [
+            'cronograma' => $cronograma,
+            'proyectos' => $proyectos
+        ]);
     }
 
     /**
@@ -52,7 +81,19 @@ class CronogramaController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $cronograma = Cronograma::findOrFail($id);
+        
+        $validated = $request->validate([
+            'proyecto_id' => 'required|exists:proyectos,id',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after:fecha_inicio',
+            'descripcion' => 'nullable|string',
+        ]);
+
+        $cronograma->update($validated);
+
+        return redirect()->route('cronogramas.index')
+            ->with('success', 'Cronograma actualizado exitosamente');
     }
 
     /**
@@ -60,6 +101,10 @@ class CronogramaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $cronograma = Cronograma::findOrFail($id);
+        $cronograma->delete();
+
+        return redirect()->route('cronogramas.index')
+            ->with('success', 'Cronograma eliminado exitosamente');
     }
 }

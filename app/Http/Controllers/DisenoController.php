@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Models\Diseno;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DisenoController extends Controller
 {
@@ -12,7 +14,11 @@ class DisenoController extends Controller
      */
     public function index()
     {
-        //
+        $disenos = Diseno::with('proyecto')->latest()->paginate(15);
+        
+        return Inertia::render('Disenos/Index', [
+            'disenos' => $disenos
+        ]);
     }
 
     /**
@@ -20,7 +26,11 @@ class DisenoController extends Controller
      */
     public function create()
     {
-        //
+        $proyectos = Proyecto::all();
+        
+        return Inertia::render('Disenos/Create', [
+            'proyectos' => $proyectos
+        ]);
     }
 
     /**
@@ -28,7 +38,18 @@ class DisenoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'proyecto_id' => 'required|exists:proyectos,id',
+            'descripcion' => 'nullable|string',
+            'estado' => 'required|in:pendiente,en_proceso,completado,rechazado',
+            'fecha_inicio' => 'nullable|date',
+            'fecha_fin' => 'nullable|date',
+        ]);
+
+        Diseno::create($validated);
+
+        return redirect()->route('disenos.index')
+            ->with('success', 'Diseño creado exitosamente');
     }
 
     /**
@@ -36,7 +57,10 @@ class DisenoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $diseno = Diseno::with('proyecto')->findOrFail($id);
+        return Inertia::render('Disenos/Show', [
+            'diseno' => $diseno
+        ]);
     }
 
     /**
@@ -44,7 +68,13 @@ class DisenoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $diseno = Diseno::findOrFail($id);
+        $proyectos = Proyecto::all();
+        
+        return Inertia::render('Disenos/Edit', [
+            'diseno' => $diseno,
+            'proyectos' => $proyectos
+        ]);
     }
 
     /**
@@ -52,7 +82,20 @@ class DisenoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $diseno = Diseno::findOrFail($id);
+        
+        $validated = $request->validate([
+            'proyecto_id' => 'required|exists:proyectos,id',
+            'descripcion' => 'nullable|string',
+            'estado' => 'required|in:pendiente,en_proceso,completado,rechazado',
+            'fecha_inicio' => 'nullable|date',
+            'fecha_fin' => 'nullable|date',
+        ]);
+
+        $diseno->update($validated);
+
+        return redirect()->route('disenos.index')
+            ->with('success', 'Diseño actualizado exitosamente');
     }
 
     /**
@@ -60,6 +103,10 @@ class DisenoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $diseno = Diseno::findOrFail($id);
+        $diseno->delete();
+
+        return redirect()->route('disenos.index')
+            ->with('success', 'Diseño eliminado exitosamente');
     }
 }
