@@ -8,6 +8,7 @@ const props = defineProps({
 
 const form = useForm({
     proyecto_id: '',
+    url_render: '',
     descripcion: '',
     estado: 'pendiente',
     fecha_inicio: '',
@@ -62,6 +63,26 @@ const submit = () => {
                                 <div v-if="form.errors.proyecto_id" class="form-error">
                                     {{ form.errors.proyecto_id }}
                                 </div>
+                            </div>
+
+                            <!-- URL de la Imagen del Diseño -->
+                            <div class="form-group full-width">
+                                <label for="url_render" class="form-label">
+                                    URL de la Imagen del Diseño
+                                </label>
+                                <input
+                                    id="url_render"
+                                    v-model="form.url_render"
+                                    type="url"
+                                    class="input theme-input"
+                                    placeholder="https://ejemplo.com/imagen-diseno.jpg"
+                                />
+                                <div v-if="form.errors.url_render" class="form-error">
+                                    {{ form.errors.url_render }}
+                                </div>
+                                <p style="font-size: 0.75rem; color: var(--theme-text-secondary); margin-top: 0.25rem;">
+                                    Ingresa la URL de una imagen que represente el diseño
+                                </p>
                             </div>
 
                             <!-- Estado -->
