@@ -1,9 +1,9 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, Link } from "@inertiajs/vue3";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 defineProps({
-    clientes: Object
+    clientes: Object,
 });
 
 const paginationLabel = (label) => {
