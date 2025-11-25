@@ -141,16 +141,38 @@ class DataSeeder extends Seeder
                 'comentario' => 'Cotización para ' . $proyecto->nombre
             ]);
 
-            // Crear Diseño
+            // Crear Diseño con imágenes reales
             if ($disenador) {
+                $imagenesDiseno = [
+                    'https://planner5d.com/blog/content/images/2023/02/r-architecture-rOk4VSMS3Ck-unsplash.jpg',
+                    'https://media1.amarilo.com.co/website/s3fs-public/2023-12/disen%CC%83o-de-interiores.webp',
+                    'https://i.pinimg.com/474x/63/4e/d6/634ed6c0b74885239969c26478654bda.jpg',
+                    'https://cei.es/wp-content/uploads/estilos-en-el-disen%CC%83o-de-interiores-scaled.jpg'
+                ];
+                
+                $descripcionesDiseno = [
+                    'Diseño moderno con acabados en madera natural y tonos cálidos. Incluye iluminación LED integrada.',
+                    'Estilo contemporáneo con líneas minimalistas. Combinación de materiales nobles y funcionalidad.',
+                    'Diseño elegante con detalles personalizados. Aprovechamiento máximo del espacio disponible.',
+                    'Propuesta moderna con enfoque en ergonomía. Acabados premium y atención al detalle.'
+                ];
+                
+                $indexImagen = ($proyecto->id - 1) % count($imagenesDiseno);
+                $indexDescripcion = ($proyecto->id - 1) % count($descripcionesDiseno);
+                
                 Diseno::create([
                     'cotizacion_id' => $cotizacion->id,
+                    'proyecto_id' => $proyecto->id,
                     'user_id' => $disenador->id,
-                    'url_render' => '/diseños/proyecto_' . $proyecto->id . '.jpg',
+                    'url_render' => $imagenesDiseno[$indexImagen],
                     'plano_iluminador' => '/planos/proyecto_' . $proyecto->id . '.pdf',
-                    'aprovado' => true,
-                    'fecha_aprovacion' => now()->subDays(7),
-                    'comentario' => 'Diseño 3D aprobado para ' . $proyecto->nombre
+                    'aprovado' => $proyecto->estado !== 'pendiente',
+                    'fecha_aprovacion' => $proyecto->estado !== 'pendiente' ? now()->subDays(7) : null,
+                    'comentario' => 'Diseño 3D para ' . $proyecto->nombre,
+                    'descripcion' => $descripcionesDiseno[$indexDescripcion],
+                    'estado' => $proyecto->estado === 'completado' ? 'completado' : ($proyecto->estado === 'en_proceso' ? 'en_proceso' : 'pendiente'),
+                    'fecha_inicio' => $proyecto->estado !== 'pendiente' ? now()->subDays(20) : null,
+                    'fecha_fin' => $proyecto->estado === 'completado' ? now()->subDays(5) : null
                 ]);
             }
 

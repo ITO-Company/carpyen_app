@@ -62,12 +62,17 @@ return new class extends Migration
             CREATE TABLE IF NOT EXISTS disenos (
                 id BIGSERIAL PRIMARY KEY,
                 cotizacion_id BIGINT NOT NULL REFERENCES cotizaciones(id) ON DELETE CASCADE,
+                proyecto_id BIGINT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
                 user_id BIGINT NULL REFERENCES users(id) ON DELETE SET NULL,
-                url_render VARCHAR(255) NULL,
+                url_render VARCHAR(500) NULL,
                 plano_iluminador VARCHAR(255) NULL,
                 aprovado BOOLEAN DEFAULT FALSE,
                 fecha_aprovacion DATE NULL,
                 comentario TEXT NULL,
+                descripcion TEXT NULL,
+                estado VARCHAR(50) DEFAULT \'pendiente\' CHECK (estado IN (\'pendiente\', \'en_proceso\', \'completado\', \'rechazado\')),
+                fecha_inicio DATE NULL,
+                fecha_fin DATE NULL,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
             );

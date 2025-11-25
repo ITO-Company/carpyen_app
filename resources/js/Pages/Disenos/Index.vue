@@ -29,10 +29,24 @@ const filteredDisenos = computed(() => {
     };
 });
 
-const paginationLabel = (label) => {
-    if (label.includes("Previous")) return "← Anterior";
-    if (label.includes("Next")) return "Siguiente →";
-    return label;
+const getEstadoClass = (estado) => {
+    const estados = {
+        'pendiente': 'badge-warning',
+        'en_proceso': 'badge-info',
+        'completado': 'badge-success',
+        'rechazado': 'badge-error'
+    };
+    return estados[estado] || 'badge';
+};
+
+const getEstadoTexto = (estado) => {
+    const textos = {
+        'pendiente': 'Pendiente',
+        'en_proceso': 'En Proceso',
+        'completado': 'Completado',
+        'rechazado': 'Rechazado'
+    };
+    return textos[estado] || estado;
 };
 </script>
 
@@ -45,148 +59,134 @@ const paginationLabel = (label) => {
                 class="font-semibold text-xl leading-tight"
                 style="color: var(--theme-text-primary)"
             >
-                Gestión de Diseños
+                Galería de Diseños
             </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="card fade-in">
-                    <!-- Barra de búsqueda con botón crear -->
-                    <div class="mb-6 flex justify-between items-center gap-4">
-                        <input
-                            v-model="searchQuery"
-                            type="text"
-                            placeholder="Buscar diseños..."
-                            class="input search-input"
-                            style="flex: 1; max-width: 500px"
-                        />
-                        <Link :href="route('disenos.create')" class="btn btn-primary">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Nuevo Diseño
-                        </Link>
-                    </div>
+                <!-- Barra de búsqueda con botón crear -->
+                <div class="mb-6 flex justify-between items-center gap-4">
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Buscar diseños..."
+                        class="input search-input"
+                        style="flex: 1; max-width: 500px"
+                    />
+                    <Link :href="route('disenos.create')" class="btn btn-primary">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Nuevo Diseño
+                    </Link>
+                </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Proyecto</th>
-                                    <th>Descripción</th>
-                                    <th>Estado</th>
-                                    <th>Fecha Inicio</th>
-                                    <th>Fecha Fin</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    v-for="diseno in filteredDisenos.data"
-                                    :key="diseno.id"
-                                >
-                                    <td>{{ diseno.id }}</td>
-                                    <td class="font-medium">
-                                        {{ diseno.proyecto?.nombre || "-" }}
-                                    </td>
-                                    <td>{{ diseno.descripcion || "-" }}</td>
-                                    <td>
-                                        <span
-                                            class="badge"
-                                            :class="{
-                                                'badge-warning':
-                                                    (diseno.estado ?? null) ===
-                                                    'pendiente',
-                                                'badge-info':
-                                                    (diseno.estado ?? null) ===
-                                                    'en_proceso',
-                                                'badge-success':
-                                                    (diseno.estado ?? null) ===
-                                                    'completado',
-                                                'badge-error':
-                                                    (diseno.estado ?? null) ===
-                                                    'rechazado',
-                                            }"
-                                        >
-                                            {{ diseno.estado || "-" }}
-                                        </span>
-                                    </td>
-                                    <td>{{ diseno.fecha_inicio || "-" }}</td>
-                                    <td>{{ diseno.fecha_fin || "-" }}</td>
-                                    <td>
-                                        <div class="flex gap-2">
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'disenos.edit',
-                                                        diseno.id
-                                                    )
-                                                "
-                                                class="text-primary hover:underline"
-                                                style="
-                                                    color: var(--theme-primary);
-                                                "
-                                            >
-                                                Editar
-                                            </Link>
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'disenos.destroy',
-                                                        diseno.id
-                                                    )
-                                                "
-                                                method="delete"
-                                                as="button"
-                                                class="text-error hover:underline"
-                                                style="
-                                                    color: var(--theme-error);
-                                                "
-                                            >
-                                                Eliminar
-                                            </Link>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr
-                                    v-if="
-                                        !filteredDisenos.data ||
-                                        filteredDisenos.data.length === 0
-                                    "
-                                >
-                                    <td
-                                        colspan="7"
-                                        class="text-center py-8"
-                                        style="
-                                            color: var(--theme-text-secondary);
-                                        "
-                                    >
-                                        No hay diseños registrados
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <!-- Contador de resultados -->
+                <div class="mb-4" style="color: var(--theme-text-secondary); font-size: var(--font-size-sm)">
+                    Mostrando {{ filteredDisenos.data.length }} diseño(s)
+                </div>
 
-                    <!-- Contador de resultados -->
+                <!-- Grid de Cards -->
+                <div class="designs-grid">
                     <div
-                        v-if="filteredDisenos.data && filteredDisenos.data.length > 0"
-                        class="mt-4 text-sm"
-                        style="color: var(--theme-text-secondary)"
+                        v-for="diseno in filteredDisenos.data"
+                        :key="diseno.id"
+                        class="design-card"
                     >
-                        Mostrando {{ filteredDisenos.data.length }} resultado(s)
+                        <!-- Imagen del diseño -->
+                        <div class="design-image-container">
+                            <img
+                                :src="diseno.url_render"
+                                :alt="diseno.proyecto?.nombre || 'Diseño'"
+                                class="design-image"
+                                @error="(e) => e.target.src = 'https://via.placeholder.com/400x300?text=Sin+Imagen'"
+                            />
+                            <div class="design-overlay">
+                                <span :class="['badge', getEstadoClass(diseno.estado)]">
+                                    {{ getEstadoTexto(diseno.estado) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Contenido del card -->
+                        <div class="design-content">
+                            <h3 class="design-title">
+                                {{ diseno.proyecto?.nombre || 'Sin proyecto' }}
+                            </h3>
+                            
+                            <p class="design-description">
+                                {{ diseno.descripcion || diseno.comentario || 'Sin descripción' }}
+                            </p>
+
+                            <!-- Información adicional -->
+                            <div class="design-info">
+                                <div class="info-item" v-if="diseno.fecha_inicio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    <span>{{ new Date(diseno.fecha_inicio).toLocaleDateString('es-ES') }}</span>
+                                </div>
+                                
+                                <div class="info-item" v-if="diseno.aprovado">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Aprobado</span>
+                                </div>
+                            </div>
+
+                            <!-- Acciones -->
+                            <div class="design-actions">
+                                <Link
+                                    :href="route('disenos.edit', diseno.id)"
+                                    class="btn-action btn-action-edit"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    Editar
+                                </Link>
+                                
+                                <Link
+                                    :href="route('disenos.destroy', diseno.id)"
+                                    method="delete"
+                                    as="button"
+                                    class="btn-action btn-action-delete"
+                                    @click="(e) => !confirm('¿Estás seguro de eliminar este diseño?') && e.preventDefault()"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                    Eliminar
+                                </Link>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Mensaje si no hay resultados -->
+                <div v-if="filteredDisenos.data.length === 0" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <p>No se encontraron diseños</p>
                 </div>
             </div>
         </div>
@@ -194,100 +194,142 @@ const paginationLabel = (label) => {
 </template>
 
 <style scoped>
-.flex {
-    display: flex;
-}
-
-.justify-between {
-    justify-content: space-between;
-}
-
-.items-center {
-    align-items: center;
-}
-
-.gap-2 {
-    gap: var(--spacing-2);
-}
-
-.gap-4 {
-    gap: var(--spacing-4);
-}
-
-.mb-6 {
+/* Grid de diseños */
+.designs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--spacing-6);
     margin-bottom: var(--spacing-6);
 }
 
-.mt-4 {
-    margin-top: var(--spacing-4);
+/* Card de diseño */
+.design-card {
+    background: var(--theme-bg-primary);
+    border: 1px solid var(--theme-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.mt-6 {
-    margin-top: var(--spacing-6);
+.design-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: var(--theme-primary);
 }
 
-.py-12 {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+/* Imagen del diseño */
+.design-image-container {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    background: var(--theme-bg-secondary);
 }
 
-.py-8 {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+.design-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
 }
 
-.max-w-7xl {
-    max-width: 80rem;
+.design-card:hover .design-image {
+    transform: scale(1.05);
 }
 
-.mx-auto {
-    margin-left: auto;
-    margin-right: auto;
+.design-overlay {
+    position: absolute;
+    top: var(--spacing-3);
+    right: var(--spacing-3);
 }
 
-.overflow-x-auto {
-    overflow-x: auto;
+/* Contenido del card */
+.design-content {
+    padding: var(--spacing-5);
 }
 
-.text-center {
-    text-align: center;
-}
-
-.text-sm {
-    font-size: var(--font-size-sm);
-}
-
-.font-medium {
-    font-weight: 500;
-}
-
-.font-semibold {
+.design-title {
+    font-size: var(--font-size-lg);
     font-weight: 600;
+    color: var(--theme-text-primary);
+    margin-bottom: var(--spacing-2);
+    line-height: 1.4;
 }
 
-.text-xl {
-    font-size: var(--font-size-xl);
+.design-description {
+    font-size: var(--font-size-sm);
+    color: var(--theme-text-secondary);
+    margin-bottom: var(--spacing-4);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.leading-tight {
-    line-height: 1.25;
+/* Información adicional */
+.design-info {
+    display: flex;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--theme-border);
 }
 
-.btn svg {
-    margin-right: var(--spacing-2);
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-xs);
+    color: var(--theme-text-secondary);
 }
 
-/* Mejoras visuales para la tabla */
-.table tbody tr {
+.info-item svg {
+    color: var(--theme-primary);
+}
+
+/* Acciones */
+.design-actions {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+.btn-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
     transition: all 0.2s ease;
+    border: 1px solid var(--theme-border);
+    background: var(--theme-bg-primary);
+    color: var(--theme-text-primary);
+    cursor: pointer;
 }
 
-.table tbody tr:hover {
+.btn-action:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Adaptación del buscador al tema */
+.btn-action-edit:hover {
+    border-color: var(--theme-primary);
+    color: var(--theme-primary);
+    background: var(--theme-primary-alpha);
+}
+
+.btn-action-delete:hover {
+    border-color: var(--theme-error);
+    color: var(--theme-error);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Input de búsqueda */
 .search-input {
     background-color: var(--theme-bg-primary) !important;
     color: var(--theme-text-primary) !important;
@@ -303,5 +345,36 @@ const paginationLabel = (label) => {
     border-color: var(--theme-primary) !important;
     outline: none;
     box-shadow: 0 0 0 3px var(--theme-primary-alpha) !important;
+}
+
+/* Estado vacío */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-12) var(--spacing-6);
+    color: var(--theme-text-secondary);
+    text-align: center;
+}
+
+.empty-state svg {
+    margin-bottom: var(--spacing-4);
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-size: var(--font-size-lg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .designs-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .design-image-container {
+        height: 200px;
+    }
 }
 </style>
