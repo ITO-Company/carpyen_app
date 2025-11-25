@@ -1,9 +1,34 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { ref, computed } from "vue";
 
-defineProps({
+const props = defineProps({
     proyectos: Object,
+});
+
+const searchQuery = ref("");
+
+const filteredProyectos = computed(() => {
+    if (!searchQuery.value) {
+        return props.proyectos;
+    }
+    
+    const query = searchQuery.value.toLowerCase();
+    const filtered = props.proyectos.data.filter(proyecto => {
+        return (
+            (proyecto.nombre && proyecto.nombre.toLowerCase().includes(query)) ||
+            (proyecto.cliente?.nombre && proyecto.cliente.nombre.toLowerCase().includes(query)) ||
+            (proyecto.vendedor?.name && proyecto.vendedor.name.toLowerCase().includes(query)) ||
+            (proyecto.ubicacion && proyecto.ubicacion.toLowerCase().includes(query)) ||
+            (proyecto.estado && proyecto.estado.toLowerCase().includes(query))
+        );
+    });
+    
+    return {
+        ...props.proyectos,
+        data: filtered
+    };
 });
 
 const paginationLabel = (label) => {
@@ -32,34 +57,43 @@ const estadoLabels = {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2
-                    class="font-semibold text-xl leading-tight"
-                    style="color: var(--theme-text-primary)"
-                >
-                    Gestión de Proyectos
-                </h2>
-                <Link :href="route('proyectos.create')" class="btn btn-primary">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Nuevo Proyecto
-                </Link>
-            </div>
+            <h2
+                class="font-semibold text-xl leading-tight"
+                style="color: var(--theme-text-primary)"
+            >
+                Gestión de Proyectos
+            </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="card fade-in">
+                    <!-- Barra de búsqueda con botón crear -->
+                    <div class="mb-6 flex justify-between items-center gap-4">
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            placeholder="Buscar proyectos..."
+                            class="input"
+                            style="flex: 1; max-width: 500px"
+                        />
+                        <Link :href="route('proyectos.create')" class="btn btn-primary">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Nuevo Proyecto
+                        </Link>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="table">
                             <thead>
@@ -75,7 +109,7 @@ const estadoLabels = {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="proyecto in proyectos.data"
+                                    v-for="proyecto in filteredProyectos.data"
                                     :key="proyecto.id"
                                 >
                                     <td>{{ proyecto.id }}</td>
@@ -146,8 +180,8 @@ const estadoLabels = {
                                 </tr>
                                 <tr
                                     v-if="
-                                        !proyectos.data ||
-                                        proyectos.data.length === 0
+                                        !filteredProyectos.data ||
+                                        filteredProyectos.data.length === 0
                                     "
                                 >
                                     <td
@@ -164,39 +198,13 @@ const estadoLabels = {
                         </table>
                     </div>
 
-                    <!-- Paginación -->
+                    <!-- Contador de resultados -->
                     <div
-                        v-if="proyectos.links"
-                        class="mt-6 flex justify-between items-center"
+                        v-if="filteredProyectos.data && filteredProyectos.data.length > 0"
+                        class="mt-4 text-sm"
+                        style="color: var(--theme-text-secondary)"
                     >
-                        <div
-                            style="
-                                color: var(--theme-text-secondary);
-                                font-size: var(--font-size-sm);
-                            "
-                        >
-                            Mostrando {{ proyectos.from }} a
-                            {{ proyectos.to }} de
-                            {{ proyectos.total }} resultados
-                        </div>
-                        <div class="flex gap-2">
-                            <Link
-                                v-for="link in proyectos.links"
-                                :key="link.label"
-                                :href="link.url || '#'"
-                                :class="[
-                                    'btn',
-                                    link.active
-                                        ? 'btn-primary'
-                                        : 'btn-secondary',
-                                    !link.url && 'btn-disabled',
-                                ]"
-                                @click.prevent="
-                                    link.url && $inertia.visit(link.url)
-                                "
-                                v-text="paginationLabel(link.label)"
-                            />
-                        </div>
+                        Mostrando {{ filteredProyectos.data.length }} resultado(s)
                     </div>
                 </div>
             </div>
@@ -219,6 +227,18 @@ const estadoLabels = {
 
 .gap-2 {
     gap: var(--spacing-2);
+}
+
+.gap-4 {
+    gap: var(--spacing-4);
+}
+
+.mb-6 {
+    margin-bottom: var(--spacing-6);
+}
+
+.mt-4 {
+    margin-top: var(--spacing-4);
 }
 
 .mt-6 {
@@ -252,6 +272,10 @@ const estadoLabels = {
     text-align: center;
 }
 
+.text-sm {
+    font-size: var(--font-size-sm);
+}
+
 .font-medium {
     font-weight: 500;
 }
@@ -270,5 +294,15 @@ const estadoLabels = {
 
 .btn svg {
     margin-right: var(--spacing-2);
+}
+
+/* Mejoras visuales para la tabla */
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>

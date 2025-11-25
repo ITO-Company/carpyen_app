@@ -1,9 +1,32 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { ref, computed } from "vue";
 
-defineProps({
+const props = defineProps({
     productos: Object,
+});
+
+const searchQuery = ref("");
+
+const filteredProductos = computed(() => {
+    if (!searchQuery.value) {
+        return props.productos;
+    }
+    
+    const query = searchQuery.value.toLowerCase();
+    const filtered = props.productos.data.filter(producto => {
+        return (
+            (producto.nombre && producto.nombre.toLowerCase().includes(query)) ||
+            (producto.tipo && producto.tipo.toLowerCase().includes(query)) ||
+            (producto.unidad_medida && producto.unidad_medida.toLowerCase().includes(query))
+        );
+    });
+    
+    return {
+        ...props.productos,
+        data: filtered
+    };
 });
 
 const paginationLabel = (label) => {
@@ -18,34 +41,43 @@ const paginationLabel = (label) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2
-                    class="font-semibold text-xl leading-tight"
-                    style="color: var(--theme-text-primary)"
-                >
-                    Gestión de Inventario
-                </h2>
-                <Link :href="route('productos.create')" class="btn btn-primary">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Nuevo Producto
-                </Link>
-            </div>
+            <h2
+                class="font-semibold text-xl leading-tight"
+                style="color: var(--theme-text-primary)"
+            >
+                Gestión de Inventario
+            </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="card fade-in">
+                    <!-- Barra de búsqueda con botón crear -->
+                    <div class="mb-6 flex justify-between items-center gap-4">
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            placeholder="Buscar productos en inventario..."
+                            class="input"
+                            style="flex: 1; max-width: 500px"
+                        />
+                        <Link :href="route('productos.create')" class="btn btn-primary">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Nuevo Producto
+                        </Link>
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="table">
                             <thead>
@@ -61,7 +93,7 @@ const paginationLabel = (label) => {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="producto in productos.data"
+                                    v-for="producto in filteredProductos.data"
                                     :key="producto.id"
                                 >
                                     <td>{{ producto.id }}</td>
@@ -127,8 +159,8 @@ const paginationLabel = (label) => {
                                 </tr>
                                 <tr
                                     v-if="
-                                        !productos.data ||
-                                        productos.data.length === 0
+                                        !filteredProductos.data ||
+                                        filteredProductos.data.length === 0
                                     "
                                 >
                                     <td
@@ -145,39 +177,13 @@ const paginationLabel = (label) => {
                         </table>
                     </div>
 
-                    <!-- Paginación -->
+                    <!-- Contador de resultados -->
                     <div
-                        v-if="productos.links"
-                        class="mt-6 flex justify-between items-center"
+                        v-if="filteredProductos.data && filteredProductos.data.length > 0"
+                        class="mt-4 text-sm"
+                        style="color: var(--theme-text-secondary)"
                     >
-                        <div
-                            style="
-                                color: var(--theme-text-secondary);
-                                font-size: var(--font-size-sm);
-                            "
-                        >
-                            Mostrando {{ productos.from }} a
-                            {{ productos.to }} de
-                            {{ productos.total }} resultados
-                        </div>
-                        <div class="flex gap-2">
-                            <Link
-                                v-for="link in productos.links"
-                                :key="link.label"
-                                :href="link.url || '#'"
-                                :class="[
-                                    'btn',
-                                    link.active
-                                        ? 'btn-primary'
-                                        : 'btn-secondary',
-                                    !link.url && 'btn-disabled',
-                                ]"
-                                @click.prevent="
-                                    link.url && $inertia.visit(link.url)
-                                "
-                                v-text="paginationLabel(link.label)"
-                            />
-                        </div>
+                        Mostrando {{ filteredProductos.data.length }} resultado(s)
                     </div>
                 </div>
             </div>
@@ -200,6 +206,18 @@ const paginationLabel = (label) => {
 
 .gap-2 {
     gap: var(--spacing-2);
+}
+
+.gap-4 {
+    gap: var(--spacing-4);
+}
+
+.mb-6 {
+    margin-bottom: var(--spacing-6);
+}
+
+.mt-4 {
+    margin-top: var(--spacing-4);
 }
 
 .mt-6 {
@@ -233,6 +251,10 @@ const paginationLabel = (label) => {
     text-align: center;
 }
 
+.text-sm {
+    font-size: var(--font-size-sm);
+}
+
 .font-medium {
     font-weight: 500;
 }
@@ -251,5 +273,15 @@ const paginationLabel = (label) => {
 
 .btn svg {
     margin-right: var(--spacing-2);
+}
+
+/* Mejoras visuales para la tabla */
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 </style>
