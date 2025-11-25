@@ -74,7 +74,7 @@ const estadoLabels = {
                             v-model="searchQuery"
                             type="text"
                             placeholder="Buscar proyectos..."
-                            class="input"
+                            class="input search-input"
                             style="flex: 1; max-width: 500px"
                         />
                         <Link :href="route('proyectos.create')" class="btn btn-primary">
@@ -304,5 +304,23 @@ const estadoLabels = {
 .table tbody tr:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Adaptación del buscador al tema */
+.search-input {
+    background-color: var(--theme-bg-primary) !important;
+    color: var(--theme-text-primary) !important;
+    border: 1px solid var(--theme-border) !important;
+}
+
+.search-input::placeholder {
+    color: var(--theme-text-secondary) !important;
+    opacity: 0.7;
+}
+
+.search-input:focus {
+    border-color: var(--theme-primary) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px var(--theme-primary-alpha) !important;
 }
 </style>
