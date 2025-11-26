@@ -75,7 +75,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gestión de Pagos (CU7)
     Route::resource('pagos', PagoController::class);
-    Route::post('/pagos/generar-qr', [PagoController::class, 'generarQR'])->name('pagos.generar-qr');
+    Route::post('/pagos/generar-qr', [PagoController::class, 'generarQR'])->name('pagos.generarQR');
+    Route::get('/pagos/{pago}/check-transaction-status', [PagoController::class, 'checkTransactionStatus'])->name('pagos.checkTransactionStatus');
     Route::post('/pagos/callback', [PagoController::class, 'callback'])->name('pagos.callback');
     Route::get('/pagos/return', [PagoController::class, 'return'])->name('pagos.return');
 

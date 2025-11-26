@@ -56,34 +56,88 @@ const cerrarModalPago = () => {
 };
 
 const generarQRPago = async () => {
-    if (!pagoSeleccionado.value) return;
+    if (!pagoSeleccionado.value || !planSeleccionado.value) return;
 
     generandoQR.value = true;
     errorQR.value = null;
 
+    console.log("=".repeat(60));
+    console.log("📱 INICIANDO GENERACIÓN DE QR CON PAGOFÁCIL (NEW)");
+    console.log("=".repeat(60));
+
     try {
-        const response = await window.axios.post("/pagos/generar-qr", {
-            monto: parseFloat(pagoSeleccionado.value.total),
-            glosa: `Pago del plan ${planSeleccionado.value?.proyecto?.nombre}`,
-            email: "",
-        });
+        // Datos correctos para el nuevo endpoint
+        const datosEnvio = {
+            plan_pago_id: planSeleccionado.value.id,
+            pago_id: pagoSeleccionado.value.id,
+        };
+
+        console.log("📤 Datos a enviar al servidor:");
+        console.table(datosEnvio);
+        console.log("📊 Pago seleccionado:", pagoSeleccionado.value.total, "Bs");
+        console.log("🔗 URL: POST /pagos/generar-qr");
+        console.log("⏳ Enviando solicitud al servidor...");
+
+        const response = await window.axios.post(
+            "/pagos/generar-qr",
+            datosEnvio
+        );
+
+        console.log("✅ Respuesta recibida del servidor:");
+        console.table(response.data);
 
         if (response.data.success) {
-            qrImage.value = response.data.qr_image;
-            transaccionId.value = response.data.transaction_id;
+            console.log("🎉 ¡Éxito! QR generado correctamente.");
+            console.log("📊 ID de Transacción:", response.data.transactionId);
+            console.log("⏰ Expiración:", response.data.expirationDate);
+            console.log("🖼️  Imagen QR disponible (base64)");
+
+            qrImage.value = response.data.qrBase64;
+            transaccionId.value = response.data.transactionId;
+
+            console.log("✨ QR cargado en la interfaz correctamente.");
         } else {
-            errorQR.value =
-                response.data.message || "Error al generar código QR";
+            const mensaje = response.data.message || "Error al generar código QR";
+            console.warn("⚠️  Fallo al generar QR (éxito = false)");
+            console.warn("Mensaje del servidor:", mensaje);
+            errorQR.value = mensaje;
         }
     } catch (error) {
-        console.error("Error:", error);
-        const errorMsg =
-            error.response?.data?.message ||
-            error.message ||
-            "Error de conexión al generar el QR";
-        errorQR.value = errorMsg;
+        console.error("");
+        console.error("❌ ERROR AL GENERAR QR - INFORMACIÓN DETALLADA:");
+        console.error("=".repeat(60));
+
+        console.error("📌 Tipo de Error:", error.name);
+        console.error("📄 Mensaje:", error.message);
+
+        if (error.response) {
+            console.error("");
+            console.error("🌐 RESPUESTA DEL SERVIDOR:");
+            console.error("─".repeat(60));
+            console.error("📍 Status Code:", error.response.status);
+            console.error("📍 Status Text:", error.response.statusText);
+            console.error("💾 Datos de respuesta:", error.response.data);
+
+            if (error.response.status === 400) {
+                console.error("🔴 Error 400 - Bad Request");
+                errorQR.value = "Datos inválidos: verifica que el pago sea válido";
+            } else if (error.response.status === 422) {
+                console.error("🔴 Error 422 - Validación Fallida");
+                console.error("Errores:", error.response.data.errors);
+                errorQR.value = "Validación fallida";
+            } else if (error.response.status === 500) {
+                console.error("🔴 Error 500 - Error Interno del Servidor");
+                errorQR.value = error.response.data.message || "Error al generar QR";
+            }
+        } else if (error.request) {
+            console.error("❌ No se recibió respuesta del servidor");
+            errorQR.value = "Error de conectividad con el servidor";
+        } else {
+            errorQR.value = error.message;
+        }
     } finally {
         generandoQR.value = false;
+        console.log("=".repeat(60));
     }
 };
 
