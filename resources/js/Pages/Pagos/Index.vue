@@ -74,7 +74,11 @@ const generarQRPago = async () => {
 
         console.log("📤 Datos a enviar al servidor:");
         console.table(datosEnvio);
-        console.log("📊 Pago seleccionado:", pagoSeleccionado.value.total, "Bs");
+        console.log(
+            "📊 Pago seleccionado:",
+            pagoSeleccionado.value.total,
+            "Bs"
+        );
         console.log("🔗 URL: POST /pagos/generar-qr");
         console.log("⏳ Enviando solicitud al servidor...");
 
@@ -97,7 +101,8 @@ const generarQRPago = async () => {
 
             console.log("✨ QR cargado en la interfaz correctamente.");
         } else {
-            const mensaje = response.data.message || "Error al generar código QR";
+            const mensaje =
+                response.data.message || "Error al generar código QR";
             console.warn("⚠️  Fallo al generar QR (éxito = false)");
             console.warn("Mensaje del servidor:", mensaje);
             errorQR.value = mensaje;
@@ -120,14 +125,16 @@ const generarQRPago = async () => {
 
             if (error.response.status === 400) {
                 console.error("🔴 Error 400 - Bad Request");
-                errorQR.value = "Datos inválidos: verifica que el pago sea válido";
+                errorQR.value =
+                    "Datos inválidos: verifica que el pago sea válido";
             } else if (error.response.status === 422) {
                 console.error("🔴 Error 422 - Validación Fallida");
                 console.error("Errores:", error.response.data.errors);
                 errorQR.value = "Validación fallida";
             } else if (error.response.status === 500) {
                 console.error("🔴 Error 500 - Error Interno del Servidor");
-                errorQR.value = error.response.data.message || "Error al generar QR";
+                errorQR.value =
+                    error.response.data.message || "Error al generar QR";
             }
         } else if (error.request) {
             console.error("❌ No se recibió respuesta del servidor");

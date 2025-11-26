@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
 class PagoFacilService
@@ -10,14 +10,15 @@ class PagoFacilService
     private $tokenService;
     private $tokenSecret;
     private $baseUrl;
+    private $client;
 
     public function __construct()
     {
         $this->tokenService = config('services.pagofacil.token_service');
         $this->tokenSecret = config('services.pagofacil.token_secret');
-        $this->baseUrl = config('services.pagofacil.base_url', 'https://serviciostigomoney.pagofacil.com.bo/api');
+        $this->baseUrl = 'https://masterqr.pagofacil.com.bo/api/services/v2';
+        $this->client = new Client();
         
-        // Debug de configuración
         Log::debug('🔧 PagoFacilService CONSTRUCTOR');
         Log::debug('   - tokenService está configurado: ' . ($this->tokenService ? 'SÍ' : 'NO'));
         Log::debug('   - tokenSecret está configurado: ' . ($this->tokenSecret ? 'SÍ' : 'NO'));
@@ -26,167 +27,57 @@ class PagoFacilService
     }
 
     /**
-     * Generar QR para pago
+     * 🔑 OBTENER TOKEN DE ACCESO - PASO 1
      */
-    public function generarQR($monto, $glosa, $email = null)
+    private function obtenerToken()
     {
-        Log::info("─────────────────────────────────────────────────");
-        Log::info("🔄 PagoFacilService::generarQR() - INICIANDO");
-        Log::info("─────────────────────────────────────────────────");
-
-        // Verificar credenciales
-        if (!$this->tokenService || !$this->tokenSecret) {
-            Log::error("❌ CREDENCIALES DE PAGOFÁCIL NO CONFIGURADAS");
-            Log::error("   - tokenService: " . ($this->tokenService ? "✓ Presente" : "✗ Faltante"));
-            Log::error("   - tokenSecret: " . ($this->tokenSecret ? "✓ Presente" : "✗ Faltante"));
-            Log::error("   - Verifica config/services.php");
-
-            return [
-                'success' => false,
-                'message' => 'Credenciales de PagoFácil no configuradas'
-            ];
-        }
-
-        Log::info("✅ Credenciales presentes");
-        Log::info("   - Commerce ID: " . substr($this->tokenService, 0, 5) . "***");
-        Log::info("   - Base URL: " . $this->baseUrl);
+        Log::info('🔑 Obteniendo token de acceso para MasterQR...');
 
         try {
-            $nroPago = uniqid('PAG-');
-            $payload = [
-                'tcCommerceID' => $this->tokenService,
-                'tnMonto' => $monto,
-                'tcNroPago' => $nroPago,
-                'tnMoneda' => 2, // 1 = USD, 2 = BOB
-                'tcGlosa' => $glosa,
-                'tcPrimerApellido' => '',
-                'tcSegundoApellido' => '',
-                'tcNombres' => '',
-                'tnCiNit' => '',
-                'tcNroCelular' => '73726149',
-                'tcCorreo' => $email ?? '',
-                'tcUrlCallBack' => route('pagos.callback'),
-                'tcUrlReturn' => route('pagos.return'),
-                'taPedidoDetalle' => [],
-            ];
+            $response = $this->client->post("{$this->baseUrl}/login", [
+                'headers' => [
+                    'tcTokenService' => $this->tokenService,
+                    'tcTokenSecret'  => $this->tokenSecret,
+                    'Accept'         => 'application/json',
+                ],
+                'verify' => env('APP_ENV') === 'production', // Desabilitar SSL en desarrollo
+            ]);
 
-            Log::info("📤 Enviando solicitud a PagoFácil:");
-            Log::info("   URL: {$this->baseUrl}/servicio/generarqrv2");
-            Log::info("   Payload (sin credenciales):");
-            $payloadLog = $payload;
-            $payloadLog['tcCommerceID'] = '***OCULTO***';
-            Log::info(json_encode($payloadLog, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $data = json_decode($response->getBody()->getContents(), true);
 
-            Log::info("⏳ Realizando petición HTTP...");
-            $response = Http::timeout(30)->post("{$this->baseUrl}/servicio/generarqrv2", $payload);
+            Log::info('📥 Respuesta del login:', [
+                'status' => $response->getStatusCode(),
+                'has_accessToken' => isset($data['values']['accessToken']),
+            ]);
 
-            Log::info("📥 Respuesta recibida de PagoFácil:");
-            Log::info("   - Status HTTP: " . $response->status());
-            Log::info("   - Headers: " . json_encode($response->headers(), JSON_PRETTY_PRINT));
-
-            $responseBody = $response->json();
-            Log::info("   - Body: " . json_encode($responseBody, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
-            // Verificar si la respuesta es exitosa
-            if ($response->successful()) {
-                Log::info("✅ Respuesta HTTP exitosa (200-299)");
-
-                $data = $responseBody;
-
-                if (isset($data['error'])) {
-                    Log::info("   - Campo 'error': " . $data['error']);
-
-                    if ($data['error'] == 0) {
-                        Log::info("🎉 ¡Éxito! error = 0 (sin errores en PagoFácil)");
-
-                        $qrImage = $data['values']['qrImage'] ?? null;
-                        $transaccionId = $data['values']['tnTransaccion'] ?? null;
-
-                        Log::info("   - QR Image: " . (strlen($qrImage) > 0 ? "✓ Base64 válida (" . strlen($qrImage) . " bytes)" : "✗ Vacía"));
-                        Log::info("   - Transaction ID: " . ($transaccionId ? "✓ " . $transaccionId : "✗ No disponible"));
-
-                        Log::info("─────────────────────────────────────────────────");
-
-                        return [
-                            'success' => true,
-                            'qr_image' => $qrImage,
-                            'transaction_id' => $transaccionId,
-                        ];
-                    } else {
-                        Log::error("❌ PagoFácil retornó error: " . $data['error']);
-                        Log::error("   - Mensaje: " . ($data['message'] ?? "No disponible"));
-                        Log::error("   - Detalles: " . json_encode($data['values'] ?? [], JSON_PRETTY_PRINT));
-                    }
-                } else {
-                    Log::warning("⚠️  Campo 'error' no presente en respuesta");
-                    Log::warning("   - Response: " . json_encode($data, JSON_PRETTY_PRINT));
-                }
-            } else {
-                Log::error("❌ Respuesta HTTP no exitosa");
-                Log::error("   - Status: " . $response->status());
-                Log::error("   - Reason: " . $response->reason());
-                Log::error("   - Body: " . $response->body());
+            if (!isset($data['values']['accessToken'])) {
+                Log::error('❌ No se recibió accessToken en login');
+                Log::error('Response: ' . json_encode($data));
+                throw new \Exception("No se recibió accessToken. Respuesta: " . json_encode($data));
             }
 
-            Log::error("❌ No se pudo generar QR");
-            Log::info("─────────────────────────────────────────────────");
-
-            return [
-                'success' => false,
-                'message' => 'Error al generar código QR'
-            ];
-
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error("❌ ERROR DE CONEXIÓN CON PAGOFÁCIL");
-            Log::error("   - Tipo: ConnectionException");
-            Log::error("   - Mensaje: " . $e->getMessage());
-            Log::error("   - Causa: Posiblemente el servidor de PagoFácil está inactivo");
-            Log::error("   - Stack: " . $e->getTraceAsString());
-            Log::info("─────────────────────────────────────────────────");
-
-            return [
-                'success' => false,
-                'message' => 'Servicio de PagoFácil no disponible. Intenta más tarde.'
-            ];
-
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            Log::error("❌ ERROR EN LA SOLICITUD HTTP");
-            Log::error("   - Tipo: RequestException");
-            Log::error("   - Mensaje: " . $e->getMessage());
-            if ($e->response) {
-                Log::error("   - Status: " . $e->response->status());
-                Log::error("   - Body: " . $e->response->body());
-            }
-            Log::error("   - Stack: " . $e->getTraceAsString());
-            Log::info("─────────────────────────────────────────────────");
-
-            return [
-                'success' => false,
-                'message' => 'Error en la solicitud a PagoFácil'
-            ];
+            $token = $data['values']['accessToken'];
+            Log::info('✅ Token obtenido exitosamente');
+            
+            return $token;
 
         } catch (\Exception $e) {
-            Log::error("❌ EXCEPCIÓN GENERAL");
-            Log::error("   - Tipo: " . get_class($e));
-            Log::error("   - Mensaje: " . $e->getMessage());
-            Log::error("   - Archivo: " . $e->getFile() . " (Línea: " . $e->getLine() . ")");
-            Log::error("   - Stack: " . $e->getTraceAsString());
-            Log::info("─────────────────────────────────────────────────");
-
-            return [
-                'success' => false,
-                'message' => 'Error inesperado: ' . $e->getMessage()
-            ];
+            Log::error('❌ Error al obtener token:', [
+                'mensaje' => $e->getMessage(),
+                'archivo' => $e->getFile(),
+                'linea' => $e->getLine()
+            ]);
+            throw $e;
         }
     }
 
     /**
-     * Generar QR con estructura correcta de PagoFácil (nuevo formato)
+     * 📱 GENERAR QR - PASO 2
      */
     public function generateQr($qrData)
     {
         Log::info("═════════════════════════════════════════════════════");
-        Log::info("🔵 PagoFacilService::generateQr() - INICIANDO (NEW)");
+        Log::info("📱 PagoFacilService::generateQr() - INICIANDO");
         Log::info("═════════════════════════════════════════════════════");
 
         if (!$this->tokenService || !$this->tokenSecret) {
@@ -198,10 +89,14 @@ class PagoFacilService
         }
 
         try {
-            // Estructura correcta de PagoFácil
+            // 🔑 PASO 1: Obtener token
+            Log::info('🔑 Paso 1: Obtener Bearer Token');
+            $token = $this->obtenerToken();
+
+            // 📝 PASO 2: Preparar payload
+            Log::info('📝 Paso 2: Preparar payload para QR');
+            
             $payload = [
-                'tcCommerceID' => $this->tokenService,
-                'tcSecretKey' => $this->tokenSecret,
                 'paymentMethod' => $qrData['paymentMethod'] ?? 4,
                 'clientName' => $qrData['clientName'] ?? '',
                 'documentType' => $qrData['documentType'] ?? 1,
@@ -216,32 +111,48 @@ class PagoFacilService
                 'orderDetail' => $qrData['orderDetail'] ?? [],
             ];
 
-            Log::info("📤 Enviando solicitud a PagoFácil:");
-            Log::info("   URL: {$this->baseUrl}/servicio/generarqrv2");
-            $payloadLog = $payload;
-            $payloadLog['tcCommerceID'] = '***OCULTO***';
-            $payloadLog['tcSecretKey'] = '***OCULTO***';
-            Log::info("   Payload: " . json_encode($payloadLog, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            Log::info("📤 Datos principales del QR:");
+            Log::info("   - paymentNumber: " . $payload['paymentNumber']);
+            Log::info("   - amount: " . $payload['amount']);
+            Log::info("   - clientName: " . $payload['clientName']);
+            Log::info("   - currency: " . $payload['currency']);
 
-            $response = Http::timeout(30)->post("{$this->baseUrl}/servicio/generarqrv2", $payload);
-
-            Log::info("📥 Respuesta HTTP recibida:");
-            Log::info("   - Status: " . $response->status());
+            // 📤 PASO 3: Enviar solicitud con Bearer token
+            Log::info('📤 Paso 3: Enviar solicitud a generate-qr');
             
-            $responseBody = $response->json();
-            Log::info("   - Body: " . json_encode($responseBody, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $response = $this->client->post(
+                "{$this->baseUrl}/generate-qr",
+                [
+                    'headers' => [
+                        'Content-Type'  => 'application/json',
+                        'Authorization' => 'Bearer ' . $token,
+                        'Accept' => 'application/json',
+                    ],
+                    'json' => $payload,
+                    'timeout' => 30,
+                    'verify' => env('APP_ENV') === 'production', // Desabilitar SSL en desarrollo
+                ]
+            );
 
-            if ($response->successful() && $responseBody) {
-                if (isset($responseBody['error']) && $responseBody['error'] == 0) {
-                    Log::info("🎉 ¡Éxito! PagoFácil retornó error = 0");
+            Log::info("📥 Paso 4: Respuesta recibida");
+            Log::info("   - HTTP Status: " . $response->getStatusCode());
+            
+            $responseBody = json_decode($response->getBody()->getContents(), true);
 
-                    $qrImage = $responseBody['values']['qrImage'] ?? null;
-                    $transactionId = $responseBody['values']['tnTransaccion'] ?? null;
+            // ✅ PASO 5: Procesar respuesta
+            Log::info('✅ Paso 5: Procesar respuesta');
+
+            if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
+                if (isset($responseBody['values']['qrBase64']) && isset($responseBody['values']['transactionId'])) {
+                    Log::info("🎉 ¡Éxito! QR generado correctamente");
+
+                    $qrImage = $responseBody['values']['qrBase64'];
+                    $transactionId = $responseBody['values']['transactionId'];
                     $expirationDate = $responseBody['values']['expirationDate'] ?? null;
 
-                    Log::info("   ✅ QR Image: " . (strlen($qrImage) > 0 ? "Base64 válida (" . strlen($qrImage) . " bytes)" : "Vacía"));
-                    Log::info("   ✅ Transaction ID: " . ($transactionId ?? "No disponible"));
-                    Log::info("   ✅ Expiration: " . ($expirationDate ?? "No disponible"));
+                    Log::info("   ✅ QR Base64: " . (strlen($qrImage) > 0 ? "OK (" . strlen($qrImage) . " bytes)" : "VACÍO"));
+                    Log::info("   ✅ Transaction ID: " . $transactionId);
+                    Log::info("   ✅ Expiration: " . ($expirationDate ?? "N/A"));
 
                     Log::info("═════════════════════════════════════════════════════");
 
@@ -252,34 +163,56 @@ class PagoFacilService
                         'expirationDate' => $expirationDate,
                     ];
                 } else {
-                    Log::error("❌ PagoFácil retornó error: " . ($responseBody['error'] ?? 'desconocido'));
-                    Log::error("   Mensaje: " . ($responseBody['message'] ?? 'No disponible'));
+                    Log::error("❌ Respuesta exitosa pero faltan campos");
+                    Log::error("   - qrBase64 presente: " . (isset($responseBody['values']['qrBase64']) ? 'SÍ' : 'NO'));
+                    Log::error("   - transactionId presente: " . (isset($responseBody['values']['transactionId']) ? 'SÍ' : 'NO'));
+                    Log::error("   - Response: " . json_encode($responseBody, JSON_PRETTY_PRINT));
                 }
             } else {
                 Log::error("❌ Respuesta HTTP no exitosa");
-                Log::error("   Status: " . $response->status());
+                Log::error("   - Status: " . $response->getStatusCode());
+                Log::error("   - Body: " . json_encode($responseBody, JSON_PRETTY_PRINT));
             }
 
             Log::error("═════════════════════════════════════════════════════");
+            
             return [
                 'success' => false,
-                'message' => 'Error al generar QR'
+                'message' => 'Error al generar QR: ' . ($responseBody['message'] ?? 'Respuesta inválida')
             ];
 
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error("❌ ERROR DE CONEXIÓN");
-            Log::error("   Mensaje: " . $e->getMessage());
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
+            Log::error("❌ ERROR DE CONEXIÓN CON PAGOFÁCIL");
+            Log::error("   - Tipo: ConnectException");
+            Log::error("   - Mensaje: " . $e->getMessage());
+            Log::error("   - Base URL: " . $this->baseUrl);
             Log::error("═════════════════════════════════════════════════════");
 
             return [
                 'success' => false,
-                'message' => 'Servicio de PagoFácil no disponible. Intenta más tarde.'
+                'message' => 'No se puede conectar con PagoFácil. Verifica tu conexión.'
+            ];
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            Log::error("❌ ERROR EN LA SOLICITUD HTTP");
+            Log::error("   - Tipo: RequestException");
+            Log::error("   - Mensaje: " . $e->getMessage());
+            if ($e->hasResponse()) {
+                Log::error("   - Status: " . $e->getResponse()->getStatusCode());
+                Log::error("   - Body: " . $e->getResponse()->getBody());
+            }
+            Log::error("═════════════════════════════════════════════════════");
+
+            return [
+                'success' => false,
+                'message' => 'Error en la solicitud: ' . $e->getMessage()
             ];
 
         } catch (\Exception $e) {
             Log::error("❌ EXCEPCIÓN GENERAL");
-            Log::error("   Tipo: " . get_class($e));
-            Log::error("   Mensaje: " . $e->getMessage());
+            Log::error("   - Tipo: " . get_class($e));
+            Log::error("   - Mensaje: " . $e->getMessage());
+            Log::error("   - Archivo: " . $e->getFile() . " (Línea: " . $e->getLine() . ")");
             Log::error("═════════════════════════════════════════════════════");
 
             return [
@@ -289,6 +222,7 @@ class PagoFacilService
         }
     }
 
+
     /**
      * Consultar estado de transacción
      */
@@ -297,15 +231,26 @@ class PagoFacilService
         Log::info("🔍 Consultando estado de transacción: " . $transactionId);
 
         try {
-            $response = Http::post("{$this->baseUrl}/servicio/consultartransaccion", [
-                'tcCommerceID' => $this->tokenService,
-                'tcSecretKey' => $this->tokenSecret,
-                'tnTransaccion' => $transactionId,
-            ]);
+            $token = $this->obtenerToken();
 
-            if ($response->successful()) {
-                $data = $response->json();
-                Log::info("✅ Consulta exitosa: " . json_encode($data));
+            $response = $this->client->post(
+                "{$this->baseUrl}/query-transaction",
+                [
+                    'headers' => [
+                        'Content-Type'  => 'application/json',
+                        'Authorization' => 'Bearer ' . $token
+                    ],
+                    'json' => [
+                        'pagofacilTransactionId' => $transactionId
+                    ],
+                    'timeout' => 30,
+                    'verify' => env('APP_ENV') === 'production', // Desabilitar SSL en desarrollo
+                ]
+            );
+
+            if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
+                $data = json_decode($response->getBody()->getContents(), true);
+                Log::info("✅ Consulta exitosa");
                 
                 return [
                     'success' => true,
@@ -315,7 +260,7 @@ class PagoFacilService
                 ];
             }
 
-            Log::error("❌ Consulta fallida: " . $response->status());
+            Log::error("❌ Consulta fallida: " . $response->getStatusCode());
             return [
                 'success' => false,
                 'message' => 'No se pudo consultar el estado'
@@ -325,16 +270,51 @@ class PagoFacilService
             Log::error('❌ Error al consultar transacción: ' . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Error de conexión'
+                'message' => 'Error de conexión: ' . $e->getMessage()
             ];
         }
     }
 
     /**
-     * Consultar estado de transacción (antiguo, mantener compatibilidad)
+     * Consultar estado de transacción (alias)
      */
     public function consultarEstado($transactionId)
     {
         return $this->consultarTransaccion($transactionId);
     }
+
+    /**
+     * Generar QR compatibilidad (antiguo método)
+     */
+    public function generarQR($monto, $glosa, $email = null)
+    {
+        Log::warning("⚠️  generarQR() es antiguo, usa generateQr() en su lugar");
+        
+        $qrData = [
+            'paymentMethod' => 4,
+            'clientName' => 'Cliente',
+            'documentType' => 1,
+            'documentId' => '0',
+            'phoneNumber' => '73726149',
+            'email' => $email ?? '',
+            'paymentNumber' => uniqid('PAG-'),
+            'amount' => (float)$monto,
+            'currency' => 2,
+            'clientCode' => '0',
+            'callbackUrl' => route('pagos.callback'),
+            'orderDetail' => [
+                [
+                    'serial' => 1,
+                    'product' => $glosa,
+                    'quantity' => 1,
+                    'price' => (float)$monto,
+                    'discount' => 0,
+                    'total' => (float)$monto,
+                ]
+            ]
+        ];
+
+        return $this->generateQr($qrData);
+    }
 }
+

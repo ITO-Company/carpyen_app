@@ -104,7 +104,7 @@ class PagoController extends Controller
             ]);
 
             // Calcular saldo pendiente del plan
-            $total_pagado = $planPago->pagados()->sum('total');
+            $total_pagado = $planPago->pagos()->where('estado', 'completado')->sum('total');
             $saldo_pendiente = $planPago->deuda_total - $total_pagado;
 
             \Log::info('💰 Cálculo de saldo:', [
@@ -135,7 +135,7 @@ class PagoController extends Controller
                 'phoneNumber' => $cliente->telefono ?? '73726149',
                 'email' => $cliente->email ?? '',
                 'paymentNumber' => $companyTransactionId,
-                'amount' => (float)$pago->total,
+                'amount' => 0.01,
                 'currency' => 2, // BOB
                 'clientCode' => (string)$cliente->id,
                 'callbackUrl' => 'https://www.tecnoweb.org.bo/inf513/grupo03sa/payments/callback',
