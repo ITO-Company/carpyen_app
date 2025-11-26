@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { computed } from 'vue';
 
 const props = defineProps({
     cronograma: Object,
@@ -9,9 +10,16 @@ const props = defineProps({
 
 const form = useForm({
     proyecto_id: props.cronograma.proyecto_id,
-    fecha_inicio: props.cronograma.fecha_inicio,
+    fecha_inicio: props.cronograma.fecha_inicio ? new Date(props.cronograma.fecha_inicio).toISOString().split('T')[0] : '',
     dias_estimados: props.cronograma.dias_estimados,
     estado: props.cronograma.estado
+});
+
+const fechaEstimada = computed(() => {
+    if (!form.fecha_inicio || !form.dias_estimados) return '';
+    const fecha = new Date(form.fecha_inicio);
+    fecha.setDate(fecha.getDate() + parseInt(form.dias_estimados));
+    return fecha.toISOString().split('T')[0];
 });
 
 const submit = () => {
@@ -36,6 +44,15 @@ const formatDate = (date) => {
         day: '2-digit'
     });
 };
+
+const formatDateDisplay = (dateStr) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+};
 </script>
 
 <template>
@@ -43,23 +60,25 @@ const formatDate = (date) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
-                    Editar Cronograma
-                </h2>
-                <Link :href="route('cronogramas.index')" class="btn btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    Volver
-                </Link>
-            </div>
+            <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                Editar Cronograma
+            </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
                 <div class="card fade-in">
+                    <div class="flex justify-between items-center mb-6 pb-6 border-b" style="border-color: var(--theme-border);">
+                        <h3 class="text-lg font-semibold" style="color: var(--theme-text-primary)">Editar Cronograma</h3>
+                        <Link :href="route('cronogramas.index')" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            Volver
+                        </Link>
+                    </div>
+
                     <form @submit.prevent="submit">
                         <div class="form-grid">
                             <!-- Proyecto -->
@@ -119,6 +138,16 @@ const formatDate = (date) => {
                                 </div>
                             </div>
 
+                            <!-- Fecha Estimada (Read-only) -->
+                            <div class="form-group">
+                                <label for="fecha_estimada" class="form-label">
+                                    Fecha Estimada
+                                </label>
+                                <div class="input theme-input read-only">
+                                    {{ formatDateDisplay(fechaEstimada) }}
+                                </div>
+                            </div>
+
                             <!-- Estado -->
                             <div class="form-group">
                                 <label for="estado" class="form-label">
@@ -152,7 +181,7 @@ const formatDate = (date) => {
                             <div class="form-group">
                                 <label class="form-label">Fecha de Finalización</label>
                                 <div class="input theme-input read-only" style="display: flex; align-items: center;">
-                                    {{ cronograma.fecha_fin ? formatDate(cronograma.fecha_fin) : '-' }}
+                                    {{ formatDate(cronograma.fecha_fin) }}
                                 </div>
                             </div>
 

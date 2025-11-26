@@ -47,6 +47,13 @@ const formatDate = (date) => {
     });
 };
 
+const calcularFechaEstimada = (fechaInicio, diasEstimados) => {
+    if (!fechaInicio || !diasEstimados) return null;
+    const fecha = new Date(fechaInicio);
+    fecha.setDate(fecha.getDate() + parseInt(diasEstimados));
+    return formatDate(fecha.toISOString().split('T')[0]);
+};
+
 const getEstadoLabel = (estado) => {
     const labels = {
         'pendiente': 'Pendiente',
@@ -111,7 +118,7 @@ const getEstadoLabel = (estado) => {
                                     <th>Proyecto</th>
                                     <th>Usuario</th>
                                     <th>Fecha Inicio</th>
-                                    <th>Fecha Fin</th>
+                                    <th>Fecha Estimada</th>
                                     <th>Días Estimados</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
@@ -128,7 +135,7 @@ const getEstadoLabel = (estado) => {
                                     </td>
                                     <td>{{ cronograma.usuario?.name || "-" }}</td>
                                     <td>{{ formatDate(cronograma.fecha_inicio) }}</td>
-                                    <td>{{ formatDate(cronograma.fecha_fin) }}</td>
+                                    <td>{{ calcularFechaEstimada(cronograma.fecha_inicio, cronograma.dias_estimados) }}</td>
                                     <td>{{ cronograma.dias_estimados }} días</td>
                                     <td>
                                         <span :class="['badge', getEstadoBadge(cronograma.estado)]">
@@ -292,5 +299,4 @@ const getEstadoLabel = (estado) => {
     outline: none;
     box-shadow: 0 0 0 3px var(--theme-primary-alpha) !important;
 }
-</style>
 </style>

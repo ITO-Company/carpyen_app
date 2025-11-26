@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cronograma;
 use App\Models\Proyecto;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -28,9 +29,11 @@ class CronogramaController extends Controller
     public function create()
     {
         $proyectos = Proyecto::all();
+        $usuarios = User::whereIn('rol', ['ADMIN', 'JEFE_INSTALADOR'])->get();
         
         return Inertia::render('Cronogramas/Create', [
-            'proyectos' => $proyectos
+            'proyectos' => $proyectos,
+            'usuarios' => $usuarios
         ]);
     }
 
@@ -41,11 +44,14 @@ class CronogramaController extends Controller
     {
         $validated = $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
+            'usuario_id' => 'required|exists:users,id',
             'fecha_inicio' => 'required|date',
             'dias_estimados' => 'required|integer|min:1',
         ], [
             'proyecto_id.required' => 'El proyecto es obligatorio',
             'proyecto_id.exists' => 'El proyecto no existe',
+            'usuario_id.required' => 'El usuario es obligatorio',
+            'usuario_id.exists' => 'El usuario no existe',
             'fecha_inicio.required' => 'La fecha de inicio es obligatoria',
             'fecha_inicio.date' => 'La fecha de inicio debe ser una fecha válida',
             'dias_estimados.required' => 'Los días estimados son obligatorios',
@@ -55,7 +61,7 @@ class CronogramaController extends Controller
 
         Cronograma::create([
             'proyecto_id' => $validated['proyecto_id'],
-            'usuario_id' => auth()->id(),
+            'usuario_id' => $validated['usuario_id'],
             'fecha_inicio' => $validated['fecha_inicio'],
             'fecha_fin' => null,
             'dias_estimados' => $validated['dias_estimados'],

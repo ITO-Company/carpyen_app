@@ -1,16 +1,52 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { computed, watch } from 'vue';
 
 const props = defineProps({
-    proyectos: Array
+    proyectos: {
+        type: Array,
+        default: () => []
+    },
+    usuarios: {
+        type: Array,
+        default: () => []
+    }
 });
+
+// Debug: ver qué recibimos
+watch(() => props.usuarios, (newVal) => {
+    console.log('Usuarios recibidos:', newVal);
+}, { immediate: true });
 
 const form = useForm({
     proyecto_id: '',
+    usuario_id: '',
     fecha_inicio: '',
     dias_estimados: ''
 });
+
+// Usar directamente los usuarios ya filtrados del controller
+const usuariosFiltrados = computed(() => {
+    console.log('usuariosFiltrados computed:', props.usuarios);
+    return props.usuarios || [];
+});
+
+const fechaEstimada = computed(() => {
+    if (!form.fecha_inicio || !form.dias_estimados) return '';
+    const fecha = new Date(form.fecha_inicio);
+    fecha.setDate(fecha.getDate() + parseInt(form.dias_estimados));
+    return fecha.toISOString().split('T')[0];
+});
+
+const formatDateDisplay = (dateStr) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+};
 
 const submit = () => {
     form.post(route('cronogramas.store'));
@@ -22,23 +58,25 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
-                    Nuevo Cronograma
-                </h2>
-                <Link :href="route('cronogramas.index')" class="btn btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    Volver
-                </Link>
-            </div>
+            <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                Nuevo Cronograma
+            </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
                 <div class="card fade-in">
+                    <div class="flex justify-between items-center mb-6 pb-6 border-b" style="border-color: var(--theme-border);">
+                        <h3 class="text-lg font-semibold" style="color: var(--theme-text-primary)">Crear Nuevo Cronograma</h3>
+                        <Link :href="route('cronogramas.index')" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            Volver
+                        </Link>
+                    </div>
+
                     <form @submit.prevent="submit">
                         <div class="form-grid">
                             <!-- Proyecto -->
@@ -95,6 +133,37 @@ const submit = () => {
                                 />
                                 <div v-if="form.errors.dias_estimados" class="form-error">
                                     {{ form.errors.dias_estimados }}
+                                </div>
+                            </div>
+
+                            <!-- Usuario -->
+                            <div class="form-group">
+                                <label for="usuario_id" class="form-label">
+                                    Usuario Responsable <span class="text-error">*</span>
+                                </label>
+                                <select
+                                    id="usuario_id"
+                                    v-model="form.usuario_id"
+                                    class="input theme-input"
+                                    required
+                                >
+                                    <option value="">Seleccione un usuario</option>
+                                    <option v-for="usuario in usuariosFiltrados" :key="usuario.id" :value="usuario.id">
+                                        {{ usuario.name }} ({{ usuario.rol }})
+                                    </option>
+                                </select>
+                                <div v-if="form.errors.usuario_id" class="form-error">
+                                    {{ form.errors.usuario_id }}
+                                </div>
+                            </div>
+
+                            <!-- Fecha Estimada (Read-only) -->
+                            <div class="form-group">
+                                <label for="fecha_estimada" class="form-label">
+                                    Fecha Estimada
+                                </label>
+                                <div class="input theme-input read-only">
+                                    {{ formatDateDisplay(fechaEstimada) }}
                                 </div>
                             </div>
 
