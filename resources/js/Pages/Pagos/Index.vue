@@ -96,7 +96,13 @@ const generarQRPago = async () => {
             console.log("⏰ Expiración:", response.data.expirationDate);
             console.log("🖼️  Imagen QR disponible (base64)");
 
-            qrImage.value = response.data.qrBase64;
+            // Agregar prefijo data:image si no lo tiene
+            let qrDataUrl = response.data.qrBase64;
+            if (!qrDataUrl.startsWith("data:")) {
+                qrDataUrl = "data:image/png;base64," + qrDataUrl;
+            }
+
+            qrImage.value = qrDataUrl;
             transaccionId.value = response.data.transactionId;
 
             console.log("✨ QR cargado en la interfaz correctamente.");
