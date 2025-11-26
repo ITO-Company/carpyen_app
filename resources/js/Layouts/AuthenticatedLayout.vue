@@ -46,12 +46,6 @@ function getMenuForRole(rol) {
             roles: ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR']
         },
         {
-            nombre: 'Productos',
-            icono: 'package',
-            ruta: '/productos',
-            roles: ['ADMIN', 'VENDEDOR']
-        },
-        {
             nombre: 'Proveedores',
             icono: 'truck',
             ruta: '/proveedores',
@@ -70,7 +64,7 @@ function getMenuForRole(rol) {
             roles: ['ADMIN', 'JEFE_INSTALADOR']
         },
         {
-            nombre: 'Inventario',
+            nombre: 'Stock',
             icono: 'archive',
             ruta: '/productos',
             roles: ['ADMIN']

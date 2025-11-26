@@ -10,8 +10,7 @@ const form = useForm({
     nombre: props.producto.nombre,
     tipo: props.producto.tipo,
     unidad_medida: props.producto.unidad_medida,
-    precio_unitario: props.producto.precio_unitario,
-    stock: props.producto.stock
+    precio_unitario: props.producto.precio_unitario
 });
 
 const submit = () => {
@@ -97,7 +96,7 @@ const submit = () => {
                             </div>
 
                             <!-- Precio Unitario -->
-                            <div class="form-group">
+                            <div class="form-group full-width">
                                 <label for="precio_unitario" class="form-label">
                                     Precio Unitario (Bs.) <span class="text-error">*</span>
                                 </label>
@@ -116,19 +115,14 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <!-- Stock -->
-                            <div class="form-group full-width">
-                                <label for="stock" class="form-label">
-                                    Stock Disponible
-                                </label>
-                                <input
-                                    id="stock"
-                                    v-model="form.stock"
-                                    type="number"
-                                    min="0"
-                                    class="input theme-input"
-                                    placeholder="0"
-                                />
+                            <!-- Información de Stock -->
+                            <div class="form-group full-width info-box">
+                                <p style="color: var(--theme-text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-2);">
+                                    ℹ️ Para modificar el stock, utiliza los botones "Agregar Stock" o "Disminuir Stock" desde la vista de productos.
+                                </p>
+                                <p style="color: var(--theme-text-primary); font-weight: 600;">
+                                    Stock Actual: <span style="color: var(--theme-primary);">{{ props.producto.stock }}</span>
+                                </p>
                             </div>
                         </div>
 
@@ -181,6 +175,13 @@ const submit = () => {
     font-size: var(--font-size-sm);
     color: var(--theme-error);
     margin-top: var(--spacing-1);
+}
+
+.info-box {
+    background-color: var(--theme-primary-alpha);
+    border: 1px solid var(--theme-primary);
+    border-radius: 8px;
+    padding: var(--spacing-4);
 }
 
 .form-actions {

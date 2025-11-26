@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { ref, computed } from "vue";
 
@@ -8,6 +8,12 @@ const props = defineProps({
 });
 
 const searchQuery = ref("");
+const stockForm = ref({
+    visible: false,
+    productId: null,
+    cantidad: 1,
+    action: null, // 'agregar' o 'disminuir'
+});
 
 const filteredProductos = computed(() => {
     if (!searchQuery.value) {
@@ -33,6 +39,46 @@ const paginationLabel = (label) => {
     if (label.includes("Previous")) return "← Anterior";
     if (label.includes("Next")) return "Siguiente →";
     return label;
+};
+
+const abrirModalStock = (productId, action) => {
+    stockForm.value.productId = productId;
+    stockForm.value.action = action;
+    stockForm.value.cantidad = 1;
+    stockForm.value.visible = true;
+};
+
+const cerrarModalStock = () => {
+    stockForm.value.visible = false;
+    stockForm.value.productId = null;
+    stockForm.value.cantidad = 1;
+    stockForm.value.action = null;
+};
+
+const enviarStock = () => {
+    if (!stockForm.value.cantidad || stockForm.value.cantidad < 1) {
+        alert('Por favor ingresa una cantidad válida');
+        return;
+    }
+
+    const routeName = stockForm.value.action === 'agregar' 
+        ? 'productos.agregarStock' 
+        : 'productos.disminuirStock';
+    
+    const form = useForm({
+        cantidad: parseInt(stockForm.value.cantidad)
+    });
+
+    form.post(route(routeName, stockForm.value.productId), {
+        onSuccess: () => {
+            cerrarModalStock();
+            window.location.reload();
+        },
+        onError: (errors) => {
+            alert('Error al actualizar stock');
+            console.error(errors);
+        }
+    });
 };
 </script>
 
@@ -126,7 +172,7 @@ const paginationLabel = (label) => {
                                         </span>
                                     </td>
                                     <td>
-                                        <div class="flex gap-2">
+                                        <div class="flex gap-2" style="flex-wrap: wrap;">
                                             <Link
                                                 :href="
                                                     route(
@@ -141,22 +187,30 @@ const paginationLabel = (label) => {
                                             >
                                                 Editar
                                             </Link>
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'productos.destroy',
-                                                        producto.id
-                                                    )
-                                                "
-                                                method="delete"
-                                                as="button"
-                                                class="text-error hover:underline"
+                                            <button
+                                                @click="abrirModalStock(producto.id, 'agregar')"
+                                                class="text-primary hover:underline"
                                                 style="
-                                                    color: var(--theme-error);
+                                                    color: var(--theme-success);
+                                                    background: none;
+                                                    border: none;
+                                                    cursor: pointer;
                                                 "
                                             >
-                                                Eliminar
-                                            </Link>
+                                                +Stock
+                                            </button>
+                                            <button
+                                                @click="abrirModalStock(producto.id, 'disminuir')"
+                                                class="text-primary hover:underline"
+                                                style="
+                                                    color: var(--theme-warning);
+                                                    background: none;
+                                                    border: none;
+                                                    cursor: pointer;
+                                                "
+                                            >
+                                                -Stock
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -189,12 +243,126 @@ const paginationLabel = (label) => {
                         Mostrando {{ filteredProductos.data.length }} resultado(s)
                     </div>
                 </div>
+
+                <!-- Modal para Agregar/Disminuir Stock -->
+                <div v-if="stockForm.visible" class="modal-overlay" @click.self="cerrarModalStock">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">
+                                {{ stockForm.action === 'agregar' ? '➕ Agregar Stock' : '➖ Disminuir Stock' }}
+                            </h3>
+                            <button @click="cerrarModalStock" class="modal-close">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">Cantidad</label>
+                                <input
+                                    v-model.number="stockForm.cantidad"
+                                    type="number"
+                                    min="1"
+                                    class="input theme-input"
+                                    placeholder="Ingrese la cantidad"
+                                />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button @click="cerrarModalStock" class="btn btn-secondary">
+                                Cancelar
+                            </button>
+                            <button @click="enviarStock" class="btn btn-primary">
+                                {{ stockForm.action === 'agregar' ? 'Agregar' : 'Disminuir' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
 
 <style scoped>
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--theme-bg-primary);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--theme-border);
+}
+
+.modal-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--theme-text-primary);
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--theme-text-secondary);
+}
+
+.modal-body {
+    padding: var(--spacing-6);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-3);
+    padding: var(--spacing-6);
+    border-top: 1px solid var(--theme-border);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.form-label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--theme-text-primary);
+}
+
+.theme-input {
+    background-color: var(--theme-bg-primary) !important;
+    color: var(--theme-text-primary) !important;
+    border: 1px solid var(--theme-border) !important;
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: 6px;
+}
+
+.theme-input:focus {
+    border-color: var(--theme-primary) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px var(--theme-primary-alpha) !important;
+}
+
 .flex {
     display: flex;
 }

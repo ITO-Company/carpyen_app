@@ -59,6 +59,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gestión de Productos (CU3)
     Route::resource('productos', ProductoController::class);
+    Route::post('/productos/{producto}/agregar-stock', [ProductoController::class, 'agregarStock'])->name('productos.agregarStock');
+    Route::post('/productos/{producto}/disminuir-stock', [ProductoController::class, 'disminuirStock'])->name('productos.disminuirStock');
 
     // Gestión de Proveedores
     Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');

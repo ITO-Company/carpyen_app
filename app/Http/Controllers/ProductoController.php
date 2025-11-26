@@ -66,13 +66,83 @@ class ProductoController extends Controller
             'tipo' => 'nullable|string',
             'unidad_medida' => 'required|string',
             'precio_unitario' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
         ]);
 
         $producto->update($validated);
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto actualizado exitosamente');
+    }
+
+    /**
+     * Agregar stock a un producto
+     */
+    public function agregarStock(Request $request, Producto $producto)
+    {
+        $validated = $request->validate([
+            'cantidad' => 'required|integer|min:1',
+        ], [
+            'cantidad.required' => 'La cantidad es obligatoria',
+            'cantidad.integer' => 'La cantidad debe ser un número entero',
+            'cantidad.min' => 'La cantidad debe ser al menos 1',
+        ]);
+
+        $producto->update([
+            'stock' => $producto->stock + $validated['cantidad']
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Se agregaron {$validated['cantidad']} unidades al stock",
+                'stock' => $producto->stock
+            ]);
+        }
+
+        return redirect()->route('productos.index')
+            ->with('success', "Se agregaron {$validated['cantidad']} unidades al stock");
+    }
+
+    /**
+     * Disminuir stock de un producto
+     */
+    public function disminuirStock(Request $request, Producto $producto)
+    {
+        $validated = $request->validate([
+            'cantidad' => 'required|integer|min:1',
+        ], [
+            'cantidad.required' => 'La cantidad es obligatoria',
+            'cantidad.integer' => 'La cantidad debe ser un número entero',
+            'cantidad.min' => 'La cantidad debe ser al menos 1',
+        ]);
+
+        $nuevoStock = $producto->stock - $validated['cantidad'];
+        
+        if ($nuevoStock < 0) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "No hay suficiente stock. Stock actual: {$producto->stock}"
+                ], 422);
+            }
+            return redirect()->route('productos.index')
+                ->with('error', "No hay suficiente stock para disminuir. Stock actual: {$producto->stock}");
+        }
+
+        $producto->update([
+            'stock' => $nuevoStock
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Se disminuyeron {$validated['cantidad']} unidades del stock",
+                'stock' => $producto->stock
+            ]);
+        }
+
+        return redirect()->route('productos.index')
+            ->with('success', "Se disminuyeron {$validated['cantidad']} unidades del stock");
     }
 
     public function destroy(Producto $producto)
