@@ -19,6 +19,11 @@ const planSeleccionado = ref(null);
 const pagosSeleccionados = ref([]);
 const mostrarModalPago = ref(false);
 const pagoSeleccionado = ref(null);
+const qrImage = ref(null);
+const transaccionId = ref(null);
+const generandoQR = ref(false);
+const errorQR = ref(null);
+const pagoCompletado = ref(false);
 
 const verPagos = (plan) => {
     planSeleccionado.value = plan;
@@ -34,12 +39,60 @@ const volverAPlanes = () => {
 
 const abrirModalPago = (pago) => {
     pagoSeleccionado.value = pago;
+    qrImage.value = null;
+    transaccionId.value = null;
+    errorQR.value = null;
+    pagoCompletado.value = false;
     mostrarModalPago.value = true;
 };
 
 const cerrarModalPago = () => {
     mostrarModalPago.value = false;
     pagoSeleccionado.value = null;
+    qrImage.value = null;
+    transaccionId.value = null;
+    errorQR.value = null;
+    pagoCompletado.value = false;
+};
+
+const generarQRPago = async () => {
+    if (!pagoSeleccionado.value) return;
+
+    generandoQR.value = true;
+    errorQR.value = null;
+
+    try {
+        const response = await fetch("/pagos/generar-qr", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+            },
+            body: JSON.stringify({
+                monto: parseFloat(pagoSeleccionado.value.total),
+                glosa: `Pago del plan ${planSeleccionado.value?.proyecto?.nombre}`,
+                email: "", // Puedes obtener del usuario si está disponible
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Error al generar QR");
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            qrImage.value = data.qr_image;
+            transaccionId.value = data.transaction_id;
+        } else {
+            errorQR.value = data.message || "Error al generar código QR";
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        errorQR.value = "Error de conexión al generar el QR";
+    } finally {
+        generandoQR.value = false;
+    }
 };
 
 const cerrarModalPagos = () => {
@@ -802,7 +855,7 @@ const eliminar = (plan) => {
                                 style="border-color: var(--theme-border)"
                             >
                                 <h3 class="text-2xl font-bold">
-                                    Detalles del Pago
+                                    {{ qrImage ? "Código de Pago QR" : "Detalles del Pago" }}
                                 </h3>
                                 <button
                                     @click="cerrarModalPago"
@@ -824,8 +877,8 @@ const eliminar = (plan) => {
                                 </button>
                             </div>
 
-                            <!-- Contenido del Modal -->
-                            <div v-if="pagoSeleccionado" class="space-y-6">
+                            <!-- Contenido del Modal - Vista de Detalles -->
+                            <div v-if="!qrImage && pagoSeleccionado" class="space-y-6">
                                 <!-- Información del Plan -->
                                 <div
                                     class="rounded-lg p-4"
@@ -975,7 +1028,9 @@ const eliminar = (plan) => {
                                     <p
                                         class="text-sm font-semibold mb-2"
                                         style="
-                                            color: var(--theme-text-secondary);
+                                            color: var(
+                                                --theme-text-secondary
+                                            );
                                         "
                                     >
                                         Concepto
@@ -986,6 +1041,17 @@ const eliminar = (plan) => {
                                         <strong>{{
                                             planSeleccionado?.proyecto?.nombre
                                         }}</strong>
+                                    </p>
+                                </div>
+
+                                <!-- Mensaje de Error -->
+                                <div
+                                    v-if="errorQR"
+                                    class="rounded-lg p-4"
+                                    style="background-color: var(--theme-error)"
+                                >
+                                    <p class="text-sm text-white">
+                                        {{ errorQR }}
                                     </p>
                                 </div>
 
@@ -1001,10 +1067,12 @@ const eliminar = (plan) => {
                                         Cancelar
                                     </button>
                                     <button
+                                        @click="generarQRPago"
+                                        :disabled="generandoQR"
                                         class="btn btn-primary flex-1"
-                                        title="Funcionalidad de pago a implementar"
                                     >
                                         <svg
+                                            v-if="!generandoQR"
                                             class="w-5 h-5 mr-2"
                                             fill="none"
                                             stroke="currentColor"
@@ -1017,7 +1085,130 @@ const eliminar = (plan) => {
                                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                             />
                                         </svg>
-                                        Proceder al Pago
+                                        <span
+                                            v-if="generandoQR"
+                                            class="loading loading-spinner loading-sm mr-2"
+                                        ></span>
+                                        {{
+                                            generandoQR
+                                                ? "Generando..."
+                                                : "Proceder al Pago"
+                                        }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Contenido del Modal - Vista de QR -->
+                            <div
+                                v-else-if="qrImage"
+                                class="space-y-6 text-center"
+                            >
+                                <!-- Información del Pago en QR -->
+                                <div class="space-y-2">
+                                    <p
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
+                                        Escanea el código QR con tu teléfono
+                                    </p>
+                                    <p class="text-2xl font-bold">
+                                        Bs
+                                        {{
+                                            parseFloat(
+                                                pagoSeleccionado.total || 0
+                                            ).toFixed(2)
+                                        }}
+                                    </p>
+                                </div>
+
+                                <!-- QR Image -->
+                                <div class="flex justify-center py-6">
+                                    <img
+                                        :src="qrImage"
+                                        alt="Código QR de pago"
+                                        class="w-64 h-64 object-contain"
+                                    />
+                                </div>
+
+                                <!-- ID de Transacción -->
+                                <div
+                                    class="rounded-lg p-3"
+                                    style="
+                                        background-color: var(
+                                            --theme-bg-secondary
+                                        );
+                                    "
+                                >
+                                    <p
+                                        class="text-xs"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
+                                        ID de Transacción
+                                    </p>
+                                    <p
+                                        class="text-sm font-mono break-all"
+                                        style="color: var(--theme-primary)"
+                                    >
+                                        {{ transaccionId }}
+                                    </p>
+                                </div>
+
+                                <!-- Instrucciones -->
+                                <div
+                                    class="rounded-lg p-4"
+                                    style="
+                                        background-color: var(
+                                            --theme-bg-secondary
+                                        );
+                                    "
+                                >
+                                    <p
+                                        class="text-sm font-semibold mb-2"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
+                                        Instrucciones de Pago:
+                                    </p>
+                                    <ol class="text-sm text-left space-y-1">
+                                        <li>
+                                            1. Abre tu aplicación de billetera
+                                            digital o banco
+                                        </li>
+                                        <li>
+                                            2. Selecciona escanear código QR
+                                        </li>
+                                        <li>3. Escanea el código de arriba</li>
+                                        <li>4. Confirma el pago</li>
+                                        <li>
+                                            5. Recibirás confirmación
+                                            automáticamente
+                                        </li>
+                                    </ol>
+                                </div>
+
+                                <!-- Botones de Acción QR -->
+                                <div
+                                    class="flex gap-3 border-t pt-6"
+                                    style="border-color: var(--theme-border)"
+                                >
+                                    <button
+                                        @click="
+                                            qrImage = null;
+                                            errorQR = null;
+                                        "
+                                        class="btn btn-ghost flex-1"
+                                    >
+                                        Atrás
+                                    </button>
+                                    <button
+                                        @click="cerrarModalPago"
+                                        class="btn btn-primary flex-1"
+                                    >
+                                        Cerrar
                                     </button>
                                 </div>
                             </div>
