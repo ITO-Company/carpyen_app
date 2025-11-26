@@ -143,7 +143,14 @@ const getEstadoLabel = (estado) => {
                                         </span>
                                     </td>
                                     <td>
-                                        <div class="flex gap-2">
+                                        <div class="flex gap-2 flex-wrap">
+                                            <Link
+                                                :href="route('tareas.index', cronograma.id)"
+                                                class="text-info hover:underline"
+                                                style="color: var(--theme-primary);"
+                                            >
+                                                Ver Tareas
+                                            </Link>
                                             <Link
                                                 :href="route('cronogramas.edit', cronograma.id)"
                                                 class="text-primary hover:underline"

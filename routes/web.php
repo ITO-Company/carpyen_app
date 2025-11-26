@@ -9,6 +9,7 @@ use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\CronogramaController;
+use App\Http\Controllers\TareaController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PlanPagoController;
 use App\Http\Controllers\ReporteController;
@@ -99,6 +100,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gestión de Cronogramas y Tareas (CU6)
     Route::resource('cronogramas', CronogramaController::class);
+
+    // Gestión de Tareas anidadas en Cronogramas
+    Route::get('/cronogramas/{cronogramaId}/tareas', [TareaController::class, 'index'])->name('tareas.index');
+    Route::get('/cronogramas/{cronogramaId}/tareas/crear', [TareaController::class, 'create'])->name('tareas.create');
+    Route::post('/cronogramas/{cronogramaId}/tareas', [TareaController::class, 'store'])->name('tareas.store');
+    Route::get('/tareas/{id}/editar', [TareaController::class, 'edit'])->name('tareas.edit');
+    Route::put('/tareas/{id}', [TareaController::class, 'update'])->name('tareas.update');
+    Route::delete('/tareas/{id}', [TareaController::class, 'destroy'])->name('tareas.destroy');
 
     // Gestión de Planes de Pago (CU6)
     Route::resource('planesPago', PlanPagoController::class);

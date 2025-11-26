@@ -12,6 +12,7 @@ class Tarea extends Model
     protected $fillable = [
         'cronograma_id',
         'user_id',
+        'fecha',
         'hora_inicio',
         'hora_fin',
         'descripcion',

@@ -164,6 +164,7 @@ return new class extends Migration
                 id BIGSERIAL PRIMARY KEY,
                 cronograma_id BIGINT NOT NULL REFERENCES cronogramas(id) ON DELETE CASCADE,
                 user_id BIGINT NULL REFERENCES users(id) ON DELETE SET NULL,
+                fecha DATE NOT NULL,
                 hora_inicio TIME NULL,
                 hora_fin TIME NULL,
                 descripcion TEXT NULL,

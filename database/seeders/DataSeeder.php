@@ -219,6 +219,7 @@ class DataSeeder extends Seeder
                 Tarea::create([
                     'cronograma_id' => $cronograma->id,
                     'user_id' => $instalador ? $instalador->id : null,
+                    'fecha' => now()->subDays(15),
                     'descripcion' => 'Corte de materiales',
                     'hora_inicio' => '08:00',
                     'hora_fin' => '12:00',
@@ -228,6 +229,7 @@ class DataSeeder extends Seeder
                 Tarea::create([
                     'cronograma_id' => $cronograma->id,
                     'user_id' => $instalador ? $instalador->id : null,
+                    'fecha' => now()->subDays(14),
                     'descripcion' => 'Ensamblaje',
                     'hora_inicio' => '13:00',
                     'hora_fin' => '17:00',
@@ -238,6 +240,7 @@ class DataSeeder extends Seeder
                     Tarea::create([
                         'cronograma_id' => $cronograma->id,
                         'user_id' => $instalador ? $instalador->id : null,
+                        'fecha' => now()->addDays(1),
                         'descripcion' => 'Acabados finales',
                         'hora_inicio' => '08:00',
                         'hora_fin' => '12:00',
