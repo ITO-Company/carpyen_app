@@ -32,7 +32,6 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole('ADMIN');
 
-        // 2. Vendedor
         $vendedor = User::firstOrCreate(
             ['email' => 'vendedor@carpyen.com'],
             [

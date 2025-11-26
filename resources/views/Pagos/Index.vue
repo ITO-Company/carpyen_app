@@ -384,7 +384,7 @@
                             class="bg-gray-50 p-6 rounded-lg mb-8 border border-gray-200"
                         >
                             <h3 class="text-lg font-bold text-gray-900 mb-4">
-                                Resumen Financiero
+                                Resumen Financiero 1
                             </h3>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div
@@ -509,7 +509,7 @@
                                         <th
                                             class="px-6 py-3 text-left text-sm font-semibold text-gray-700"
                                         >
-                                            Fecha Registro
+                                            Fecha Registro 1
                                         </th>
                                     </tr>
                                 </thead>

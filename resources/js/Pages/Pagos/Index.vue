@@ -13,14 +13,21 @@ const props = defineProps({
     },
 });
 
-const mostrarModalPagos = ref(false);
+const mostrarModalPagos = ref(false); // Variable legada, no se usa más
+const vistaActual = ref("planes"); // 'planes' o 'pagos'
 const planSeleccionado = ref(null);
 const pagosSeleccionados = ref([]);
 
 const verPagos = (plan) => {
     planSeleccionado.value = plan;
     pagosSeleccionados.value = plan.pagos || [];
-    mostrarModalPagos.value = true;
+    vistaActual.value = "pagos";
+};
+
+const volverAPlanes = () => {
+    vistaActual.value = "planes";
+    planSeleccionado.value = null;
+    pagosSeleccionados.value = [];
 };
 
 const cerrarModalPagos = () => {
@@ -66,597 +73,933 @@ const eliminar = (plan) => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="mb-6 flex justify-between items-center gap-4">
-                    <div></div>
-                    <Link
-                        :href="route('planesPago.create')"
-                        class="btn btn-primary"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Nuevo Plan de Pago
-                    </Link>
-                </div>
-
-                <!-- LISTA DE PLANES DE PAGO -->
-                <template
-                    v-if="
-                        planesPago &&
-                        planesPago.data &&
-                        planesPago.data.length > 0
-                    "
-                >
-                    <div class="grid gap-6">
-                        <div
-                            v-for="plan in planesPago.data"
-                            :key="plan.id"
-                            class="card"
-                        >
-                            <div class="card-body p-6">
-                                <!-- Encabezado -->
-                                <div
-                                    class="flex justify-between items-start mb-4"
-                                >
-                                    <div>
-                                        <h3 class="text-xl font-bold">
-                                            {{ plan.proyecto.nombre }}
-                                        </h3>
-                                        <p
-                                            style="
-                                                color: var(
-                                                    --theme-text-secondary
-                                                );
-                                                font-size: 0.875rem;
-                                                margin-top: 0.25rem;
-                                            "
-                                        >
-                                            Cliente:
-                                            <span class="font-semibold">{{
-                                                plan.proyecto.cliente.nombre
-                                            }}</span>
-                                        </p>
-                                    </div>
-                                    <span
-                                        class="badge"
-                                        :class="{
-                                            'badge-info':
-                                                plan.estado === 'activo',
-                                            'badge-success':
-                                                plan.estado === 'completado',
-                                            'badge-warning':
-                                                plan.estado === 'mora',
-                                        }"
-                                    >
-                                        {{
-                                            plan.estado
-                                                .charAt(0)
-                                                .toUpperCase() +
-                                            plan.estado.slice(1)
-                                        }}
-                                    </span>
-                                </div>
-
-                                <!-- Información Financiera -->
-                                <div
-                                    class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
-                                >
-                                    <div class="stat-box">
-                                        <p class="stat-label">Deuda Total</p>
-                                        <p class="stat-value">
-                                            Bs
-                                            {{
-                                                parseFloat(
-                                                    plan.deuda_total
-                                                ).toFixed(2)
-                                            }}
-                                        </p>
-                                    </div>
-                                    <div class="stat-box">
-                                        <p class="stat-label">Pagado</p>
-                                        <p
-                                            class="stat-value"
-                                            style="color: var(--theme-success)"
-                                        >
-                                            Bs
-                                            {{
-                                                parseFloat(
-                                                    plan.pagado_total
-                                                ).toFixed(2)
-                                            }}
-                                        </p>
-                                    </div>
-                                    <div class="stat-box">
-                                        <p class="stat-label">Saldo</p>
-                                        <p
-                                            class="stat-value"
-                                            style="color: var(--theme-warning)"
-                                        >
-                                            Bs
-                                            {{
-                                                (
-                                                    parseFloat(
-                                                        plan.deuda_total
-                                                    ) -
-                                                    parseFloat(
-                                                        plan.pagado_total
-                                                    )
-                                                ).toFixed(2)
-                                            }}
-                                        </p>
-                                    </div>
-                                    <div class="stat-box">
-                                        <p class="stat-label">Progreso</p>
-                                        <p
-                                            class="stat-value"
-                                            style="color: var(--theme-primary)"
-                                        >
-                                            {{
-                                                (
-                                                    (parseFloat(
-                                                        plan.pagado_total
-                                                    ) /
-                                                        parseFloat(
-                                                            plan.deuda_total
-                                                        )) *
-                                                    100
-                                                ).toFixed(0)
-                                            }}%
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Barra de Progreso -->
-                                <div class="mb-6">
-                                    <div
-                                        class="flex justify-between items-center mb-2"
-                                    >
-                                        <p
-                                            class="text-sm font-semibold"
-                                            style="
-                                                color: var(
-                                                    --theme-text-primary
-                                                );
-                                            "
-                                        >
-                                            Progreso de Pago
-                                        </p>
-                                        <p
-                                            class="text-sm"
-                                            style="
-                                                color: var(
-                                                    --theme-text-secondary
-                                                );
-                                            "
-                                        >
-                                            {{
-                                                (
-                                                    (parseFloat(
-                                                        plan.pagado_total
-                                                    ) /
-                                                        parseFloat(
-                                                            plan.deuda_total
-                                                        )) *
-                                                    100
-                                                ).toFixed(0)
-                                            }}%
-                                        </p>
-                                    </div>
-                                    <div
-                                        class="w-full bg-gray-300 rounded-full h-2 overflow-hidden"
-                                    >
-                                        <div
-                                            :style="{
-                                                width:
-                                                    (parseFloat(
-                                                        plan.pagado_total
-                                                    ) /
-                                                        parseFloat(
-                                                            plan.deuda_total
-                                                        )) *
-                                                        100 +
-                                                    '%',
-                                                backgroundColor:
-                                                    parseFloat(
-                                                        plan.pagado_total
-                                                    ) /
-                                                        parseFloat(
-                                                            plan.deuda_total
-                                                        ) >=
-                                                    1
-                                                        ? 'var(--theme-success)'
-                                                        : parseFloat(
-                                                              plan.pagado_total
-                                                          ) /
-                                                              parseFloat(
-                                                                  plan.deuda_total
-                                                              ) >=
-                                                          0.5
-                                                        ? 'var(--theme-primary)'
-                                                        : 'var(--theme-warning)',
-                                            }"
-                                            class="h-full transition-all duration-300"
-                                        />
-                                    </div>
-                                </div>
-
-                                <!-- Acciones -->
-                                <div class="flex gap-2 flex-wrap">
-                                    <button
-                                        @click="verPagos(plan)"
-                                        class="btn btn-primary btn-sm"
-                                    >
-                                        Ver Pagos
-                                    </button>
-                                    <Link
-                                        :href="
-                                            route('planesPago.edit', plan.id)
-                                        "
-                                        class="btn btn-secondary btn-sm"
-                                    >
-                                        Editar
-                                    </Link>
-                                    <button
-                                        @click="eliminar(plan)"
-                                        class="btn btn-error btn-sm"
-                                    >
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Paginación -->
-                    <div
-                        v-if="
-                            planesPago &&
-                            planesPago.links &&
-                            planesPago.links.length > 0
-                        "
-                        class="mt-8 flex justify-center gap-2"
-                    >
-                        <template v-for="link in planesPago.links">
-                            <Link
-                                v-if="link.url"
-                                :href="link.url"
-                                :class="[
-                                    'btn',
-                                    link.active ? 'btn-primary' : 'btn-ghost',
-                                ]"
-                                v-html="link.label"
-                            />
-                        </template>
-                    </div>
-                </template>
-
-                <!-- Sin planes de pago -->
-                <div v-else class="card text-center py-12">
-                    <div class="card-body">
-                        <svg
-                            class="w-16 h-16 mx-auto mb-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            style="color: var(--theme-text-secondary)"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        <h3 class="text-xl font-semibold">
-                            No hay planes de pago
-                        </h3>
-                        <p
-                            style="
-                                color: var(--theme-text-secondary);
-                                margin-bottom: 1.5rem;
-                            "
-                        >
-                            Comienza creando un nuevo plan de pago para tus
-                            proyectos
-                        </p>
+                <!-- VISTA DE PLANES DE PAGO -->
+                <template v-if="vistaActual === 'planes'">
+                    <div class="mb-6 flex justify-between items-center gap-4">
+                        <div></div>
                         <Link
                             :href="route('planesPago.create')"
                             class="btn btn-primary"
                         >
-                            Crear Plan de Pago
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Nuevo Plan de Pago
                         </Link>
                     </div>
-                </div>
 
-                <!-- MODAL DE PAGOS DEL PLAN -->
-                <div
-                    v-if="mostrarModalPagos"
-                    class="modal modal-open"
-                    @click="cerrarModalPagos"
-                >
-                    <div class="modal-box max-w-4xl" @click.stop>
-                        <div
-                            class="flex justify-between items-center mb-6 pb-4 border-b"
-                            style="border-color: var(--theme-border)"
-                        >
-                            <div>
-                                <h2 class="text-2xl font-bold">
-                                    Pagos del Plan
-                                </h2>
-                                <p
-                                    style="
-                                        color: var(--theme-text-secondary);
-                                        font-size: 0.875rem;
-                                        margin-top: 0.25rem;
-                                    "
-                                >
-                                    {{ planSeleccionado?.proyecto?.nombre }}
-                                </p>
-                            </div>
-                            <button
-                                @click="cerrarModalPagos"
-                                class="btn btn-ghost btn-circle btn-sm"
+                    <!-- LISTA DE PLANES DE PAGO -->
+                    <template
+                        v-if="
+                            planesPago &&
+                            planesPago.data &&
+                            planesPago.data.length > 0
+                        "
+                    >
+                        <div class="grid gap-6">
+                            <div
+                                v-for="plan in planesPago.data"
+                                :key="plan.id"
+                                class="card"
                             >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
+                                <div class="card-body p-6">
+                                    <!-- Encabezado -->
+                                    <div
+                                        class="flex justify-between items-start mb-4"
+                                    >
+                                        <div>
+                                            <h3 class="text-xl font-bold">
+                                                {{ plan.proyecto.nombre }}
+                                            </h3>
+                                            <p
+                                                style="
+                                                    color: var(
+                                                        --theme-text-secondary
+                                                    );
+                                                    font-size: 0.875rem;
+                                                    margin-top: 0.25rem;
+                                                "
+                                            >
+                                                Cliente:
+                                                <span class="font-semibold">{{
+                                                    plan.proyecto.cliente.nombre
+                                                }}</span>
+                                            </p>
+                                        </div>
+                                        <span
+                                            class="badge"
+                                            :class="{
+                                                'badge-info':
+                                                    plan.estado === 'activo',
+                                                'badge-success':
+                                                    plan.estado ===
+                                                    'completado',
+                                                'badge-warning':
+                                                    plan.estado === 'mora',
+                                            }"
+                                        >
+                                            {{
+                                                plan.estado
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                plan.estado.slice(1)
+                                            }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Información Financiera -->
+                                    <div
+                                        class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+                                    >
+                                        <div class="stat-box">
+                                            <p class="stat-label">
+                                                Deuda Total
+                                            </p>
+                                            <p class="stat-value">
+                                                Bs
+                                                {{
+                                                    parseFloat(
+                                                        plan.deuda_total
+                                                    ).toFixed(2)
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="stat-box">
+                                            <p class="stat-label">Pagado</p>
+                                            <p
+                                                class="stat-value"
+                                                style="
+                                                    color: var(--theme-success);
+                                                "
+                                            >
+                                                Bs
+                                                {{
+                                                    parseFloat(
+                                                        plan.pagado_total
+                                                    ).toFixed(2)
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="stat-box">
+                                            <p class="stat-label">Saldo</p>
+                                            <p
+                                                class="stat-value"
+                                                style="
+                                                    color: var(--theme-warning);
+                                                "
+                                            >
+                                                Bs
+                                                {{
+                                                    (
+                                                        parseFloat(
+                                                            plan.deuda_total
+                                                        ) -
+                                                        parseFloat(
+                                                            plan.pagado_total
+                                                        )
+                                                    ).toFixed(2)
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="stat-box">
+                                            <p class="stat-label">Progreso</p>
+                                            <p
+                                                class="stat-value"
+                                                style="
+                                                    color: var(--theme-primary);
+                                                "
+                                            >
+                                                {{
+                                                    (
+                                                        (parseFloat(
+                                                            plan.pagado_total
+                                                        ) /
+                                                            parseFloat(
+                                                                plan.deuda_total
+                                                            )) *
+                                                        100
+                                                    ).toFixed(0)
+                                                }}%
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Barra de Progreso -->
+                                    <div class="mb-6">
+                                        <div
+                                            class="flex justify-between items-center mb-2"
+                                        >
+                                            <p
+                                                class="text-sm font-semibold"
+                                                style="
+                                                    color: var(
+                                                        --theme-text-primary
+                                                    );
+                                                "
+                                            >
+                                                Progreso de Pago
+                                            </p>
+                                            <p
+                                                class="text-sm"
+                                                style="
+                                                    color: var(
+                                                        --theme-text-secondary
+                                                    );
+                                                "
+                                            >
+                                                {{
+                                                    (
+                                                        (parseFloat(
+                                                            plan.pagado_total
+                                                        ) /
+                                                            parseFloat(
+                                                                plan.deuda_total
+                                                            )) *
+                                                        100
+                                                    ).toFixed(0)
+                                                }}%
+                                            </p>
+                                        </div>
+                                        <div
+                                            class="w-full bg-gray-300 rounded-full h-2 overflow-hidden"
+                                        >
+                                            <div
+                                                :style="{
+                                                    width:
+                                                        (parseFloat(
+                                                            plan.pagado_total
+                                                        ) /
+                                                            parseFloat(
+                                                                plan.deuda_total
+                                                            )) *
+                                                            100 +
+                                                        '%',
+                                                    backgroundColor:
+                                                        parseFloat(
+                                                            plan.pagado_total
+                                                        ) /
+                                                            parseFloat(
+                                                                plan.deuda_total
+                                                            ) >=
+                                                        1
+                                                            ? 'var(--theme-success)'
+                                                            : parseFloat(
+                                                                  plan.pagado_total
+                                                              ) /
+                                                                  parseFloat(
+                                                                      plan.deuda_total
+                                                                  ) >=
+                                                              0.5
+                                                            ? 'var(--theme-primary)'
+                                                            : 'var(--theme-warning)',
+                                                }"
+                                                class="h-full transition-all duration-300"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <!-- Acciones -->
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button
+                                            @click="verPagos(plan)"
+                                            class="btn btn-primary btn-sm"
+                                        >
+                                            Ver Pagos
+                                        </button>
+                                        <Link
+                                            :href="
+                                                route(
+                                                    'planesPago.edit',
+                                                    plan.id
+                                                )
+                                            "
+                                            class="btn btn-secondary btn-sm"
+                                        >
+                                            Editar
+                                        </Link>
+                                        <button
+                                            @click="eliminar(plan)"
+                                            class="btn btn-error btn-sm"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Información Financiera -->
+                        <!-- Paginación -->
                         <div
-                            class="mb-6 p-4 rounded-lg"
-                            style="background-color: var(--theme-bg-secondary)"
+                            v-if="
+                                planesPago &&
+                                planesPago.links &&
+                                planesPago.links.length > 0
+                            "
+                            class="mt-8 flex justify-center gap-2"
                         >
-                            <h3 class="text-lg font-bold mb-4">
-                                Resumen Financiero
+                            <template v-for="link in planesPago.links">
+                                <Link
+                                    v-if="link.url"
+                                    :href="link.url"
+                                    :class="[
+                                        'btn',
+                                        link.active
+                                            ? 'btn-primary'
+                                            : 'btn-ghost',
+                                    ]"
+                                    v-html="link.label"
+                                />
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Sin planes de pago -->
+                    <div v-else class="card text-center py-12">
+                        <div class="card-body">
+                            <svg
+                                class="w-16 h-16 mx-auto mb-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                style="color: var(--theme-text-secondary)"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                            <h3 class="text-xl font-semibold">
+                                No hay planes de pago
                             </h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div class="stat-box">
-                                    <p class="stat-label">Deuda Total</p>
-                                    <p class="stat-value">
-                                        Bs
-                                        {{
+                            <p
+                                style="
+                                    color: var(--theme-text-secondary);
+                                    margin-bottom: 1.5rem;
+                                "
+                            >
+                                Comienza creando un nuevo plan de pago para tus
+                                proyectos
+                            </p>
+                            <Link
+                                :href="route('planesPago.create')"
+                                class="btn btn-primary"
+                            >
+                                Crear Plan de Pago
+                            </Link>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- VISTA DE PAGOS DEL PLAN - PÁGINA COMPLETA -->
+                <div class="modal-box max-w-4xl" @click.stop>
+                    <div
+                        class="flex justify-between items-center mb-6 pb-4 border-b"
+                        style="border-color: var(--theme-border)"
+                    >
+                        <div>
+                            <h2 class="text-2xl font-bold">Pagos del Plan</h2>
+                            <p
+                                style="
+                                    color: var(--theme-text-secondary);
+                                    font-size: 0.875rem;
+                                    margin-top: 0.25rem;
+                                "
+                            >
+                                {{ planSeleccionado?.proyecto?.nombre }}
+                            </p>
+                        </div>
+                        <button
+                            @click="cerrarModalPagos"
+                            class="btn btn-ghost btn-circle btn-sm"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Información Financiera -->
+                    <div
+                        class="mb-6 p-4 rounded-lg"
+                        style="background-color: var(--theme-bg-secondary)"
+                    >
+                        <h3 class="text-lg font-bold mb-4">
+                            Resumen Financiero
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="stat-box">
+                                <p class="stat-label">Deuda Total</p>
+                                <p class="stat-value">
+                                    Bs
+                                    {{
+                                        parseFloat(
+                                            planSeleccionado?.deuda_total || 0
+                                        ).toFixed(2)
+                                    }}
+                                </p>
+                            </div>
+                            <div class="stat-box">
+                                <p class="stat-label">Pagado</p>
+                                <p
+                                    class="stat-value"
+                                    style="color: var(--theme-success)"
+                                >
+                                    Bs
+                                    {{
+                                        parseFloat(
+                                            planSeleccionado?.pagado_total || 0
+                                        ).toFixed(2)
+                                    }}
+                                </p>
+                            </div>
+                            <div class="stat-box">
+                                <p class="stat-label">Saldo Pendiente</p>
+                                <p
+                                    class="stat-value"
+                                    style="color: var(--theme-warning)"
+                                >
+                                    Bs
+                                    {{
+                                        (
                                             parseFloat(
                                                 planSeleccionado?.deuda_total ||
                                                     0
-                                            ).toFixed(2)
-                                        }}
-                                    </p>
-                                </div>
-                                <div class="stat-box">
-                                    <p class="stat-label">Pagado</p>
-                                    <p
-                                        class="stat-value"
-                                        style="color: var(--theme-success)"
-                                    >
-                                        Bs
-                                        {{
+                                            ) -
                                             parseFloat(
                                                 planSeleccionado?.pagado_total ||
                                                     0
-                                            ).toFixed(2)
-                                        }}
-                                    </p>
-                                </div>
-                                <div class="stat-box">
-                                    <p class="stat-label">Saldo Pendiente</p>
-                                    <p
-                                        class="stat-value"
-                                        style="color: var(--theme-warning)"
-                                    >
-                                        Bs
-                                        {{
-                                            (
+                                            )
+                                        ).toFixed(2)
+                                    }}
+                                </p>
+                            </div>
+                            <div class="stat-box">
+                                <p class="stat-label">Progreso</p>
+                                <p
+                                    class="stat-value"
+                                    style="color: var(--theme-primary)"
+                                >
+                                    {{
+                                        (
+                                            (parseFloat(
+                                                planSeleccionado?.pagado_total ||
+                                                    0
+                                            ) /
                                                 parseFloat(
                                                     planSeleccionado?.deuda_total ||
-                                                        0
-                                                ) -
-                                                parseFloat(
-                                                    planSeleccionado?.pagado_total ||
-                                                        0
-                                                )
-                                            ).toFixed(2)
-                                        }}
-                                    </p>
-                                </div>
-                                <div class="stat-box">
-                                    <p class="stat-label">Progreso</p>
-                                    <p
-                                        class="stat-value"
-                                        style="color: var(--theme-primary)"
-                                    >
-                                        {{
-                                            (
-                                                (parseFloat(
-                                                    planSeleccionado?.pagado_total ||
-                                                        0
-                                                ) /
-                                                    parseFloat(
-                                                        planSeleccionado?.deuda_total ||
-                                                            1
-                                                    )) *
-                                                100
-                                            ).toFixed(0)
-                                        }}%
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tabla de Pagos -->
-                        <div class="overflow-x-auto mb-6">
-                            <table class="table table-compact w-full">
-                                <thead>
-                                    <tr
-                                        style="
-                                            background-color: var(
-                                                --theme-bg-secondary
-                                            );
-                                        "
-                                    >
-                                        <th class="text-sm">#</th>
-                                        <th class="text-sm">Fecha</th>
-                                        <th class="text-sm">Monto</th>
-                                        <th class="text-sm">Método</th>
-                                        <th class="text-sm">Estado</th>
-                                        <th class="text-sm">Fecha Registro</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr
-                                        v-for="(
-                                            pago, index
-                                        ) in pagosSeleccionados"
-                                        :key="pago.id"
-                                    >
-                                        <td class="text-sm">{{ index + 1 }}</td>
-                                        <td class="text-sm">
-                                            {{ formatearFecha(pago.fecha) }}
-                                        </td>
-                                        <td class="text-sm font-semibold">
-                                            Bs
-                                            {{
-                                                parseFloat(pago.total).toFixed(
-                                                    2
-                                                )
-                                            }}
-                                        </td>
-                                        <td class="text-sm">
-                                            <span class="badge badge-sm">{{
-                                                pago.metodo_pago ||
-                                                "No especificado"
-                                            }}</span>
-                                        </td>
-                                        <td class="text-sm">
-                                            <span
-                                                class="badge badge-sm"
-                                                :class="{
-                                                    'badge-warning':
-                                                        pago.estado ===
-                                                        'pendiente',
-                                                    'badge-success':
-                                                        pago.estado ===
-                                                        'completado',
-                                                    'badge-error':
-                                                        pago.estado ===
-                                                        'fallido',
-                                                }"
-                                            >
-                                                {{
-                                                    pago.estado
-                                                        .charAt(0)
-                                                        .toUpperCase() +
-                                                    pago.estado.slice(1)
-                                                }}
-                                            </span>
-                                        </td>
-                                        <td class="text-sm">
-                                            {{
-                                                formatearFecha(pago.created_at)
-                                            }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Resumen de Estados -->
-                        <div
-                            class="grid grid-cols-3 gap-4 pt-4 border-t"
-                            style="border-color: var(--theme-border)"
-                        >
-                            <div class="text-center">
-                                <p
-                                    style="
-                                        color: var(--theme-text-secondary);
-                                        font-size: 0.875rem;
-                                        font-weight: 600;
-                                        margin-bottom: 0.5rem;
-                                    "
-                                >
-                                    Pendientes
-                                </p>
-                                <p
-                                    class="text-2xl font-bold"
-                                    style="color: var(--theme-warning)"
-                                >
-                                    {{
-                                        pagosSeleccionados.filter(
-                                            (p) => p.estado === "pendiente"
-                                        ).length
-                                    }}
-                                </p>
-                            </div>
-                            <div class="text-center">
-                                <p
-                                    style="
-                                        color: var(--theme-text-secondary);
-                                        font-size: 0.875rem;
-                                        font-weight: 600;
-                                        margin-bottom: 0.5rem;
-                                    "
-                                >
-                                    Completados
-                                </p>
-                                <p
-                                    class="text-2xl font-bold"
-                                    style="color: var(--theme-success)"
-                                >
-                                    {{
-                                        pagosSeleccionados.filter(
-                                            (p) => p.estado === "completado"
-                                        ).length
-                                    }}
-                                </p>
-                            </div>
-                            <div class="text-center">
-                                <p
-                                    style="
-                                        color: var(--theme-text-secondary);
-                                        font-size: 0.875rem;
-                                        font-weight: 600;
-                                        margin-bottom: 0.5rem;
-                                    "
-                                >
-                                    Fallidos
-                                </p>
-                                <p
-                                    class="text-2xl font-bold"
-                                    style="color: var(--theme-error)"
-                                >
-                                    {{
-                                        pagosSeleccionados.filter(
-                                            (p) => p.estado === "fallido"
-                                        ).length
-                                    }}
+                                                        1
+                                                )) *
+                                            100
+                                        ).toFixed(0)
+                                    }}%
                                 </p>
                             </div>
                         </div>
                     </div>
-                    <form method="dialog" class="modal-backdrop">
-                        <button @click="cerrarModalPagos">Cerrar</button>
-                    </form>
+
+                    <!-- Tabla de Pagos -->
+                    <div class="overflow-x-auto mb-6">
+                        <table class="table table-compact w-full">
+                            <thead>
+                                <tr
+                                    style="
+                                        background-color: var(
+                                            --theme-bg-secondary
+                                        );
+                                    "
+                                >
+                                    <th class="text-sm">#</th>
+                                    <th class="text-sm">Fecha</th>
+                                    <th class="text-sm">Monto</th>
+                                    <th class="text-sm">Método</th>
+                                    <th class="text-sm">Estado</th>
+                                    <th class="text-sm">Fecha Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr
+                                    v-for="(pago, index) in pagosSeleccionados"
+                                    :key="pago.id"
+                                >
+                                    <td class="text-sm">{{ index + 1 }}</td>
+                                    <td class="text-sm">
+                                        {{ formatearFecha(pago.fecha) }}
+                                    </td>
+                                    <td class="text-sm font-semibold">
+                                        Bs
+                                        {{ parseFloat(pago.total).toFixed(2) }}
+                                    </td>
+                                    <td class="text-sm">
+                                        <span class="badge badge-sm">{{
+                                            pago.metodo_pago ||
+                                            "No especificado"
+                                        }}</span>
+                                    </td>
+                                    <td class="text-sm">
+                                        <span
+                                            class="badge badge-sm"
+                                            :class="{
+                                                'badge-warning':
+                                                    pago.estado === 'pendiente',
+                                                'badge-success':
+                                                    pago.estado ===
+                                                    'completado',
+                                                'badge-error':
+                                                    pago.estado === 'fallido',
+                                            }"
+                                        >
+                                            {{
+                                                pago.estado
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                pago.estado.slice(1)
+                                            }}
+                                        </span>
+                                    </td>
+                                    <td class="text-sm">
+                                        {{ formatearFecha(pago.created_at) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Resumen de Estados -->
+                    <div
+                        class="grid grid-cols-3 gap-4 pt-4 border-t"
+                        style="border-color: var(--theme-border)"
+                    >
+                        <div class="text-center">
+                            <p
+                                style="
+                                    color: var(--theme-text-secondary);
+                                    font-size: 0.875rem;
+                                    font-weight: 600;
+                                    margin-bottom: 0.5rem;
+                                "
+                            >
+                                Pendientes
+                            </p>
+                            <p
+                                class="text-2xl font-bold"
+                                style="color: var(--theme-warning)"
+                            >
+                                {{
+                                    pagosSeleccionados.filter(
+                                        (p) => p.estado === "pendiente"
+                                    ).length
+                                }}
+                            </p>
+                        </div>
+                        <div class="text-center">
+                            <p
+                                style="
+                                    color: var(--theme-text-secondary);
+                                    font-size: 0.875rem;
+                                    font-weight: 600;
+                                    margin-bottom: 0.5rem;
+                                "
+                            >
+                                Completados
+                            </p>
+                            <p
+                                class="text-2xl font-bold"
+                                style="color: var(--theme-success)"
+                            >
+                                {{
+                                    pagosSeleccionados.filter(
+                                        (p) => p.estado === "completado"
+                                    ).length
+                                }}
+                            </p>
+                        </div>
+                        <div class="text-center">
+                            <p
+                                style="
+                                    color: var(--theme-text-secondary);
+                                    font-size: 0.875rem;
+                                    font-weight: 600;
+                                    margin-bottom: 0.5rem;
+                                "
+                            >
+                                Fallidos
+                            </p>
+                            <p
+                                class="text-2xl font-bold"
+                                style="color: var(--theme-error)"
+                            >
+                                {{
+                                    pagosSeleccionados.filter(
+                                        (p) => p.estado === "fallido"
+                                    ).length
+                                }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- VISTA DE PAGOS DEL PLAN - PÁGINA COMPLETA -->
+                <template v-if="vistaActual === 'pagos' && planSeleccionado">
+                    <!-- Header con botón de volver atrás -->
+                    <div class="mb-8 flex items-center gap-4">
+                        <button
+                            @click="volverAPlanes"
+                            class="btn btn-ghost btn-circle"
+                            title="Volver atrás"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 19l-7-7 7-7"
+                                />
+                            </svg>
+                        </button>
+                        <div>
+                            <h2 class="text-3xl font-bold">Pagos del Plan</h2>
+                            <p
+                                style="
+                                    color: var(--theme-text-secondary);
+                                    margin-top: 0.5rem;
+                                "
+                            >
+                                {{ planSeleccionado?.proyecto?.nombre }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Resumen Financiero -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="card">
+                            <div class="card-body p-6 text-center">
+                                <p
+                                    class="text-sm font-semibold uppercase"
+                                    style="color: var(--theme-text-secondary)"
+                                >
+                                    Deuda Total
+                                </p>
+                                <p
+                                    class="text-3xl font-bold"
+                                    style="
+                                        color: var(--theme-primary);
+                                        margin-top: 0.5rem;
+                                    "
+                                >
+                                    Bs
+                                    {{
+                                        parseFloat(
+                                            planSeleccionado?.deuda_total || 0
+                                        ).toFixed(2)
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body p-6 text-center">
+                                <p
+                                    class="text-sm font-semibold uppercase"
+                                    style="color: var(--theme-text-secondary)"
+                                >
+                                    Pagado
+                                </p>
+                                <p
+                                    class="text-3xl font-bold"
+                                    style="
+                                        color: var(--theme-success);
+                                        margin-top: 0.5rem;
+                                    "
+                                >
+                                    Bs
+                                    {{
+                                        parseFloat(
+                                            planSeleccionado?.pagado_total || 0
+                                        ).toFixed(2)
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body p-6 text-center">
+                                <p
+                                    class="text-sm font-semibold uppercase"
+                                    style="color: var(--theme-text-secondary)"
+                                >
+                                    Saldo Pendiente
+                                </p>
+                                <p
+                                    class="text-3xl font-bold"
+                                    style="
+                                        color: var(--theme-warning);
+                                        margin-top: 0.5rem;
+                                    "
+                                >
+                                    Bs
+                                    {{
+                                        (
+                                            parseFloat(
+                                                planSeleccionado?.deuda_total ||
+                                                    0
+                                            ) -
+                                            parseFloat(
+                                                planSeleccionado?.pagado_total ||
+                                                    0
+                                            )
+                                        ).toFixed(2)
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body p-6 text-center">
+                                <p
+                                    class="text-sm font-semibold uppercase"
+                                    style="color: var(--theme-text-secondary)"
+                                >
+                                    Progreso
+                                </p>
+                                <p
+                                    class="text-3xl font-bold"
+                                    style="
+                                        color: var(--theme-primary);
+                                        margin-top: 0.5rem;
+                                    "
+                                >
+                                    {{
+                                        (
+                                            (parseFloat(
+                                                planSeleccionado?.pagado_total ||
+                                                    0
+                                            ) /
+                                                parseFloat(
+                                                    planSeleccionado?.deuda_total ||
+                                                        1
+                                                )) *
+                                            100
+                                        ).toFixed(0)
+                                    }}%
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Pagos -->
+                    <div class="card">
+                        <div class="card-body p-6">
+                            <h3 class="text-2xl font-bold mb-6">
+                                Detalle de Pagos
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="table table-compact w-full">
+                                    <thead>
+                                        <tr
+                                            style="
+                                                background-color: var(
+                                                    --theme-bg-secondary
+                                                );
+                                            "
+                                        >
+                                            <th class="text-sm">#</th>
+                                            <th class="text-sm">
+                                                Fecha de Pago
+                                            </th>
+                                            <th class="text-sm">Monto</th>
+                                            <th class="text-sm">
+                                                Método de Pago
+                                            </th>
+                                            <th class="text-sm">Estado</th>
+                                            <th class="text-sm">
+                                                Fecha de Registro
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            v-for="(
+                                                pago, index
+                                            ) in pagosSeleccionados"
+                                            :key="pago.id"
+                                        >
+                                            <td class="text-sm font-semibold">
+                                                {{ index + 1 }}
+                                            </td>
+                                            <td class="text-sm">
+                                                {{ formatearFecha(pago.fecha) }}
+                                            </td>
+                                            <td class="text-sm font-semibold">
+                                                Bs
+                                                {{
+                                                    parseFloat(
+                                                        pago.total || 0
+                                                    ).toFixed(2)
+                                                }}
+                                            </td>
+                                            <td class="text-sm">
+                                                <span
+                                                    class="badge badge-sm"
+                                                    style="
+                                                        background-color: var(
+                                                            --theme-bg-secondary
+                                                        );
+                                                    "
+                                                >
+                                                    {{
+                                                        pago.metodo_pago ||
+                                                        "No especificado"
+                                                    }}
+                                                </span>
+                                            </td>
+                                            <td class="text-sm">
+                                                <span
+                                                    class="badge badge-sm"
+                                                    :class="{
+                                                        'badge-warning':
+                                                            pago.estado ===
+                                                            'pendiente',
+                                                        'badge-success':
+                                                            pago.estado ===
+                                                            'completado',
+                                                        'badge-error':
+                                                            pago.estado ===
+                                                            'fallido',
+                                                    }"
+                                                >
+                                                    {{
+                                                        pago.estado
+                                                            .charAt(0)
+                                                            .toUpperCase() +
+                                                        pago.estado.slice(1)
+                                                    }}
+                                                </span>
+                                            </td>
+                                            <td class="text-sm">
+                                                {{
+                                                    formatearFecha(
+                                                        pago.created_at
+                                                    )
+                                                }}
+                                            </td>
+                                        </tr>
+                                        <tr
+                                            v-if="
+                                                !pagosSeleccionados ||
+                                                pagosSeleccionados.length === 0
+                                            "
+                                        >
+                                            <td
+                                                colspan="6"
+                                                class="text-center py-8"
+                                                style="
+                                                    color: var(
+                                                        --theme-text-secondary
+                                                    );
+                                                "
+                                            >
+                                                No hay pagos registrados
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Resumen de Estados -->
+                            <div
+                                class="grid grid-cols-3 gap-6 mt-8 pt-6 border-t"
+                                style="border-color: var(--theme-border)"
+                            >
+                                <div class="text-center">
+                                    <p
+                                        class="text-sm font-semibold"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                            margin-bottom: 0.5rem;
+                                        "
+                                    >
+                                        Pendientes
+                                    </p>
+                                    <p
+                                        class="text-3xl font-bold"
+                                        style="color: var(--theme-warning)"
+                                    >
+                                        {{
+                                            pagosSeleccionados.filter(
+                                                (p) => p.estado === "pendiente"
+                                            ).length
+                                        }}
+                                    </p>
+                                </div>
+                                <div class="text-center">
+                                    <p
+                                        class="text-sm font-semibold"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                            margin-bottom: 0.5rem;
+                                        "
+                                    >
+                                        Completados
+                                    </p>
+                                    <p
+                                        class="text-3xl font-bold"
+                                        style="color: var(--theme-success)"
+                                    >
+                                        {{
+                                            pagosSeleccionados.filter(
+                                                (p) => p.estado === "completado"
+                                            ).length
+                                        }}
+                                    </p>
+                                </div>
+                                <div class="text-center">
+                                    <p
+                                        class="text-sm font-semibold"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                            margin-bottom: 0.5rem;
+                                        "
+                                    >
+                                        Fallidos
+                                    </p>
+                                    <p
+                                        class="text-3xl font-bold"
+                                        style="color: var(--theme-error)"
+                                    >
+                                        {{
+                                            pagosSeleccionados.filter(
+                                                (p) => p.estado === "fallido"
+                                            ).length
+                                        }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </AuthenticatedLayout>
