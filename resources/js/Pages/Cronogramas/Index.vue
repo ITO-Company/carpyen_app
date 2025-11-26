@@ -18,7 +18,7 @@ const filteredCronogramas = computed(() => {
     const filtered = props.cronogramas.data.filter(cronograma => {
         return (
             (cronograma.proyecto?.nombre && cronograma.proyecto.nombre.toLowerCase().includes(query)) ||
-            (cronograma.descripcion && cronograma.descripcion.toLowerCase().includes(query))
+            (cronograma.usuario?.name && cronograma.usuario.name.toLowerCase().includes(query))
         );
     });
     
@@ -28,10 +28,33 @@ const filteredCronogramas = computed(() => {
     };
 });
 
-const paginationLabel = (label) => {
-    if (label.includes("Previous")) return "← Anterior";
-    if (label.includes("Next")) return "Siguiente →";
-    return label;
+const getEstadoBadge = (estado) => {
+    const badgeMap = {
+        'pendiente': 'badge-warning',
+        'en_curso': 'badge-info',
+        'completado': 'badge-success',
+        'atrasado': 'badge-error'
+    };
+    return badgeMap[estado] || 'badge-secondary';
+};
+
+const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('es-ES', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+    });
+};
+
+const getEstadoLabel = (estado) => {
+    const labels = {
+        'pendiente': 'Pendiente',
+        'en_curso': 'En Curso',
+        'completado': 'Completado',
+        'atrasado': 'Atrasado'
+    };
+    return labels[estado] || estado;
 };
 </script>
 
@@ -50,31 +73,34 @@ const paginationLabel = (label) => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="mb-6">
+                    <Link :href="route('cronogramas.create')" class="btn btn-primary">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Nuevo Cronograma
+                    </Link>
+                </div>
+
                 <div class="card fade-in">
-                    <!-- Barra de búsqueda con botón crear -->
-                    <div class="mb-6 flex justify-between items-center gap-4">
+                    <!-- Barra de búsqueda -->
+                    <div class="mb-6">
                         <input
                             v-model="searchQuery"
                             type="text"
-                            placeholder="Buscar cronogramas..."
+                            placeholder="Buscar por proyecto o usuario..."
                             class="input search-input"
-                            style="flex: 1; max-width: 500px"
+                            style="width: 100%; max-width: 500px"
                         />
-                        <Link :href="route('cronogramas.create')" class="btn btn-primary">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                            >
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Nuevo Cronograma
-                        </Link>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -83,9 +109,11 @@ const paginationLabel = (label) => {
                                 <tr>
                                     <th>ID</th>
                                     <th>Proyecto</th>
-                                    <th>Descripción</th>
+                                    <th>Usuario</th>
                                     <th>Fecha Inicio</th>
                                     <th>Fecha Fin</th>
+                                    <th>Días Estimados</th>
+                                    <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -98,40 +126,30 @@ const paginationLabel = (label) => {
                                     <td class="font-medium">
                                         {{ cronograma.proyecto?.nombre || "-" }}
                                     </td>
-                                    <td>{{ cronograma.descripcion || "-" }}</td>
+                                    <td>{{ cronograma.usuario?.name || "-" }}</td>
+                                    <td>{{ formatDate(cronograma.fecha_inicio) }}</td>
+                                    <td>{{ formatDate(cronograma.fecha_fin) }}</td>
+                                    <td>{{ cronograma.dias_estimados }} días</td>
                                     <td>
-                                        {{ cronograma.fecha_inicio || "-" }}
+                                        <span :class="['badge', getEstadoBadge(cronograma.estado)]">
+                                            {{ getEstadoLabel(cronograma.estado) }}
+                                        </span>
                                     </td>
-                                    <td>{{ cronograma.fecha_fin || "-" }}</td>
                                     <td>
                                         <div class="flex gap-2">
                                             <Link
-                                                :href="
-                                                    route(
-                                                        'cronogramas.edit',
-                                                        cronograma.id
-                                                    )
-                                                "
+                                                :href="route('cronogramas.edit', cronograma.id)"
                                                 class="text-primary hover:underline"
-                                                style="
-                                                    color: var(--theme-primary);
-                                                "
+                                                style="color: var(--theme-primary);"
                                             >
                                                 Editar
                                             </Link>
                                             <Link
-                                                :href="
-                                                    route(
-                                                        'cronogramas.destroy',
-                                                        cronograma.id
-                                                    )
-                                                "
+                                                :href="route('cronogramas.destroy', cronograma.id)"
                                                 method="delete"
                                                 as="button"
                                                 class="text-error hover:underline"
-                                                style="
-                                                    color: var(--theme-error);
-                                                "
+                                                style="color: var(--theme-error);"
                                             >
                                                 Eliminar
                                             </Link>
@@ -139,18 +157,9 @@ const paginationLabel = (label) => {
                                     </td>
                                 </tr>
                                 <tr
-                                    v-if="
-                                        !filteredCronogramas.data ||
-                                        filteredCronogramas.data.length === 0
-                                    "
+                                    v-if="!filteredCronogramas.data || filteredCronogramas.data.length === 0"
                                 >
-                                    <td
-                                        colspan="6"
-                                        class="text-center py-8"
-                                        style="
-                                            color: var(--theme-text-secondary);
-                                        "
-                                    >
+                                    <td colspan="8" class="text-center py-8" style="color: var(--theme-text-secondary);">
                                         No hay cronogramas registrados
                                     </td>
                                 </tr>
@@ -283,4 +292,5 @@ const paginationLabel = (label) => {
     outline: none;
     box-shadow: 0 0 0 3px var(--theme-primary-alpha) !important;
 }
+</style>
 </style>

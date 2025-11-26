@@ -11,6 +11,7 @@ class Cronograma extends Model
 
     protected $fillable = [
         'proyecto_id',
+        'usuario_id',
         'fecha_inicio',
         'fecha_fin',
         'dias_estimados',
@@ -25,6 +26,11 @@ class Cronograma extends Model
     public function proyecto()
     {
         return $this->belongsTo(Proyecto::class);
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function tareas()

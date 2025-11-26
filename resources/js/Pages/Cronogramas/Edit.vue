@@ -10,12 +10,31 @@ const props = defineProps({
 const form = useForm({
     proyecto_id: props.cronograma.proyecto_id,
     fecha_inicio: props.cronograma.fecha_inicio,
-    fecha_fin: props.cronograma.fecha_fin,
-    descripcion: props.cronograma.descripcion
+    dias_estimados: props.cronograma.dias_estimados,
+    estado: props.cronograma.estado
 });
 
 const submit = () => {
     form.put(route('cronogramas.update', props.cronograma.id));
+};
+
+const getEstadoLabel = (estado) => {
+    const labels = {
+        pendiente: 'Pendiente',
+        en_curso: 'En Curso',
+        completado: 'Completado',
+        atrasado: 'Atrasado'
+    };
+    return labels[estado] || estado;
+};
+
+const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('es-MX', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 };
 </script>
 
@@ -81,35 +100,72 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <!-- Fecha Fin -->
+                            <!-- Días Estimados -->
                             <div class="form-group">
-                                <label for="fecha_fin" class="form-label">
-                                    Fecha de Fin <span class="text-error">*</span>
+                                <label for="dias_estimados" class="form-label">
+                                    Días Estimados <span class="text-error">*</span>
                                 </label>
                                 <input
-                                    id="fecha_fin"
-                                    v-model="form.fecha_fin"
-                                    type="date"
+                                    id="dias_estimados"
+                                    v-model.number="form.dias_estimados"
+                                    type="number"
+                                    min="1"
                                     class="input theme-input"
                                     required
+                                    placeholder="Ej: 30"
                                 />
-                                <div v-if="form.errors.fecha_fin" class="form-error">
-                                    {{ form.errors.fecha_fin }}
+                                <div v-if="form.errors.dias_estimados" class="form-error">
+                                    {{ form.errors.dias_estimados }}
                                 </div>
                             </div>
 
-                            <!-- Descripción -->
-                            <div class="form-group full-width">
-                                <label for="descripcion" class="form-label">
-                                    Descripción
+                            <!-- Estado -->
+                            <div class="form-group">
+                                <label for="estado" class="form-label">
+                                    Estado <span class="text-error">*</span>
                                 </label>
-                                <textarea
-                                    id="descripcion"
-                                    v-model="form.descripcion"
+                                <select
+                                    id="estado"
+                                    v-model="form.estado"
                                     class="input theme-input"
-                                    rows="3"
-                                    placeholder="Descripción del cronograma"
-                                ></textarea>
+                                    required
+                                >
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="en_curso">En Curso</option>
+                                    <option value="completado">Completado</option>
+                                    <option value="atrasado">Atrasado</option>
+                                </select>
+                                <div v-if="form.errors.estado" class="form-error">
+                                    {{ form.errors.estado }}
+                                </div>
+                            </div>
+
+                            <!-- Usuario (Read-only) -->
+                            <div class="form-group">
+                                <label class="form-label">Usuario</label>
+                                <div class="input theme-input read-only" style="display: flex; align-items: center;">
+                                    {{ cronograma.usuario.name }}
+                                </div>
+                            </div>
+
+                            <!-- Fecha Fin (Read-only) -->
+                            <div class="form-group">
+                                <label class="form-label">Fecha de Finalización</label>
+                                <div class="input theme-input read-only" style="display: flex; align-items: center;">
+                                    {{ cronograma.fecha_fin ? formatDate(cronograma.fecha_fin) : '-' }}
+                                </div>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="form-group full-width">
+                                <div class="alert alert-info">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                    <span>La fecha de finalización se asignará automáticamente cuando cambies el estado a 'Completado'</span>
+                                </div>
                             </div>
                         </div>
 
@@ -123,8 +179,8 @@ const submit = () => {
                                 class="btn btn-primary"
                                 :disabled="form.processing"
                             >
-                                <span v-if="form.processing">Actualizando...</span>
-                                <span v-else">Actualizar Cronograma</span>
+                                <span v-if="form.processing">Guardando...</span>
+                                <span v-else>Guardar Cambios</span>
                             </button>
                         </div>
                     </form>
@@ -177,6 +233,13 @@ textarea.input {
     min-height: 80px;
 }
 
+.read-only {
+    background-color: var(--theme-bg-secondary) !important;
+    cursor: not-allowed;
+    padding: var(--spacing-2);
+    border-radius: 4px;
+}
+
 /* Adaptación del input al tema */
 .theme-input {
     background-color: var(--theme-bg-primary) !important;
@@ -193,6 +256,21 @@ textarea.input {
     border-color: var(--theme-primary) !important;
     outline: none;
     box-shadow: 0 0 0 3px var(--theme-primary-alpha) !important;
+}
+
+.alert {
+    display: flex;
+    gap: var(--spacing-3);
+    align-items: flex-start;
+    padding: var(--spacing-3);
+    border-radius: 6px;
+    font-size: var(--font-size-sm);
+}
+
+.alert-info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #1e40af;
+    border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 @media (max-width: 768px) {

@@ -6,11 +6,76 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
-     * Run the migrations - Crea todas las tablas usando SQL bruto
-     * Esto evita problemas de transacciones con Neon PostgreSQL
+     * Run the migrations
      */
     public function up(): void
     {
+        // Crear tabla users (debe existir primero para las FK)
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS users (
+                id BIGSERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                email_verified_at TIMESTAMP NULL,
+                password VARCHAR(255) NOT NULL,
+                rol VARCHAR(50) DEFAULT \'VENDEDOR\',
+                telefono VARCHAR(255) NULL,
+                direccion VARCHAR(255) NULL,
+                remember_token VARCHAR(100) NULL,
+                created_at TIMESTAMP NULL,
+                updated_at TIMESTAMP NULL
+            );
+        ');
+
+        // Tablas de Spatie Permission
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS roles (
+                id BIGSERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                guard_name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP NULL,
+                updated_at TIMESTAMP NULL,
+                UNIQUE(name, guard_name)
+            );
+        ');
+
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS permissions (
+                id BIGSERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                guard_name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP NULL,
+                updated_at TIMESTAMP NULL,
+                UNIQUE(name, guard_name)
+            );
+        ');
+
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS model_has_roles (
+                role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+                model_id BIGINT NOT NULL,
+                model_type VARCHAR(255) NOT NULL,
+                PRIMARY KEY(role_id, model_id, model_type)
+            );
+        ');
+
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS model_has_permissions (
+                permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+                model_id BIGINT NOT NULL,
+                model_type VARCHAR(255) NOT NULL,
+                PRIMARY KEY(permission_id, model_id, model_type)
+            );
+        ');
+
+        DB::unprepared('
+            CREATE TABLE IF NOT EXISTS role_has_permissions (
+                permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
+                role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+                PRIMARY KEY(permission_id, role_id)
+            );
+        ');
+
         // Crear tabla clientes
         DB::unprepared('
             CREATE TABLE IF NOT EXISTS clientes (
@@ -44,7 +109,7 @@ return new class extends Migration
             CREATE TABLE IF NOT EXISTS cotizaciones (
                 id BIGSERIAL PRIMARY KEY,
                 proyecto_id BIGINT NOT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
-                hipo_metro DECIMAL(10, 2) NULL,
+                tipo_metro VARCHAR(50) NULL,
                 costo_metro DECIMAL(10, 2) NULL,
                 cantidad_metro INTEGER NULL,
                 costo_mueble DECIMAL(10, 2) NULL,
@@ -83,8 +148,9 @@ return new class extends Migration
             CREATE TABLE IF NOT EXISTS cronogramas (
                 id BIGSERIAL PRIMARY KEY,
                 proyecto_id BIGINT NOT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
+                usuario_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                 fecha_inicio DATE NOT NULL,
-                fecha_fin DATE NOT NULL,
+                fecha_fin DATE NULL,
                 dias_estimados INTEGER NOT NULL,
                 estado VARCHAR(50) DEFAULT \'pendiente\' CHECK (estado IN (\'pendiente\', \'en_curso\', \'completado\', \'atrasado\')),
                 created_at TIMESTAMP NULL,
@@ -219,6 +285,11 @@ return new class extends Migration
                 updated_at TIMESTAMP NULL
             );
         ');
+
+        // Crear índices
+        DB::unprepared('CREATE INDEX IF NOT EXISTS cronogramas_proyecto_id_index ON cronogramas(proyecto_id);');
+        DB::unprepared('CREATE INDEX IF NOT EXISTS cronogramas_usuario_id_index ON cronogramas(usuario_id);');
+        DB::unprepared('CREATE INDEX IF NOT EXISTS cronogramas_estado_index ON cronogramas(estado);');
     }
 
     /**
@@ -240,5 +311,12 @@ return new class extends Migration
         DB::unprepared('DROP TABLE IF EXISTS cotizaciones CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS proyectos CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS clientes CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS role_has_permissions CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS model_has_permissions CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS model_has_roles CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS permissions CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS roles CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS users CASCADE;');
     }
 };
+

@@ -9,8 +9,7 @@ const props = defineProps({
 const form = useForm({
     proyecto_id: '',
     fecha_inicio: '',
-    fecha_fin: '',
-    descripcion: ''
+    dias_estimados: ''
 });
 
 const submit = () => {
@@ -80,35 +79,35 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <!-- Fecha Fin -->
+                            <!-- Días Estimados -->
                             <div class="form-group">
-                                <label for="fecha_fin" class="form-label">
-                                    Fecha de Fin <span class="text-error">*</span>
+                                <label for="dias_estimados" class="form-label">
+                                    Días Estimados <span class="text-error">*</span>
                                 </label>
                                 <input
-                                    id="fecha_fin"
-                                    v-model="form.fecha_fin"
-                                    type="date"
+                                    id="dias_estimados"
+                                    v-model.number="form.dias_estimados"
+                                    type="number"
+                                    min="1"
                                     class="input theme-input"
                                     required
+                                    placeholder="Ej: 30"
                                 />
-                                <div v-if="form.errors.fecha_fin" class="form-error">
-                                    {{ form.errors.fecha_fin }}
+                                <div v-if="form.errors.dias_estimados" class="form-error">
+                                    {{ form.errors.dias_estimados }}
                                 </div>
                             </div>
 
-                            <!-- Descripción -->
+                            <!-- Info -->
                             <div class="form-group full-width">
-                                <label for="descripcion" class="form-label">
-                                    Descripción
-                                </label>
-                                <textarea
-                                    id="descripcion"
-                                    v-model="form.descripcion"
-                                    class="input theme-input"
-                                    rows="3"
-                                    placeholder="Descripción del cronograma"
-                                ></textarea>
+                                <div class="alert alert-info">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                    <span>La fecha de finalización se asignará automáticamente cuando cambies el estado a 'Completado'</span>
+                                </div>
                             </div>
                         </div>
 

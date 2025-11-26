@@ -131,7 +131,7 @@ class DataSeeder extends Seeder
             // Crear Cotización para cada proyecto
             $cotizacion = Cotizacion::create([
                 'proyecto_id' => $proyecto->id,
-                'hipo_metro' => 50.00,
+                'tipo_metro' => 'cuadrado',
                 'costo_metro' => 150.00,
                 'cantidad_metro' => 10,
                 'costo_mueble' => 3000.00,
@@ -209,6 +209,7 @@ class DataSeeder extends Seeder
             if ($proyecto->estado !== 'pendiente') {
                 $cronograma = Cronograma::create([
                     'proyecto_id' => $proyecto->id,
+                    'usuario_id' => $instalador ? $instalador->id : 1,
                     'fecha_inicio' => now()->subDays(15),
                     'fecha_fin' => now()->addDays(15),
                     'dias_estimados' => 30,

@@ -20,67 +20,58 @@ class UserSeeder extends Seeder
         // Crear usuarios de ejemplo (uno por cada rol)
         
         // 1. Administrador
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@carpyen.com'],
-            [
-                'name' => 'Administrador',
-                'password' => bcrypt('12345'),
-                'telefono' => '70000000',
-                'direccion' => 'Santa Cruz, Bolivia',
-                'rol' => 'ADMIN',
-            ]
-        );
+        $admin = User::create([
+            'name' => 'Administrador',
+            'email' => 'admin@carpyen.com',
+            'password' => bcrypt('12345'),
+            'telefono' => '70000000',
+            'direccion' => 'Santa Cruz, Bolivia',
+            'rol' => 'ADMIN',
+        ]);
         $admin->assignRole('ADMIN');
 
-        $vendedor = User::firstOrCreate(
-            ['email' => 'vendedor@carpyen.com'],
-            [
-                'name' => 'Carlos Vendedor',
-                'password' => bcrypt('12345'),
-                'telefono' => '70111111',
-                'direccion' => 'Santa Cruz, Bolivia',
-                'rol' => 'VENDEDOR',
-            ]
-        );
+        // 2. Vendedor
+        $vendedor = User::create([
+            'name' => 'Carlos Vendedor',
+            'email' => 'vendedor@carpyen.com',
+            'password' => bcrypt('12345'),
+            'telefono' => '70111111',
+            'direccion' => 'Santa Cruz, Bolivia',
+            'rol' => 'VENDEDOR',
+        ]);
         $vendedor->assignRole('VENDEDOR');
 
         // 3. Jefe Instalador
-        $jefeInstalador = User::firstOrCreate(
-            ['email' => 'jefe@carpyen.com'],
-            [
-                'name' => 'Juan Jefe Instalador',
-                'password' => bcrypt('12345'),
-                'telefono' => '70222222',
-                'direccion' => 'Santa Cruz, Bolivia',
-                'rol' => 'JEFE_INSTALADOR',
-            ]
-        );
+        $jefeInstalador = User::create([
+            'name' => 'Juan Jefe Instalador',
+            'email' => 'jefe@carpyen.com',
+            'password' => bcrypt('12345'),
+            'telefono' => '70222222',
+            'direccion' => 'Santa Cruz, Bolivia',
+            'rol' => 'JEFE_INSTALADOR',
+        ]);
         $jefeInstalador->assignRole('JEFE_INSTALADOR');
 
         // 4. Diseñador
-        $disenador = User::firstOrCreate(
-            ['email' => 'disenador@carpyen.com'],
-            [
-                'name' => 'María Diseñadora',
-                'password' => bcrypt('12345'),
-                'telefono' => '70333333',
-                'direccion' => 'Santa Cruz, Bolivia',
-                'rol' => 'DISEÑADOR',
-            ]
-        );
+        $disenador = User::create([
+            'name' => 'María Diseñadora',
+            'email' => 'disenador@carpyen.com',
+            'password' => bcrypt('12345'),
+            'telefono' => '70333333',
+            'direccion' => 'Santa Cruz, Bolivia',
+            'rol' => 'DISEÑADOR',
+        ]);
         $disenador->assignRole('DISEÑADOR');
 
         // 5. Instalador
-        $instalador = User::firstOrCreate(
-            ['email' => 'instalador@carpyen.com'],
-            [
-                'name' => 'Pedro Instalador',
-                'password' => bcrypt('12345'),
-                'telefono' => '70444444',
-                'direccion' => 'Santa Cruz, Bolivia',
-                'rol' => 'INSTALADOR',
-            ]
-        );
+        $instalador = User::create([
+            'name' => 'Pedro Instalador',
+            'email' => 'instalador@carpyen.com',
+            'password' => bcrypt('12345'),
+            'telefono' => '70444444',
+            'direccion' => 'Santa Cruz, Bolivia',
+            'rol' => 'INSTALADOR',
+        ]);
         $instalador->assignRole('INSTALADOR');
 
         echo "✅ 5 usuarios creados exitosamente:\n";

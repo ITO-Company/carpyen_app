@@ -98,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('disenos', DisenoController::class);
 
     // Gestión de Cronogramas y Tareas (CU6)
+    Route::resource('cronogramas', CronogramaController::class);
 
     // Gestión de Planes de Pago (CU6)
     Route::resource('planesPago', PlanPagoController::class);
