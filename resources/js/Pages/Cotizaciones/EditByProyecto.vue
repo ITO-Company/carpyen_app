@@ -3,12 +3,11 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const props = defineProps({
-    cotizacion: Object,
-    proyectos: Array
+    proyecto: Object,
+    cotizacion: Object
 });
 
 const form = useForm({
-    proyecto_id: props.cotizacion.proyecto_id,
     tipo_metro: props.cotizacion.tipo_metro,
     costo_metro: props.cotizacion.costo_metro,
     cantidad_metro: props.cotizacion.cantidad_metro,
@@ -26,7 +25,7 @@ const calcularTotal = () => {
 };
 
 const submit = () => {
-    form.put(route('cotizaciones.update', props.cotizacion.id));
+    form.put(route('proyectos.cotizaciones.update', [props.proyecto.id, props.cotizacion.id]));
 };
 </script>
 
@@ -36,10 +35,15 @@ const submit = () => {
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
-                    Editar Cotización
-                </h2>
-                <Link :href="route('cotizaciones.index')" class="btn btn-secondary">
+                <div class="flex flex-col gap-1">
+                    <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                        Editar Cotización
+                    </h2>
+                    <p class="text-sm" style="color: var(--theme-text-secondary)">
+                        {{ proyecto.nombre }}
+                    </p>
+                </div>
+                <Link :href="route('proyectos.cotizaciones.index', proyecto.id)" class="btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="19" y1="12" x2="5" y2="12"></line>
                         <polyline points="12 19 5 12 12 5"></polyline>
@@ -54,27 +58,6 @@ const submit = () => {
                 <div class="card fade-in">
                     <form @submit.prevent="submit">
                         <div class="form-grid">
-                            <!-- Proyecto -->
-                            <div class="form-group full-width">
-                                <label for="proyecto_id" class="form-label">
-                                    Proyecto <span class="text-error">*</span>
-                                </label>
-                                <select
-                                    id="proyecto_id"
-                                    v-model="form.proyecto_id"
-                                    class="input theme-input"
-                                    required
-                                >
-                                    <option value="">Seleccione un proyecto</option>
-                                    <option v-for="proyecto in proyectos" :key="proyecto.id" :value="proyecto.id">
-                                        {{ proyecto.nombre }} - {{ proyecto.cliente?.nombre }}
-                                    </option>
-                                </select>
-                                <div v-if="form.errors.proyecto_id" class="form-error">
-                                    {{ form.errors.proyecto_id }}
-                                </div>
-                            </div>
-
                             <!-- Tipo de Metro -->
                             <div class="form-group">
                                 <label for="tipo_metro" class="form-label">
@@ -211,7 +194,7 @@ const submit = () => {
 
                         <!-- Botones -->
                         <div class="form-actions">
-                            <Link :href="route('cotizaciones.index')" class="btn btn-secondary">
+                            <Link :href="route('proyectos.cotizaciones.index', proyecto.id)" class="btn btn-secondary">
                                 Cancelar
                             </Link>
                             <button 
@@ -289,6 +272,56 @@ textarea.input {
     border-color: var(--theme-primary) !important;
     outline: none;
     box-shadow: 0 0 0 3px var(--theme-primary-alpha) !important;
+}
+
+.flex {
+    display: flex;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.gap-1 {
+    gap: var(--spacing-1);
+}
+
+.py-12 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.text-sm {
+    font-size: var(--font-size-sm);
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.text-xl {
+    font-size: var(--font-size-xl);
+}
+
+.leading-tight {
+    line-height: 1.25;
+}
+
+.max-w-4xl {
+    max-width: 56rem;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 @media (max-width: 768px) {

@@ -14,6 +14,11 @@ class Cliente extends Model
         'email',
         'telefono',
         'direccion',
+        'password',
+    ];
+
+    protected $hidden = [
+        'password',
     ];
 
     /**

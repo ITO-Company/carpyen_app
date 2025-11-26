@@ -6,7 +6,9 @@ const form = useForm({
     nombre: '',
     email: '',
     telefono: '',
-    direccion: ''
+    direccion: '',
+    password: '',
+    password_confirmation: ''
 });
 
 const submit = () => {
@@ -107,6 +109,42 @@ const submit = () => {
                                 ></textarea>
                                 <div v-if="form.errors.direccion" class="form-error">
                                     {{ form.errors.direccion }}
+                                </div>
+                            </div>
+
+                            <!-- Contraseña -->
+                            <div class="form-group">
+                                <label for="password" class="form-label">
+                                    Contraseña <span class="text-error">*</span>
+                                </label>
+                                <input
+                                    id="password"
+                                    v-model="form.password"
+                                    type="password"
+                                    class="input"
+                                    required
+                                    placeholder="Mínimo 8 caracteres"
+                                />
+                                <div v-if="form.errors.password" class="form-error">
+                                    {{ form.errors.password }}
+                                </div>
+                            </div>
+
+                            <!-- Confirmar Contraseña -->
+                            <div class="form-group">
+                                <label for="password_confirmation" class="form-label">
+                                    Confirmar Contraseña <span class="text-error">*</span>
+                                </label>
+                                <input
+                                    id="password_confirmation"
+                                    v-model="form.password_confirmation"
+                                    type="password"
+                                    class="input"
+                                    required
+                                    placeholder="Repite tu contraseña"
+                                />
+                                <div v-if="form.errors.password_confirmation" class="form-error">
+                                    {{ form.errors.password_confirmation }}
                                 </div>
                             </div>
                         </div>

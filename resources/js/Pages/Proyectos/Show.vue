@@ -17,6 +17,13 @@ const props = defineProps({
                     Detalles del Proyecto
                 </h2>
                 <div class="flex gap-3">
+                    <Link :href="route('proyectos.cotizaciones.index', proyecto.id)" class="btn btn-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"></path>
+                            <path d="M20 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h11"></path>
+                        </svg>
+                        Ver Cotizaciones
+                    </Link>
                     <Link :href="route('proyectos.edit', proyecto.id)" class="btn btn-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>

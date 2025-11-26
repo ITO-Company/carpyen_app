@@ -10,7 +10,8 @@ const form = useForm({
     nombre: props.cliente.nombre,
     email: props.cliente.email,
     telefono: props.cliente.telefono,
-    direccion: props.cliente.direccion
+    direccion: props.cliente.direccion,
+    password: ''
 });
 
 const submit = () => {
@@ -107,6 +108,23 @@ const submit = () => {
                                 ></textarea>
                                 <div v-if="form.errors.direccion" class="form-error">
                                     {{ form.errors.direccion }}
+                                </div>
+                            </div>
+
+                            <!-- Contraseña (opcional) -->
+                            <div class="form-group full-width">
+                                <label for="password" class="form-label">
+                                    Cambiar Contraseña (opcional)
+                                </label>
+                                <input
+                                    id="password"
+                                    v-model="form.password"
+                                    type="password"
+                                    class="input"
+                                    placeholder="Dejar vacío para mantener la contraseña actual. Mínimo 8 caracteres si se cambia"
+                                />
+                                <div v-if="form.errors.password" class="form-error">
+                                    {{ form.errors.password }}
                                 </div>
                             </div>
                         </div>

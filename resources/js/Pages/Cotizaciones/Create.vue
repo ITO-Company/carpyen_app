@@ -9,7 +9,7 @@ const props = defineProps({
 
 const form = useForm({
     proyecto_id: '',
-    hipo_metro: '',
+    tipo_metro: 'lineal',
     costo_metro: '',
     cantidad_metro: '',
     costo_mueble: '',
@@ -76,20 +76,20 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <!-- Hipótesis por Metro -->
+                            <!-- Tipo de Metro -->
                             <div class="form-group">
-                                <label for="hipo_metro" class="form-label">
-                                    Hipótesis por Metro (Bs.)
+                                <label for="tipo_metro" class="form-label">
+                                    Tipo de Metro <span class="text-error">*</span>
                                 </label>
-                                <input
-                                    id="hipo_metro"
-                                    v-model="form.hipo_metro"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
+                                <select
+                                    id="tipo_metro"
+                                    v-model="form.tipo_metro"
                                     class="input theme-input"
-                                    placeholder="0.00"
-                                />
+                                    required
+                                >
+                                    <option value="lineal">Metro Lineal</option>
+                                    <option value="cuadrado">Metro Cuadrado</option>
+                                </select>
                             </div>
 
                             <!-- Costo por Metro -->

@@ -5,6 +5,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\CronogramaController;
 use App\Http\Controllers\PagoController;
@@ -63,7 +64,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return redirect()->route('productos.index');
     })->name('inventario.index');
 
-    // Gestión de Diseños (CU4)
+    // Gestión de Cotizaciones por Proyecto (CU4)
+    Route::get('/proyectos/{proyecto}/cotizaciones', [CotizacionController::class, 'byProyecto'])->name('proyectos.cotizaciones.index');
+    Route::get('/proyectos/{proyecto}/cotizaciones/crear', [CotizacionController::class, 'createByProyecto'])->name('proyectos.cotizaciones.create');
+    Route::post('/proyectos/{proyecto}/cotizaciones', [CotizacionController::class, 'storeByProyecto'])->name('proyectos.cotizaciones.store');
+    Route::get('/proyectos/{proyecto}/cotizaciones/{cotizacion}/editar', [CotizacionController::class, 'editByProyecto'])->name('proyectos.cotizaciones.edit');
+    Route::put('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'updateByProyecto'])->name('proyectos.cotizaciones.update');
+    Route::delete('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'destroyByProyecto'])->name('proyectos.cotizaciones.destroy');
+
+    // Gestión de Diseños (CU5)
     Route::resource('disenos', DisenoController::class);
 
     // Gestión de Cronogramas y Tareas (CU5)

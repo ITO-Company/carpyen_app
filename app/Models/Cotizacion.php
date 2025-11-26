@@ -13,7 +13,7 @@ class Cotizacion extends Model
 
     protected $fillable = [
         'proyecto_id',
-        'hipo_metro',
+        'tipo_metro', // 'lineal' o 'cuadrado'
         'costo_metro',
         'cantidad_metro',
         'costo_mueble',
@@ -24,7 +24,6 @@ class Cotizacion extends Model
     ];
 
     protected $casts = [
-        'hipo_metro' => 'decimal:2',
         'costo_metro' => 'decimal:2',
         'costo_mueble' => 'decimal:2',
         'total' => 'decimal:2',
