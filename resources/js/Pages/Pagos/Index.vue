@@ -62,34 +62,24 @@ const generarQRPago = async () => {
     errorQR.value = null;
 
     try {
-        const response = await fetch("/pagos/generar-qr", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Requested-With": "XMLHttpRequest",
-            },
-            body: JSON.stringify({
-                monto: parseFloat(pagoSeleccionado.value.total),
-                glosa: `Pago del plan ${planSeleccionado.value?.proyecto?.nombre}`,
-                email: "", // Puedes obtener del usuario si está disponible
-            }),
+        const response = await window.axios.post("/pagos/generar-qr", {
+            monto: parseFloat(pagoSeleccionado.value.total),
+            glosa: `Pago del plan ${planSeleccionado.value?.proyecto?.nombre}`,
+            email: "",
         });
 
-        if (!response.ok) {
-            throw new Error("Error al generar QR");
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-            qrImage.value = data.qr_image;
-            transaccionId.value = data.transaction_id;
+        if (response.data.success) {
+            qrImage.value = response.data.qr_image;
+            transaccionId.value = response.data.transaction_id;
         } else {
-            errorQR.value = data.message || "Error al generar código QR";
+            errorQR.value = response.data.message || "Error al generar código QR";
         }
     } catch (error) {
         console.error("Error:", error);
-        errorQR.value = "Error de conexión al generar el QR";
+        const errorMsg = error.response?.data?.message || 
+                         error.message || 
+                         "Error de conexión al generar el QR";
+        errorQR.value = errorMsg;
     } finally {
         generandoQR.value = false;
     }
@@ -855,7 +845,11 @@ const eliminar = (plan) => {
                                 style="border-color: var(--theme-border)"
                             >
                                 <h3 class="text-2xl font-bold">
-                                    {{ qrImage ? "Código de Pago QR" : "Detalles del Pago" }}
+                                    {{
+                                        qrImage
+                                            ? "Código de Pago QR"
+                                            : "Detalles del Pago"
+                                    }}
                                 </h3>
                                 <button
                                     @click="cerrarModalPago"
@@ -878,7 +872,10 @@ const eliminar = (plan) => {
                             </div>
 
                             <!-- Contenido del Modal - Vista de Detalles -->
-                            <div v-if="!qrImage && pagoSeleccionado" class="space-y-6">
+                            <div
+                                v-if="!qrImage && pagoSeleccionado"
+                                class="space-y-6"
+                            >
                                 <!-- Información del Plan -->
                                 <div
                                     class="rounded-lg p-4"
@@ -1028,9 +1025,7 @@ const eliminar = (plan) => {
                                     <p
                                         class="text-sm font-semibold mb-2"
                                         style="
-                                            color: var(
-                                                --theme-text-secondary
-                                            );
+                                            color: var(--theme-text-secondary);
                                         "
                                     >
                                         Concepto
