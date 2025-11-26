@@ -73,7 +73,7 @@ const getEstadoClass = (estado) => {
                                     <td style="padding: 12px;">
                                         <div class="action-buttons">
                                             <Link
-                                                :href="route('proveedores.show', proveedor.id)"
+                                                :href="route('proveedores.show', { id: proveedor.id })"
                                                 class="btn-icon btn-icon-view"
                                                 title="Ver"
                                             >
@@ -83,7 +83,7 @@ const getEstadoClass = (estado) => {
                                                 </svg>
                                             </Link>
                                             <Link
-                                                :href="route('proveedores.edit', proveedor.id)"
+                                                :href="route('proveedores.edit', { id: proveedor.id })"
                                                 class="btn-icon btn-icon-edit"
                                                 title="Editar"
                                             >

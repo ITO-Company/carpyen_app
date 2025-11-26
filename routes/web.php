@@ -61,7 +61,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('productos', ProductoController::class);
 
     // Gestión de Proveedores
-    Route::resource('proveedores', ProveedorController::class);
+    Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
+    Route::get('/proveedores/create', [ProveedorController::class, 'create'])->name('proveedores.create');
+    Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
+    Route::get('/proveedores/{id}', [ProveedorController::class, 'show'])->name('proveedores.show');
+    Route::get('/proveedores/{id}/edit', [ProveedorController::class, 'edit'])->name('proveedores.edit');
+    Route::put('/proveedores/{id}', [ProveedorController::class, 'update'])->name('proveedores.update');
+    Route::delete('/proveedores/{id}', [ProveedorController::class, 'destroy'])->name('proveedores.destroy');
+    Route::get('/proveedores/{id}/agregar-productos', [ProveedorController::class, 'agregarProductos'])->name('proveedores.agregarProductos');
+    Route::post('/proveedores/{id}/guardar-productos', [ProveedorController::class, 'guardarProductos'])->name('proveedores.guardarProductos');
 
     // Gestión de Inventario (redirige a Productos)
     Route::get('/inventario', function() {
