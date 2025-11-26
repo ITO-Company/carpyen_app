@@ -11,7 +11,6 @@ const form = useForm({
     nombre: '',
     descripcion: '',
     ubicacion: '',
-    estado: 'pendiente',
     cliente_id: '',
     user_id: ''
 });
@@ -99,27 +98,6 @@ const submit = () => {
                                         {{ vendedor.name }}
                                     </option>
                                 </select>
-                            </div>
-
-                            <!-- Estado -->
-                            <div class="form-group">
-                                <label for="estado" class="form-label">
-                                    Estado <span class="text-error">*</span>
-                                </label>
-                                <select
-                                    id="estado"
-                                    v-model="form.estado"
-                                    class="input theme-input"
-                                    required
-                                >
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="en_proceso">En Proceso</option>
-                                    <option value="completado">Completado</option>
-                                    <option value="cancelado">Cancelado</option>
-                                </select>
-                                <div v-if="form.errors.estado" class="form-error">
-                                    {{ form.errors.estado }}
-                                </div>
                             </div>
 
                             <!-- Ubicación -->

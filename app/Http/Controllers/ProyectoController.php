@@ -40,15 +40,16 @@ class ProyectoController extends Controller
             'nombre' => 'required|string|max:255',
             'descripcion' => 'nullable|string',
             'ubicacion' => 'nullable|string',
-            'estado' => 'required|in:pendiente,en_proceso,completado,cancelado',
             'cliente_id' => 'required|exists:clientes,id',
             'user_id' => 'nullable|exists:users,id',
         ], [
             'nombre.required' => 'El nombre del proyecto es obligatorio',
-            'estado.required' => 'El estado es obligatorio',
             'cliente_id.required' => 'Debe seleccionar un cliente',
             'cliente_id.exists' => 'El cliente seleccionado no existe',
         ]);
+
+        // Asignar estado por defecto
+        $validated['estado'] = 'pendiente';
 
         Proyecto::create($validated);
 
