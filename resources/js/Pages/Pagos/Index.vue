@@ -17,6 +17,8 @@ const mostrarModalPagos = ref(false); // Variable legada, no se usa más
 const vistaActual = ref("planes"); // 'planes' o 'pagos'
 const planSeleccionado = ref(null);
 const pagosSeleccionados = ref([]);
+const mostrarModalPago = ref(false);
+const pagoSeleccionado = ref(null);
 
 const verPagos = (plan) => {
     planSeleccionado.value = plan;
@@ -28,6 +30,16 @@ const volverAPlanes = () => {
     vistaActual.value = "planes";
     planSeleccionado.value = null;
     pagosSeleccionados.value = [];
+};
+
+const abrirModalPago = (pago) => {
+    pagoSeleccionado.value = pago;
+    mostrarModalPago.value = true;
+};
+
+const cerrarModalPago = () => {
+    mostrarModalPago.value = false;
+    pagoSeleccionado.value = null;
 };
 
 const cerrarModalPagos = () => {
@@ -577,6 +589,7 @@ const eliminar = (plan) => {
                                             <th class="text-sm">
                                                 Fecha de Registro
                                             </th>
+                                            <th class="text-sm">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -644,6 +657,31 @@ const eliminar = (plan) => {
                                                         pago.created_at
                                                     )
                                                 }}
+                                            </td>
+                                            <td class="text-sm">
+                                                <button
+                                                    v-if="
+                                                        pago.estado ===
+                                                        'pendiente'
+                                                    "
+                                                    @click="
+                                                        abrirModalPago(pago)
+                                                    "
+                                                    class="btn btn-sm btn-primary"
+                                                >
+                                                    Pagar
+                                                </button>
+                                                <span
+                                                    v-else
+                                                    class="text-xs"
+                                                    style="
+                                                        color: var(
+                                                            --theme-text-secondary
+                                                        );
+                                                    "
+                                                >
+                                                    —
+                                                </span>
                                             </td>
                                         </tr>
                                         <tr
@@ -740,6 +778,252 @@ const eliminar = (plan) => {
                         </div>
                     </div>
                 </template>
+
+                <!-- MODAL DE PAGO -->
+                <div
+                    v-if="mostrarModalPago"
+                    class="fixed inset-0 z-50 overflow-y-auto"
+                >
+                    <div
+                        class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                        @click="cerrarModalPago"
+                    ></div>
+                    <div
+                        class="flex min-h-screen items-center justify-center p-4"
+                    >
+                        <div
+                            class="relative w-full max-w-2xl rounded-lg bg-white p-8 shadow-xl"
+                            style="background-color: var(--theme-bg-primary)"
+                            @click.stop
+                        >
+                            <!-- Header del Modal -->
+                            <div
+                                class="mb-6 flex items-center justify-between border-b"
+                                style="border-color: var(--theme-border)"
+                            >
+                                <h3 class="text-2xl font-bold">
+                                    Detalles del Pago
+                                </h3>
+                                <button
+                                    @click="cerrarModalPago"
+                                    class="btn btn-ghost btn-circle btn-sm"
+                                >
+                                    <svg
+                                        class="w-6 h-6"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Contenido del Modal -->
+                            <div v-if="pagoSeleccionado" class="space-y-6">
+                                <!-- Información del Plan -->
+                                <div
+                                    class="rounded-lg p-4"
+                                    style="
+                                        background-color: var(
+                                            --theme-bg-secondary
+                                        );
+                                    "
+                                >
+                                    <p
+                                        class="text-sm font-semibold uppercase"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
+                                        Plan de Pago
+                                    </p>
+                                    <p class="text-lg font-bold mt-1">
+                                        {{ planSeleccionado?.proyecto?.nombre }}
+                                    </p>
+                                </div>
+
+                                <!-- Detalle del Pago -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div
+                                        class="rounded-lg p-4"
+                                        style="
+                                            background-color: var(
+                                                --theme-bg-secondary
+                                            );
+                                        "
+                                    >
+                                        <p
+                                            class="text-sm font-semibold uppercase"
+                                            style="
+                                                color: var(
+                                                    --theme-text-secondary
+                                                );
+                                            "
+                                        >
+                                            Monto a Pagar
+                                        </p>
+                                        <p
+                                            class="text-3xl font-bold mt-2"
+                                            style="color: var(--theme-primary)"
+                                        >
+                                            Bs
+                                            {{
+                                                parseFloat(
+                                                    pagoSeleccionado.total || 0
+                                                ).toFixed(2)
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="rounded-lg p-4"
+                                        style="
+                                            background-color: var(
+                                                --theme-bg-secondary
+                                            );
+                                        "
+                                    >
+                                        <p
+                                            class="text-sm font-semibold uppercase"
+                                            style="
+                                                color: var(
+                                                    --theme-text-secondary
+                                                );
+                                            "
+                                        >
+                                            Fecha de Vencimiento
+                                        </p>
+                                        <p class="text-xl font-bold mt-2">
+                                            {{
+                                                formatearFecha(
+                                                    pagoSeleccionado.fecha
+                                                )
+                                            }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Información Adicional -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p
+                                            class="text-sm font-semibold mb-2"
+                                            style="
+                                                color: var(
+                                                    --theme-text-secondary
+                                                );
+                                            "
+                                        >
+                                            Método de Pago Registrado
+                                        </p>
+                                        <p class="font-semibold">
+                                            {{
+                                                pagoSeleccionado.metodo_pago ||
+                                                "No especificado"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p
+                                            class="text-sm font-semibold mb-2"
+                                            style="
+                                                color: var(
+                                                    --theme-text-secondary
+                                                );
+                                            "
+                                        >
+                                            Estado Actual
+                                        </p>
+                                        <span
+                                            class="badge badge-lg"
+                                            :class="{
+                                                'badge-warning':
+                                                    pagoSeleccionado.estado ===
+                                                    'pendiente',
+                                                'badge-success':
+                                                    pagoSeleccionado.estado ===
+                                                    'completado',
+                                                'badge-error':
+                                                    pagoSeleccionado.estado ===
+                                                    'fallido',
+                                            }"
+                                        >
+                                            {{
+                                                pagoSeleccionado.estado
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                pagoSeleccionado.estado.slice(1)
+                                            }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Descripción o Concepto -->
+                                <div
+                                    class="rounded-lg p-4"
+                                    style="
+                                        background-color: var(
+                                            --theme-bg-secondary
+                                        );
+                                    "
+                                >
+                                    <p
+                                        class="text-sm font-semibold mb-2"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
+                                        Concepto
+                                    </p>
+                                    <p class="text-sm">
+                                        Pago por cuota del plan de pago para el
+                                        proyecto
+                                        <strong>{{
+                                            planSeleccionado?.proyecto?.nombre
+                                        }}</strong>
+                                    </p>
+                                </div>
+
+                                <!-- Botones de Acción -->
+                                <div
+                                    class="flex gap-3 border-t pt-6"
+                                    style="border-color: var(--theme-border)"
+                                >
+                                    <button
+                                        @click="cerrarModalPago"
+                                        class="btn btn-ghost flex-1"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        class="btn btn-primary flex-1"
+                                        title="Funcionalidad de pago a implementar"
+                                    >
+                                        <svg
+                                            class="w-5 h-5 mr-2"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                        Proceder al Pago
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
