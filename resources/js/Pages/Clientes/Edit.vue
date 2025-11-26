@@ -24,22 +24,23 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
-                    Editar Cliente
-                </h2>
-                <Link :href="route('clientes.index')" class="btn btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    Volver
-                </Link>
-            </div>
+            <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                Editar Cliente
+            </h2>
         </template>
 
         <div class="py-12">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+                <div class="mb-6">
+                    <Link :href="route('clientes.index')" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Volver
+                    </Link>
+                </div>
+
                 <div class="card fade-in">
                     <form @submit.prevent="submit">
                         <div class="form-grid">

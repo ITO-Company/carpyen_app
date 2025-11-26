@@ -45,6 +45,13 @@ class ProductoController extends Controller
             ->with('success', 'Producto creado exitosamente');
     }
 
+    public function show(Producto $producto)
+    {
+        return Inertia::render('Productos/Show', [
+            'producto' => $producto
+        ]);
+    }
+
     public function edit(Producto $producto)
     {
         return Inertia::render('Productos/Edit', [

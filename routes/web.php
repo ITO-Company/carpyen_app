@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\DisenoController;
+use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\CronogramaController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PlanPagoController;
@@ -58,6 +59,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gestión de Productos (CU3)
     Route::resource('productos', ProductoController::class);
+
+    // Gestión de Proveedores
+    Route::resource('proveedores', ProveedorController::class);
 
     // Gestión de Inventario (redirige a Productos)
     Route::get('/inventario', function() {
