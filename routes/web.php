@@ -8,6 +8,7 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\DisenoController;
 use App\Http\Controllers\CronogramaController;
 use App\Http\Controllers\PagoController;
+use App\Http\Controllers\PlanPagoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Foundation\Application;
@@ -67,6 +68,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Gestión de Cronogramas y Tareas (CU5)
     Route::resource('cronogramas', CronogramaController::class);
+
+    // Gestión de Planes de Pago (CU6)
+    Route::resource('planesPago', PlanPagoController::class);
+    Route::get('/planesPago/{planPago}/pagos', [PlanPagoController::class, 'getPagos'])->name('planesPago.getPagos');
 
     // Gestión de Pagos (CU7)
     Route::resource('pagos', PagoController::class);
