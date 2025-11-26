@@ -117,6 +117,16 @@ const getMetroTipo = (tipoMetro) => {
                                     <td>
                                         <div class="action-buttons">
                                             <Link
+                                                :href="route('cotizaciones.disenos.index', cotizacion.id)"
+                                                class="btn-icon btn-icon-view"
+                                                title="Ver Diseños"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                            </Link>
+                                            <Link
                                                 :href="route('proyectos.cotizaciones.edit', [proyecto.id, cotizacion.id])"
                                                 class="btn-icon btn-icon-edit"
                                                 title="Editar"

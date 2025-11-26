@@ -72,11 +72,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'updateByProyecto'])->name('proyectos.cotizaciones.update');
     Route::delete('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'destroyByProyecto'])->name('proyectos.cotizaciones.destroy');
 
-    // Gestión de Diseños (CU5)
+    // Gestión de Diseños por Cotización (CU5)
+    Route::get('/cotizaciones/{cotizacion}/disenos', [DisenoController::class, 'byCotizacion'])->name('cotizaciones.disenos.index');
+    Route::get('/cotizaciones/{cotizacion}/disenos/crear', [DisenoController::class, 'createByCotizacion'])->name('cotizaciones.disenos.create');
+    Route::post('/cotizaciones/{cotizacion}/disenos', [DisenoController::class, 'storeByCotizacion'])->name('cotizaciones.disenos.store');
+    Route::get('/cotizaciones/{cotizacion}/disenos/{diseno}/editar', [DisenoController::class, 'editByCotizacion'])->name('cotizaciones.disenos.edit');
+    Route::put('/cotizaciones/{cotizacion}/disenos/{diseno}', [DisenoController::class, 'updateByCotizacion'])->name('cotizaciones.disenos.update');
+    Route::delete('/cotizaciones/{cotizacion}/disenos/{diseno}', [DisenoController::class, 'destroyByCotizacion'])->name('cotizaciones.disenos.destroy');
+
+    // Gestión de Diseños (CU5 - Admin)
     Route::resource('disenos', DisenoController::class);
 
-    // Gestión de Cronogramas y Tareas (CU5)
-    Route::resource('cronogramas', CronogramaController::class);
+    // Gestión de Cronogramas y Tareas (CU6)
 
     // Gestión de Planes de Pago (CU6)
     Route::resource('planesPago', PlanPagoController::class);

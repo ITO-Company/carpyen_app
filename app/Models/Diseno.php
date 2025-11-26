@@ -43,12 +43,6 @@ class Diseno extends Model
         return $this->belongsTo(Cotizacion::class);
     }
 
-    // Un diseño pertenece a un proyecto
-    public function proyecto()
-    {
-        return $this->belongsTo(Proyecto::class);
-    }
-
     // Un diseño pertenece a un diseñador (usuario)
     public function diseñador()
     {
