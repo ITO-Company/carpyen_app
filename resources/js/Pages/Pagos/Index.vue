@@ -72,13 +72,15 @@ const generarQRPago = async () => {
             qrImage.value = response.data.qr_image;
             transaccionId.value = response.data.transaction_id;
         } else {
-            errorQR.value = response.data.message || "Error al generar código QR";
+            errorQR.value =
+                response.data.message || "Error al generar código QR";
         }
     } catch (error) {
         console.error("Error:", error);
-        const errorMsg = error.response?.data?.message || 
-                         error.message || 
-                         "Error de conexión al generar el QR";
+        const errorMsg =
+            error.response?.data?.message ||
+            error.message ||
+            "Error de conexión al generar el QR";
         errorQR.value = errorMsg;
     } finally {
         generandoQR.value = false;
