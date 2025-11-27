@@ -15,6 +15,7 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PlanPagoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\InstaladorTareasController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -111,6 +112,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tareas/{id}/editar', [TareaController::class, 'edit'])->name('tareas.edit');
     Route::put('/tareas/{id}', [TareaController::class, 'update'])->name('tareas.update');
     Route::delete('/tareas/{id}', [TareaController::class, 'destroy'])->name('tareas.destroy');
+
+    // ============================================
+    // MIS TAREAS - INSTALADOR
+    // ============================================
+    Route::get('/mis-tareas', [InstaladorTareasController::class, 'index'])->name('instalador.tareas.index');
+    Route::get('/mis-tareas/{tarea}/editar', [InstaladorTareasController::class, 'edit'])->name('instalador.tareas.edit');
+    Route::put('/mis-tareas/{tarea}', [InstaladorTareasController::class, 'update'])->name('instalador.tareas.update');
 
     // ============================================
     // PRODUCTOS

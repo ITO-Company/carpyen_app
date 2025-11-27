@@ -45,7 +45,7 @@ function getMenuForRole(rol) {
             nombre: 'Proyectos',
             icono: 'folder',
             ruta: '/proyectos',
-            roles: ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR']
+            roles: ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR', 'INSTALADOR']
         },
         // JEFE_INSTALADOR: Gestión de Proveedores y Productos
         {
@@ -73,6 +73,13 @@ function getMenuForRole(rol) {
             icono: 'calendar',
             ruta: '/cronogramas',
             roles: ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR']
+        },
+        // INSTALADOR: Mis Tareas
+        {
+            nombre: 'Mis Tareas',
+            icono: 'check-square',
+            ruta: '/mis-tareas',
+            roles: ['INSTALADOR']
         },
         // VENDEDOR: Pagos y Reportes
         {
@@ -102,6 +109,7 @@ const getIcon = (iconName) => {
         'truck': '<polyline points="1 4 1 10 15 10 15 4"></polyline><path d="M19 8v12a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-5h-8"></path><circle cx="5" cy="20" r="2"></circle><circle cx="21" cy="20" r="2"></circle>',
         'layout': '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>',
         'calendar': '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>',
+        'check-square': '<polyline points="6.5 15.5 10 12 16 18 23 11"></polyline><rect x="4" y="3" width="16" height="16" rx="2" ry="2"></rect>',
         'archive': '<polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line>',
         'credit-card': '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line>',
         'bar-chart': '<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>'
@@ -173,6 +181,9 @@ const getIcon = (iconName) => {
                         <line v-if="item.icono === 'calendar'" x1="16" y1="2" x2="16" y2="6"></line>
                         <line v-if="item.icono === 'calendar'" x1="8" y1="2" x2="8" y2="6"></line>
                         <line v-if="item.icono === 'calendar'" x1="3" y1="10" x2="21" y2="10"></line>
+                        
+                        <polyline v-if="item.icono === 'check-square'" points="6.5 15.5 10 12 16 18 23 11"></polyline>
+                        <rect v-if="item.icono === 'check-square'" x="4" y="3" width="16" height="16" rx="2" ry="2"></rect>
                         
                         <polyline v-if="item.icono === 'archive'" points="21 8 21 21 3 21 3 8"></polyline>
                         <rect v-if="item.icono === 'archive'" x="1" y="3" width="22" height="5"></rect>

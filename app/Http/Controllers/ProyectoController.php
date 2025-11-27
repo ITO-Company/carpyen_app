@@ -13,8 +13,8 @@ class ProyectoController extends Controller
 
     public function index()
     {
-        // ADMIN, VENDEDOR y JEFE_INSTALADOR pueden ver proyectos
-        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR'])) {
+        // ADMIN, VENDEDOR, JEFE_INSTALADOR e INSTALADOR pueden ver proyectos
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR', 'INSTALADOR'])) {
             return redirect()->route('dashboard');
         }
 
@@ -24,7 +24,7 @@ class ProyectoController extends Controller
         if (auth()->user()->rol === 'VENDEDOR') {
             $query->where('user_id', auth()->id());
         }
-        // JEFE_INSTALADOR: ver todos los proyectos
+        // JEFE_INSTALADOR e INSTALADOR: ver todos los proyectos
         // ADMIN: ver todos los proyectos
 
         $proyectos = $query->latest()->paginate(10);
@@ -85,6 +85,16 @@ class ProyectoController extends Controller
 
     public function show(Proyecto $proyecto)
     {
+        // Solo ADMIN y VENDEDOR pueden ver detalles del proyecto
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+            return redirect()->route('dashboard');
+        }
+
+        // VENDEDOR: solo puede ver sus propios proyectos
+        if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
+            return redirect()->route('dashboard');
+        }
+
         $proyecto->load(['cliente', 'vendedor', 'cotizaciones', 'cronogramas', 'planPagos']);
         
         return Inertia::render('Proyectos/Show', [

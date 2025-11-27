@@ -29,6 +29,7 @@ export function usePermisos() {
     // Proyectos
     proyecto: {
       ver: tiene(['ADMIN', 'VENDEDOR']),
+      verLista: tiene(['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR', 'INSTALADOR']),
       crear: tiene(['ADMIN', 'VENDEDOR']),
       editar: (proyecto) => {
         if (tiene('ADMIN')) return true
