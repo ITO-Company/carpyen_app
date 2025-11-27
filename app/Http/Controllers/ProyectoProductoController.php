@@ -82,14 +82,6 @@ class ProyectoProductoController extends Controller
             'productosDisponibles' => $productosDisponibles
         ]);
     }
-                ->where('proyecto_id', $proyectoId);
-        })->get();
-
-        return Inertia::render('ProyectoProductos/Create', [
-            'proyecto' => $proyecto,
-            'productosDisponibles' => $productosDisponibles
-        ]);
-    }
 
     /**
      * Store a newly created producto in proyecto
