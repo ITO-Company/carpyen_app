@@ -16,6 +16,7 @@ use App\Http\Controllers\PlanPagoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\InstaladorTareasController;
+use App\Http\Controllers\DiseñadorDisenosController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -161,6 +162,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reportes/estadisticas', [ReporteController::class, 'estadisticas'])->name('reportes.estadisticas');
     Route::get('/reportes/ventas', [ReporteController::class, 'ventas'])->name('reportes.ventas');
     Route::get('/reportes/inventario', [ReporteController::class, 'inventario'])->name('reportes.inventario');
+
+    // ============================================
+    // MIS DISEÑOS - DISEÑADOR
+    // ============================================
+    Route::get('/mis-disenos', [DiseñadorDisenosController::class, 'index'])->name('diseñador.disenos.index');
+    Route::get('/mis-disenos/{diseno}/editar', [DiseñadorDisenosController::class, 'edit'])->name('diseñador.disenos.edit');
+    Route::put('/mis-disenos/{diseno}', [DiseñadorDisenosController::class, 'update'])->name('diseñador.disenos.update');
 
     // ============================================
     // PAGOS
