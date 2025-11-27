@@ -27,12 +27,14 @@ function getMenuForRole(rol) {
             ruta: '/dashboard',
             roles: ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR', 'DISEÑADOR', 'INSTALADOR']
         },
+        // ADMIN: Gestión Completa
         {
             nombre: 'Usuarios',
             icono: 'users',
             ruta: '/usuarios',
             roles: ['ADMIN']
         },
+        // VENDEDOR: Gestión de Clientes y Proyectos
         {
             nombre: 'Clientes',
             icono: 'user-check',
@@ -45,30 +47,34 @@ function getMenuForRole(rol) {
             ruta: '/proyectos',
             roles: ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR']
         },
+        // JEFE_INSTALADOR: Gestión de Proveedores y Productos
         {
             nombre: 'Proveedores',
             icono: 'truck',
             ruta: '/proveedores',
-            roles: ['ADMIN', 'VENDEDOR']
+            roles: ['ADMIN', 'JEFE_INSTALADOR']
         },
+        {
+            nombre: 'Productos',
+            icono: 'package',
+            ruta: '/productos',
+            roles: ['ADMIN', 'JEFE_INSTALADOR', 'INSTALADOR']
+        },
+        // VENDEDOR: Diseños
         {
             nombre: 'Diseños',
             icono: 'layout',
             ruta: '/disenos',
-            roles: ['ADMIN', 'DISEÑADOR', 'VENDEDOR']
+            roles: ['ADMIN', 'VENDEDOR']
         },
+        // JEFE_INSTALADOR: Cronogramas y Tareas
         {
             nombre: 'Cronogramas',
             icono: 'calendar',
             ruta: '/cronogramas',
-            roles: ['ADMIN', 'JEFE_INSTALADOR']
+            roles: ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR']
         },
-        {
-            nombre: 'Stock',
-            icono: 'archive',
-            ruta: '/productos',
-            roles: ['ADMIN']
-        },
+        // VENDEDOR: Pagos y Reportes
         {
             nombre: 'Pagos',
             icono: 'credit-card',

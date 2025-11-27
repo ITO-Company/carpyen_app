@@ -9,12 +9,32 @@ use Inertia\Inertia;
 
 class ProyectoProductoController extends Controller
 {
+    public function __construct()
+    {
+        // VENDEDOR: puede ver/crear/editar productos de sus propios proyectos
+        // JEFE_INSTALADOR: puede ver/crear/editar productos
+        // INSTALADOR: puede ver/crear/editar productos
+        // ADMIN: acceso total
+        $this->middleware(function ($request, $next) {
+            $allowedRoles = ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR', 'INSTALADOR'];
+            if (!in_array(auth()->user()->rol, $allowedRoles)) {
+                abort(403, 'No tienes permisos para acceder a productos de proyecto.');
+            }
+            return $next($request);
+        });
+    }
+
     /**
      * Display a listing of productos for a proyecto
      */
     public function index(string $proyectoId)
     {
         $proyecto = Proyecto::with('cliente', 'vendedor')->findOrFail($proyectoId);
+
+        // VENDEDOR: solo puede ver productos de sus propios proyectos
+        if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
+            abort(403, 'Solo puedes ver productos de tus propios proyectos.');
+        }
         
         $productosProyecto = $proyecto->productos()
             ->with('proveedores')
@@ -44,11 +64,24 @@ class ProyectoProductoController extends Controller
     public function create(string $proyectoId)
     {
         $proyecto = Proyecto::with('cliente', 'vendedor')->findOrFail($proyectoId);
+
+        // VENDEDOR: solo puede crear productos en sus propios proyectos
+        if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
+            abort(403, 'Solo puedes agregar productos a tus propios proyectos.');
+        }
         
         // Obtener productos que NO están ya asociados al proyecto
         $productosDisponibles = Producto::whereNotIn('id', function ($query) use ($proyectoId) {
             $query->select('producto_id')
                 ->from('proyecto_producto')
+                ->where('proyecto_id', $proyectoId);
+        })->get();
+
+        return Inertia::render('ProyectoProductos/Create', [
+            'proyecto' => $proyecto,
+            'productosDisponibles' => $productosDisponibles
+        ]);
+    }
                 ->where('proyecto_id', $proyectoId);
         })->get();
 

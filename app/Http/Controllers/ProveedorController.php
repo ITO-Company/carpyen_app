@@ -9,6 +9,19 @@ use Inertia\Inertia;
 
 class ProveedorController extends Controller
 {
+    public function __construct()
+    {
+        // JEFE_INSTALADOR: puede ver y crear proveedores
+        // ADMIN: acceso total
+        $this->middleware(function ($request, $next) {
+            $allowedRoles = ['ADMIN', 'JEFE_INSTALADOR'];
+            if (!in_array(auth()->user()->rol, $allowedRoles)) {
+                abort(403, 'No tienes permisos para acceder a proveedores.');
+            }
+            return $next($request);
+        });
+    }
+
     /**
      * Display a listing of the resource.
      */

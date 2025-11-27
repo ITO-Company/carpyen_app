@@ -11,12 +11,35 @@ use Carbon\Carbon;
 
 class CronogramaController extends Controller
 {
+    public function __construct()
+    {
+        // JEFE_INSTALADOR: puede ver/editar cronogramas asignados
+        // VENDEDOR: puede crear cronogramas
+        // ADMIN: acceso total
+        $this->middleware(function ($request, $next) {
+            $allowedRoles = ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR'];
+            if (!in_array(auth()->user()->rol, $allowedRoles)) {
+                abort(403, 'No tienes permisos para acceder a cronogramas.');
+            }
+            return $next($request);
+        });
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $cronogramas = Cronograma::with('proyecto', 'usuario')->latest()->paginate(15);
+        $query = Cronograma::with('proyecto', 'usuario');
+
+        // JEFE_INSTALADOR: ver solo cronogramas asignados a él
+        if (auth()->user()->rol === 'JEFE_INSTALADOR') {
+            $query->where('usuario_id', auth()->id());
+        }
+        // VENDEDOR: ver todos los cronogramas (acceso a ver)
+        // ADMIN: ver todos
+
+        $cronogramas = $query->latest()->paginate(15);
         
         return Inertia::render('Cronogramas/Index', [
             'cronogramas' => $cronogramas
@@ -28,6 +51,11 @@ class CronogramaController extends Controller
      */
     public function create()
     {
+        // Solo ADMIN y VENDEDOR pueden crear cronogramas
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+            abort(403, 'Solo vendedores pueden crear cronogramas.');
+        }
+
         $proyectos = Proyecto::all();
         $usuarios = User::whereIn('rol', ['ADMIN', 'JEFE_INSTALADOR'])->get();
         
@@ -89,6 +117,16 @@ class CronogramaController extends Controller
     public function edit(string $id)
     {
         $cronograma = Cronograma::with('usuario')->findOrFail($id);
+
+        // JEFE_INSTALADOR: solo puede editar cronogramas asignados a él
+        if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
+            abort(403, 'Solo puedes editar cronogramas asignados a ti.');
+        }
+
+        // VENDEDOR: puede editar cronogramas del proyecto (se le asigna como creador)
+        // Asumiendo que VENDEDOR que lo creó puede editarlo
+        // ADMIN: puede editar cualquiera
+
         $proyectos = Proyecto::all();
         
         return Inertia::render('Cronogramas/Edit', [
@@ -103,6 +141,16 @@ class CronogramaController extends Controller
     public function update(Request $request, string $id)
     {
         $cronograma = Cronograma::findOrFail($id);
+
+        // JEFE_INSTALADOR: solo puede editar cronogramas asignados a él
+        if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
+            abort(403, 'Solo puedes editar cronogramas asignados a ti.');
+        }
+
+        // VENDEDOR: no puede editar cronogramas (solo ver)
+        if (auth()->user()->rol === 'VENDEDOR') {
+            abort(403, 'Los vendedores no pueden editar cronogramas.');
+        }
         
         $validated = $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
@@ -132,6 +180,11 @@ class CronogramaController extends Controller
      */
     public function destroy(string $id)
     {
+        // Solo ADMIN puede eliminar cronogramas
+        if (auth()->user()->rol !== 'ADMIN') {
+            abort(403, 'Solo administradores pueden eliminar cronogramas.');
+        }
+
         $cronograma = Cronograma::findOrFail($id);
         $cronograma->delete();
 

@@ -9,10 +9,29 @@ use Inertia\Inertia;
 
 class CotizacionController extends Controller
 {
+    public function __construct()
+    {
+        // Solo ADMIN y VENDEDOR pueden acceder a cotizaciones
+        $this->middleware(function ($request, $next) {
+            if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+                abort(403, 'No tienes permisos para acceder a cotizaciones.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index()
     {
-        $cotizaciones = Cotizacion::with('proyecto.cliente')
-            ->orderBy('created_at', 'desc')
+        $query = Cotizacion::with('proyecto.cliente');
+
+        // VENDEDOR: solo ver cotizaciones de sus propios proyectos
+        if (auth()->user()->rol === 'VENDEDOR') {
+            $query->whereHas('proyecto', function ($q) {
+                $q->where('user_id', auth()->id());
+            });
+        }
+
+        $cotizaciones = $query->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return Inertia::render('Cotizaciones/Index', [
@@ -51,6 +70,13 @@ class CotizacionController extends Controller
 
     public function edit(Cotizacion $cotizacion)
     {
+        // VENDEDOR: solo puede editar sus propias cotizaciones
+        if (auth()->user()->rol === 'VENDEDOR') {
+            if ($cotizacion->proyecto->user_id !== auth()->id()) {
+                abort(403, 'Solo puedes editar tus propias cotizaciones.');
+            }
+        }
+
         $proyectos = Proyecto::with('cliente')->get();
         
         return Inertia::render('Cotizaciones/Edit', [
@@ -61,6 +87,12 @@ class CotizacionController extends Controller
 
     public function update(Request $request, Cotizacion $cotizacion)
     {
+        // VENDEDOR: solo puede editar sus propias cotizaciones
+        if (auth()->user()->rol === 'VENDEDOR') {
+            if ($cotizacion->proyecto->user_id !== auth()->id()) {
+                abort(403, 'Solo puedes editar tus propias cotizaciones.');
+            }
+        }
         $validated = $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
             'tipo_metro' => 'required|in:lineal,cuadrado',
@@ -81,6 +113,11 @@ class CotizacionController extends Controller
 
     public function destroy(Cotizacion $cotizacion)
     {
+        // Solo ADMIN puede eliminar cotizaciones
+        if (auth()->user()->rol !== 'ADMIN') {
+            abort(403, 'Solo administradores pueden eliminar cotizaciones.');
+        }
+
         $cotizacion->delete();
 
         return redirect()->route('cotizaciones.index')
@@ -112,6 +149,11 @@ class CotizacionController extends Controller
 
     public function storeByProyecto(Request $request, Proyecto $proyecto)
     {
+        // VENDEDOR: solo puede crear cotizaciones en sus propios proyectos
+        if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
+            abort(403, 'Solo puedes crear cotizaciones en tus propios proyectos.');
+        }
+
         $validated = $request->validate([
             'tipo_metro' => 'required|in:lineal,cuadrado',
             'costo_metro' => 'nullable|numeric|min:0',
@@ -150,6 +192,11 @@ class CotizacionController extends Controller
         // Verificar que la cotización pertenece al proyecto
         if ($cotizacion->proyecto_id !== $proyecto->id) {
             abort(404);
+        }
+
+        // VENDEDOR: solo puede editar sus propias cotizaciones
+        if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
+            abort(403, 'Solo puedes editar cotizaciones de tus propios proyectos.');
         }
 
         $validated = $request->validate([

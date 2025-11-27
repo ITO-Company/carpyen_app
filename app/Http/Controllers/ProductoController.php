@@ -8,6 +8,20 @@ use Inertia\Inertia;
 
 class ProductoController extends Controller
 {
+    public function __construct()
+    {
+        // JEFE_INSTALADOR: puede ver y crear/editar productos
+        // INSTALADOR: puede ver productos
+        // ADMIN: acceso total
+        $this->middleware(function ($request, $next) {
+            $allowedRoles = ['ADMIN', 'JEFE_INSTALADOR', 'INSTALADOR'];
+            if (!in_array(auth()->user()->rol, $allowedRoles)) {
+                abort(403, 'No tienes permisos para acceder a productos.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index()
     {
         $productos = Producto::latest()->paginate(15);
@@ -19,11 +33,20 @@ class ProductoController extends Controller
 
     public function create()
     {
+        // INSTALADOR: no puede crear productos
+        if (auth()->user()->rol === 'INSTALADOR') {
+            abort(403, 'Los instaladores no pueden crear productos.');
+        }
+
         return Inertia::render('Productos/Create');
     }
 
     public function store(Request $request)
     {
+        // INSTALADOR: no puede crear productos
+        if (auth()->user()->rol === 'INSTALADOR') {
+            abort(403, 'Los instaladores no pueden crear productos.');
+        }
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'tipo' => 'nullable|string',
@@ -54,6 +77,11 @@ class ProductoController extends Controller
 
     public function edit(Producto $producto)
     {
+        // INSTALADOR: no puede editar productos
+        if (auth()->user()->rol === 'INSTALADOR') {
+            abort(403, 'Los instaladores no pueden editar productos.');
+        }
+
         return Inertia::render('Productos/Edit', [
             'producto' => $producto
         ]);
@@ -61,6 +89,10 @@ class ProductoController extends Controller
 
     public function update(Request $request, Producto $producto)
     {
+        // INSTALADOR: no puede editar productos
+        if (auth()->user()->rol === 'INSTALADOR') {
+            abort(403, 'Los instaladores no pueden editar productos.');
+        }
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'tipo' => 'nullable|string',

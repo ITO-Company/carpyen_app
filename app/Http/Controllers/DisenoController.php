@@ -10,6 +10,17 @@ use Inertia\Inertia;
 
 class DisenoController extends Controller
 {
+    public function __construct()
+    {
+        // Solo ADMIN y VENDEDOR pueden acceder a diseños
+        $this->middleware(function ($request, $next) {
+            if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+                abort(403, 'No tienes permisos para acceder a diseños.');
+            }
+            return $next($request);
+        });
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -70,6 +81,12 @@ class DisenoController extends Controller
     public function edit(string $id)
     {
         $diseno = Diseno::findOrFail($id);
+        
+        // VENDEDOR: no puede editar diseños, solo crear
+        if (auth()->user()->rol === 'VENDEDOR') {
+            abort(403, 'Los vendedores pueden crear diseños pero no editarlos.');
+        }
+
         $proyectos = Proyecto::all();
         
         return Inertia::render('Disenos/Edit', [
@@ -83,6 +100,11 @@ class DisenoController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // VENDEDOR: no puede editar diseños
+        if (auth()->user()->rol === 'VENDEDOR') {
+            abort(403, 'Los vendedores no pueden editar diseños.');
+        }
+
         $diseno = Diseno::findOrFail($id);
         
         $validated = $request->validate([
@@ -104,6 +126,11 @@ class DisenoController extends Controller
      */
     public function destroy(string $id)
     {
+        // Solo ADMIN puede eliminar diseños
+        if (auth()->user()->rol !== 'ADMIN') {
+            abort(403, 'Solo administradores pueden eliminar diseños.');
+        }
+
         $diseno = Diseno::findOrFail($id);
         $diseno->delete();
 

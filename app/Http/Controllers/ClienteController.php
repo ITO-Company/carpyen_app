@@ -9,6 +9,18 @@ use Inertia\Inertia;
 
 class ClienteController extends Controller
 {
+    public function __construct()
+    {
+        // VENDEDOR: puede ver clientes (todos) pero solo crear
+        // ADMIN: acceso total
+        $this->middleware(function ($request, $next) {
+            if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+                abort(403, 'No tienes permisos para acceder a clientes.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index()
     {
         $clientes = Cliente::latest()->paginate(10);
@@ -54,6 +66,11 @@ class ClienteController extends Controller
 
     public function edit(Cliente $cliente)
     {
+        // Solo ADMIN puede editar clientes
+        if (auth()->user()->rol !== 'ADMIN') {
+            abort(403, 'Solo administradores pueden editar clientes.');
+        }
+
         return Inertia::render('Clientes/Edit', [
             'cliente' => $cliente
         ]);
@@ -61,6 +78,10 @@ class ClienteController extends Controller
 
     public function update(Request $request, Cliente $cliente)
     {
+        // Solo ADMIN puede editar clientes
+        if (auth()->user()->rol !== 'ADMIN') {
+            abort(403, 'Solo administradores pueden editar clientes.');
+        }
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'email' => 'required|email|unique:clientes,email,' . $cliente->id,
@@ -93,6 +114,11 @@ class ClienteController extends Controller
 
     public function destroy(Cliente $cliente)
     {
+        // Solo ADMIN puede eliminar clientes
+        if (auth()->user()->rol !== 'ADMIN') {
+            abort(403, 'Solo administradores pueden eliminar clientes.');
+        }
+
         $cliente->delete();
 
         return redirect()->route('clientes.index')
