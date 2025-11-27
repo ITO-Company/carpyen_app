@@ -152,6 +152,18 @@ const estadoLabels = {
                                             <Link
                                                 :href="
                                                     route(
+                                                        'proyectos.productos.index',
+                                                        proyecto.id
+                                                    )
+                                                "
+                                                class="text-primary hover:underline"
+                                                style="color: var(--theme-primary);"
+                                            >
+                                                Productos
+                                            </Link>
+                                            <Link
+                                                :href="
+                                                    route(
                                                         'proyectos.cotizaciones.index',
                                                         proyecto.id
                                                     )

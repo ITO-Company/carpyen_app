@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\ProyectoProductoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\CotizacionController;
@@ -57,6 +58,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Gestión de Clientes y Proyectos (CU2)
     Route::resource('clientes', ClienteController::class);
     Route::resource('proyectos', ProyectoController::class);
+
+    // Gestión de Productos por Proyecto
+    Route::get('/proyectos/{proyectoId}/productos', [ProyectoProductoController::class, 'index'])->name('proyectos.productos.index');
+    Route::get('/proyectos/{proyectoId}/productos/crear', [ProyectoProductoController::class, 'create'])->name('proyectos.productos.create');
+    Route::post('/proyectos/{proyectoId}/productos', [ProyectoProductoController::class, 'store'])->name('proyectos.productos.store');
+    Route::get('/proyectos/{proyectoId}/productos/{productoId}/editar', [ProyectoProductoController::class, 'edit'])->name('proyectos.productos.edit');
+    Route::put('/proyectos/{proyectoId}/productos/{productoId}', [ProyectoProductoController::class, 'update'])->name('proyectos.productos.update');
+    Route::delete('/proyectos/{proyectoId}/productos/{productoId}', [ProyectoProductoController::class, 'destroy'])->name('proyectos.productos.destroy');
 
     // Gestión de Productos (CU3)
     Route::resource('productos', ProductoController::class);
