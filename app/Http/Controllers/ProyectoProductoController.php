@@ -9,32 +9,18 @@ use Inertia\Inertia;
 
 class ProyectoProductoController extends Controller
 {
-    public function __construct()
-    {
-        // VENDEDOR: puede ver/crear/editar productos de sus propios proyectos
-        // JEFE_INSTALADOR: puede ver/crear/editar productos
-        // INSTALADOR: puede ver/crear/editar productos
-        // ADMIN: acceso total
-        $this->middleware(function ($request, $next) {
-            $allowedRoles = ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR', 'INSTALADOR'];
-            if (!in_array(auth()->user()->rol, $allowedRoles)) {
-                abort(403, 'No tienes permisos para acceder a productos de proyecto.');
-            }
-            return $next($request);
-        });
-    }
 
     /**
      * Display a listing of productos for a proyecto
      */
     public function index(string $proyectoId)
     {
-        $proyecto = Proyecto::with('cliente', 'vendedor')->findOrFail($proyectoId);
-
-        // VENDEDOR: solo puede ver productos de sus propios proyectos
-        if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes ver productos de tus propios proyectos.');
+        // VENDEDOR: no puede acceder a productos de proyecto
+        if (auth()->user()->rol === 'VENDEDOR') {
+            return redirect()->route('dashboard');
         }
+
+        $proyecto = Proyecto::with('cliente', 'vendedor')->findOrFail($proyectoId);
         
         $productosProyecto = $proyecto->productos()
             ->with('proveedores')
@@ -63,13 +49,13 @@ class ProyectoProductoController extends Controller
      */
     public function create(string $proyectoId)
     {
+        // VENDEDOR: no puede acceder a productos de proyecto
+        if (auth()->user()->rol === 'VENDEDOR') {
+            return redirect()->route('dashboard');
+        }
+
         $proyecto = Proyecto::with('cliente', 'vendedor')->findOrFail($proyectoId);
 
-        // VENDEDOR: solo puede crear productos en sus propios proyectos
-        if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes agregar productos a tus propios proyectos.');
-        }
-        
         // Obtener productos que NO están ya asociados al proyecto
         $productosDisponibles = Producto::whereNotIn('id', function ($query) use ($proyectoId) {
             $query->select('producto_id')
@@ -88,6 +74,11 @@ class ProyectoProductoController extends Controller
      */
     public function store(Request $request, string $proyectoId)
     {
+        // VENDEDOR: no puede acceder a productos de proyecto
+        if (auth()->user()->rol === 'VENDEDOR') {
+            return redirect()->route('dashboard');
+        }
+
         $proyecto = Proyecto::findOrFail($proyectoId);
 
         $validated = $request->validate([
@@ -128,13 +119,23 @@ class ProyectoProductoController extends Controller
      */
     public function edit(string $proyectoId, string $productoId)
     {
-        $proyecto = Proyecto::with('cliente', 'vendedor')->findOrFail($proyectoId);
+        // VENDEDOR: no puede acceder a productos de proyecto
+        if (auth()->user()->rol === 'VENDEDOR') {
+            return redirect()->route('dashboard');
+        }
+
+        $proyecto = Proyecto::findOrFail($proyectoId);
         $producto = Producto::findOrFail($productoId);
 
         // Verificar que el producto está asociado al proyecto
         $relacion = $proyecto->productos()->where('producto_id', $productoId)->first();
         if (!$relacion) {
             abort(404);
+        }
+
+        // INSTALADOR: solo puede editar, no puede eliminar
+        if (auth()->user()->rol === 'INSTALADOR') {
+            // Solo puede ver, la vista debe mostrar solo lectura para algunas cosas
         }
 
         return Inertia::render('ProyectoProductos/Edit', [
@@ -150,6 +151,11 @@ class ProyectoProductoController extends Controller
      */
     public function update(Request $request, string $proyectoId, string $productoId)
     {
+        // VENDEDOR: no puede acceder a productos de proyecto
+        if (auth()->user()->rol === 'VENDEDOR') {
+            return redirect()->route('dashboard');
+        }
+
         $proyecto = Proyecto::findOrFail($proyectoId);
         $producto = Producto::findOrFail($productoId);
 
@@ -200,6 +206,11 @@ class ProyectoProductoController extends Controller
      */
     public function destroy(string $proyectoId, string $productoId)
     {
+        // VENDEDOR: no puede acceder a productos de proyecto
+        if (auth()->user()->rol === 'VENDEDOR') {
+            return redirect()->route('dashboard');
+        }
+
         $proyecto = Proyecto::findOrFail($proyectoId);
         $producto = Producto::findOrFail($productoId);
 
@@ -207,6 +218,11 @@ class ProyectoProductoController extends Controller
         $relacion = $proyecto->productos()->where('producto_id', $productoId)->first();
         if (!$relacion) {
             abort(404);
+        }
+
+        // INSTALADOR: no puede eliminar productos
+        if (auth()->user()->rol === 'INSTALADOR') {
+            return redirect()->route('dashboard');
         }
 
         $cantidadUsada = $relacion->pivot->cantidad;

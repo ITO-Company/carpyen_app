@@ -1,11 +1,14 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { usePermisos } from "@/composables/usePermisos";
 import { ref, computed } from "vue";
 
 const props = defineProps({
     proyectos: Object,
 });
+
+const { permisos } = usePermisos();
 
 const searchQuery = ref("");
 
@@ -150,6 +153,7 @@ const estadoLabels = {
                                     <td>
                                         <div class="flex gap-2">
                                             <Link
+                                                v-if="permisos.proyectoProducto.ver"
                                                 :href="
                                                     route(
                                                         'proyectos.productos.index',

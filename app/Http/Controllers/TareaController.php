@@ -11,20 +11,6 @@ use Carbon\Carbon;
 
 class TareaController extends Controller
 {
-    public function __construct()
-    {
-        // JEFE_INSTALADOR: puede crear/editar tareas en sus cronogramas
-        // INSTALADOR: puede ver/editar sus propias tareas
-        // VENDEDOR: puede crear tareas en sus cronogramas
-        // ADMIN: acceso total
-        $this->middleware(function ($request, $next) {
-            $allowedRoles = ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR', 'INSTALADOR'];
-            if (!in_array(auth()->user()->rol, $allowedRoles)) {
-                abort(403, 'No tienes permisos para acceder a tareas.');
-            }
-            return $next($request);
-        });
-    }
 
     /**
      * Display a listing of the resource.
@@ -35,7 +21,7 @@ class TareaController extends Controller
 
         // JEFE_INSTALADOR: solo puede ver tareas de sus cronogramas
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes ver tareas de tus cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         // INSTALADOR: puede ver solo si está asignado a una tarea o es su cronograma
@@ -45,7 +31,7 @@ class TareaController extends Controller
                 ->where('user_id', auth()->id())
                 ->exists();
             if (!$hasTarea) {
-                abort(403, 'No tienes tareas asignadas en este cronograma.');
+                return redirect()->route('dashboard');
             }
         }
 
@@ -69,12 +55,12 @@ class TareaController extends Controller
 
         // JEFE_INSTALADOR: solo puede crear tareas en sus cronogramas
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes crear tareas en tus cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         // INSTALADOR: no puede crear tareas
         if (auth()->user()->rol === 'INSTALADOR') {
-            abort(403, 'Los instaladores no pueden crear tareas.');
+            return redirect()->route('dashboard');
         }
 
         $usuarios = User::whereIn('rol', ['ADMIN', 'JEFE_INSTALADOR', 'INSTALADOR'])->get();
@@ -94,12 +80,12 @@ class TareaController extends Controller
 
         // JEFE_INSTALADOR: solo puede crear tareas en sus cronogramas
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes crear tareas en tus cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         // INSTALADOR: no puede crear tareas
         if (auth()->user()->rol === 'INSTALADOR') {
-            abort(403, 'Los instaladores no pueden crear tareas.');
+            return redirect()->route('dashboard');
         }
 
         $validated = $request->validate([
@@ -155,12 +141,12 @@ class TareaController extends Controller
 
         // JEFE_INSTALADOR: solo puede editar tareas en sus cronogramas
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $tarea->cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar tareas de tus cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         // INSTALADOR: solo puede editar sus propias tareas
         if (auth()->user()->rol === 'INSTALADOR' && $tarea->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar tus propias tareas.');
+            return redirect()->route('dashboard');
         }
 
         $usuarios = User::whereIn('rol', ['ADMIN', 'JEFE_INSTALADOR', 'INSTALADOR'])->get();
@@ -182,12 +168,12 @@ class TareaController extends Controller
 
         // JEFE_INSTALADOR: solo puede editar tareas en sus cronogramas
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar tareas de tus cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         // INSTALADOR: solo puede editar sus propias tareas
         if (auth()->user()->rol === 'INSTALADOR' && $tarea->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar tus propias tareas.');
+            return redirect()->route('dashboard');
         }
         
         $validated = $request->validate([
@@ -227,14 +213,14 @@ class TareaController extends Controller
     {
         // Solo ADMIN y JEFE_INSTALADOR pueden eliminar tareas
         if (!in_array(auth()->user()->rol, ['ADMIN', 'JEFE_INSTALADOR'])) {
-            abort(403, 'No tienes permisos para eliminar tareas.');
+            return redirect()->route('dashboard');
         }
 
         $tarea = Tarea::findOrFail($id);
 
         // JEFE_INSTALADOR: solo puede eliminar tareas de sus cronogramas
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $tarea->cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes eliminar tareas de tus cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         $cronogramaId = $tarea->cronograma_id;

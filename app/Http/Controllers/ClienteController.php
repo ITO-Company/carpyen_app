@@ -9,20 +9,14 @@ use Inertia\Inertia;
 
 class ClienteController extends Controller
 {
-    public function __construct()
-    {
-        // VENDEDOR: puede ver clientes (todos) pero solo crear
-        // ADMIN: acceso total
-        $this->middleware(function ($request, $next) {
-            if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
-                abort(403, 'No tienes permisos para acceder a clientes.');
-            }
-            return $next($request);
-        });
-    }
 
     public function index()
     {
+        // ADMIN y VENDEDOR pueden ver la lista
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+            return redirect()->route('dashboard');
+        }
+
         $clientes = Cliente::latest()->paginate(10);
         
         return Inertia::render('Clientes/Index', [
@@ -32,11 +26,21 @@ class ClienteController extends Controller
 
     public function create()
     {
+        // ADMIN y VENDEDOR pueden crear
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+            return redirect()->route('dashboard');
+        }
+
         return Inertia::render('Clientes/Create');
     }
 
     public function store(Request $request)
     {
+        // ADMIN y VENDEDOR pueden crear
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+            return redirect()->route('dashboard');
+        }
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'email' => 'required|email|unique:clientes',
@@ -68,7 +72,7 @@ class ClienteController extends Controller
     {
         // Solo ADMIN puede editar clientes
         if (auth()->user()->rol !== 'ADMIN') {
-            abort(403, 'Solo administradores pueden editar clientes.');
+            return redirect()->route('dashboard');
         }
 
         return Inertia::render('Clientes/Edit', [
@@ -80,7 +84,7 @@ class ClienteController extends Controller
     {
         // Solo ADMIN puede editar clientes
         if (auth()->user()->rol !== 'ADMIN') {
-            abort(403, 'Solo administradores pueden editar clientes.');
+            return redirect()->route('dashboard');
         }
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
@@ -116,7 +120,7 @@ class ClienteController extends Controller
     {
         // Solo ADMIN puede eliminar clientes
         if (auth()->user()->rol !== 'ADMIN') {
-            abort(403, 'Solo administradores pueden eliminar clientes.');
+            return redirect()->route('dashboard');
         }
 
         $cliente->delete();

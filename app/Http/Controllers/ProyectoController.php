@@ -10,22 +10,14 @@ use Inertia\Inertia;
 
 class ProyectoController extends Controller
 {
-    public function __construct()
-    {
-        // VENDEDOR: puede ver/crear/editar sus propios proyectos
-        // JEFE_INSTALADOR: puede ver proyectos (todos)
-        // ADMIN: acceso total
-        $this->middleware(function ($request, $next) {
-            $allowedRoles = ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR'];
-            if (!in_array(auth()->user()->rol, $allowedRoles)) {
-                abort(403, 'No tienes permisos para acceder a proyectos.');
-            }
-            return $next($request);
-        });
-    }
 
     public function index()
     {
+        // ADMIN, VENDEDOR y JEFE_INSTALADOR pueden ver proyectos
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR'])) {
+            return redirect()->route('dashboard');
+        }
+
         $query = Proyecto::with(['cliente', 'vendedor']);
 
         // VENDEDOR: ver solo sus propios proyectos
@@ -44,6 +36,11 @@ class ProyectoController extends Controller
 
     public function create()
     {
+        // ADMIN y VENDEDOR pueden crear
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
+            return redirect()->route('dashboard');
+        }
+
         $clientes = Cliente::all();
         $vendedores = User::where('rol', 'VENDEDOR')
             ->orWhere('rol', 'ADMIN')
@@ -59,7 +56,7 @@ class ProyectoController extends Controller
     {
         // Solo ADMIN y VENDEDOR pueden crear proyectos
         if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
-            abort(403, 'Solo vendedores y administradores pueden crear proyectos.');
+            return redirect()->route('dashboard');
         }
 
         $validated = $request->validate([
@@ -99,12 +96,12 @@ class ProyectoController extends Controller
     {
         // VENDEDOR: solo puede editar sus propios proyectos
         if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar tus propios proyectos.');
+            return redirect()->route('dashboard');
         }
 
         // JEFE_INSTALADOR: no puede editar
         if (auth()->user()->rol === 'JEFE_INSTALADOR') {
-            abort(403, 'Los jefes de instalación no pueden editar proyectos.');
+            return redirect()->route('dashboard');
         }
 
         $clientes = Cliente::all();
@@ -123,12 +120,12 @@ class ProyectoController extends Controller
     {
         // VENDEDOR: solo puede editar sus propios proyectos
         if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar tus propios proyectos.');
+            return redirect()->route('dashboard');
         }
 
         // JEFE_INSTALADOR: no puede editar
         if (auth()->user()->rol === 'JEFE_INSTALADOR') {
-            abort(403, 'Los jefes de instalación no pueden editar proyectos.');
+            return redirect()->route('dashboard');
         }
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
@@ -149,7 +146,7 @@ class ProyectoController extends Controller
     {
         // Solo ADMIN puede eliminar proyectos
         if (auth()->user()->rol !== 'ADMIN') {
-            abort(403, 'Solo administradores pueden eliminar proyectos.');
+            return redirect()->route('dashboard');
         }
 
         $proyecto->delete();

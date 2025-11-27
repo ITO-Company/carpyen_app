@@ -11,19 +11,6 @@ use Carbon\Carbon;
 
 class CronogramaController extends Controller
 {
-    public function __construct()
-    {
-        // JEFE_INSTALADOR: puede ver/editar cronogramas asignados
-        // VENDEDOR: puede crear cronogramas
-        // ADMIN: acceso total
-        $this->middleware(function ($request, $next) {
-            $allowedRoles = ['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR'];
-            if (!in_array(auth()->user()->rol, $allowedRoles)) {
-                abort(403, 'No tienes permisos para acceder a cronogramas.');
-            }
-            return $next($request);
-        });
-    }
 
     /**
      * Display a listing of the resource.
@@ -53,7 +40,7 @@ class CronogramaController extends Controller
     {
         // Solo ADMIN y VENDEDOR pueden crear cronogramas
         if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
-            abort(403, 'Solo vendedores pueden crear cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         $proyectos = Proyecto::all();
@@ -120,7 +107,7 @@ class CronogramaController extends Controller
 
         // JEFE_INSTALADOR: solo puede editar cronogramas asignados a él
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar cronogramas asignados a ti.');
+            return redirect()->route('dashboard');
         }
 
         // VENDEDOR: puede editar cronogramas del proyecto (se le asigna como creador)
@@ -144,12 +131,12 @@ class CronogramaController extends Controller
 
         // JEFE_INSTALADOR: solo puede editar cronogramas asignados a él
         if (auth()->user()->rol === 'JEFE_INSTALADOR' && $cronograma->usuario_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar cronogramas asignados a ti.');
+            return redirect()->route('dashboard');
         }
 
         // VENDEDOR: no puede editar cronogramas (solo ver)
         if (auth()->user()->rol === 'VENDEDOR') {
-            abort(403, 'Los vendedores no pueden editar cronogramas.');
+            return redirect()->route('dashboard');
         }
         
         $validated = $request->validate([
@@ -182,7 +169,7 @@ class CronogramaController extends Controller
     {
         // Solo ADMIN puede eliminar cronogramas
         if (auth()->user()->rol !== 'ADMIN') {
-            abort(403, 'Solo administradores pueden eliminar cronogramas.');
+            return redirect()->route('dashboard');
         }
 
         $cronograma = Cronograma::findOrFail($id);

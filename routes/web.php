@@ -52,27 +52,76 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('Dashboard', ['stats' => $stats]);
     })->name('dashboard');
 
-    // Gestión de Usuarios (CU1)
-    Route::resource('usuarios', UsuarioController::class);
+    // ============================================
+    // CLIENTES - ADMIN y VENDEDOR
+    // ============================================
+    Route::get('/clientes', [ClienteController::class, 'index'])->name('clientes.index');
+    Route::get('/clientes/create', [ClienteController::class, 'create'])->name('clientes.create');
+    Route::post('/clientes', [ClienteController::class, 'store'])->name('clientes.store');
+    Route::get('/clientes/{cliente}/edit', [ClienteController::class, 'edit'])->name('clientes.edit');
+    Route::put('/clientes/{cliente}', [ClienteController::class, 'update'])->name('clientes.update');
+    Route::delete('/clientes/{cliente}', [ClienteController::class, 'destroy'])->name('clientes.destroy');
 
-    // Gestión de Clientes y Proyectos (CU2)
-    Route::resource('clientes', ClienteController::class);
+    // ============================================
+    // PROYECTOS - ADMIN y VENDEDOR
+    // ============================================
     Route::resource('proyectos', ProyectoController::class);
 
-    // Gestión de Productos por Proyecto
-    Route::get('/proyectos/{proyectoId}/productos', [ProyectoProductoController::class, 'index'])->name('proyectos.productos.index');
-    Route::get('/proyectos/{proyectoId}/productos/crear', [ProyectoProductoController::class, 'create'])->name('proyectos.productos.create');
-    Route::post('/proyectos/{proyectoId}/productos', [ProyectoProductoController::class, 'store'])->name('proyectos.productos.store');
-    Route::get('/proyectos/{proyectoId}/productos/{productoId}/editar', [ProyectoProductoController::class, 'edit'])->name('proyectos.productos.edit');
-    Route::put('/proyectos/{proyectoId}/productos/{productoId}', [ProyectoProductoController::class, 'update'])->name('proyectos.productos.update');
-    Route::delete('/proyectos/{proyectoId}/productos/{productoId}', [ProyectoProductoController::class, 'destroy'])->name('proyectos.productos.destroy');
+    // ============================================
+    // COTIZACIONES
+    // ============================================
+    Route::get('/proyectos/{proyecto}/cotizaciones', [CotizacionController::class, 'byProyecto'])->name('proyectos.cotizaciones.index');
+    Route::get('/proyectos/{proyecto}/cotizaciones/crear', [CotizacionController::class, 'createByProyecto'])->name('proyectos.cotizaciones.create');
+    Route::post('/proyectos/{proyecto}/cotizaciones', [CotizacionController::class, 'storeByProyecto'])->name('proyectos.cotizaciones.store');
+    Route::get('/proyectos/{proyecto}/cotizaciones/{cotizacion}/editar', [CotizacionController::class, 'editByProyecto'])->name('proyectos.cotizaciones.edit');
+    Route::put('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'updateByProyecto'])->name('proyectos.cotizaciones.update');
+    Route::delete('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'destroyByProyecto'])->name('proyectos.cotizaciones.destroy');
 
-    // Gestión de Productos (CU3)
+    // ============================================
+    // DISEÑOS
+    // ============================================
+    Route::get('/cotizaciones/{cotizacion}/disenos', [DisenoController::class, 'byCotizacion'])->name('cotizaciones.disenos.index');
+    Route::get('/cotizaciones/{cotizacion}/disenos/crear', [DisenoController::class, 'createByCotizacion'])->name('cotizaciones.disenos.create');
+    Route::post('/cotizaciones/{cotizacion}/disenos', [DisenoController::class, 'storeByCotizacion'])->name('cotizaciones.disenos.store');
+    Route::resource('disenos', DisenoController::class);
+
+    // ============================================
+    // PLANES DE PAGO
+    // ============================================
+    Route::resource('planesPago', PlanPagoController::class);
+    Route::get('/planesPago/{planPago}/pagos', [PlanPagoController::class, 'getPagos'])->name('planesPago.getPagos');
+
+    // ============================================
+    // CRONOGRAMAS
+    // ============================================
+    Route::get('/cronogramas', [CronogramaController::class, 'index'])->name('cronogramas.index');
+    Route::get('/cronogramas/create', [CronogramaController::class, 'create'])->name('cronogramas.create');
+    Route::post('/cronogramas', [CronogramaController::class, 'store'])->name('cronogramas.store');
+    Route::get('/cronogramas/{cronograma}', [CronogramaController::class, 'show'])->name('cronogramas.show');
+    Route::get('/cronogramas/{cronograma}/edit', [CronogramaController::class, 'edit'])->name('cronogramas.edit');
+    Route::put('/cronogramas/{cronograma}', [CronogramaController::class, 'update'])->name('cronogramas.update');
+    Route::delete('/cronogramas/{cronograma}', [CronogramaController::class, 'destroy'])->name('cronogramas.destroy');
+
+    // ============================================
+    // TAREAS
+    // ============================================
+    Route::get('/cronogramas/{cronogramaId}/tareas', [TareaController::class, 'index'])->name('tareas.index');
+    Route::get('/cronogramas/{cronogramaId}/tareas/crear', [TareaController::class, 'create'])->name('tareas.create');
+    Route::post('/cronogramas/{cronogramaId}/tareas', [TareaController::class, 'store'])->name('tareas.store');
+    Route::get('/tareas/{id}/editar', [TareaController::class, 'edit'])->name('tareas.edit');
+    Route::put('/tareas/{id}', [TareaController::class, 'update'])->name('tareas.update');
+    Route::delete('/tareas/{id}', [TareaController::class, 'destroy'])->name('tareas.destroy');
+
+    // ============================================
+    // PRODUCTOS
+    // ============================================
     Route::resource('productos', ProductoController::class);
     Route::post('/productos/{producto}/agregar-stock', [ProductoController::class, 'agregarStock'])->name('productos.agregarStock');
     Route::post('/productos/{producto}/disminuir-stock', [ProductoController::class, 'disminuirStock'])->name('productos.disminuirStock');
 
-    // Gestión de Proveedores
+    // ============================================
+    // PROVEEDORES
+    // ============================================
     Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
     Route::get('/proveedores/create', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
@@ -83,56 +132,39 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/proveedores/{id}/agregar-productos', [ProveedorController::class, 'agregarProductos'])->name('proveedores.agregarProductos');
     Route::post('/proveedores/{id}/guardar-productos', [ProveedorController::class, 'guardarProductos'])->name('proveedores.guardarProductos');
 
+    // ============================================
+    // PRODUCTOS POR PROYECTO
+    // ============================================
+    Route::get('/proyectos/{proyectoId}/productos', [ProyectoProductoController::class, 'index'])->name('proyectos.productos.index');
+    Route::get('/proyectos/{proyectoId}/productos/crear', [ProyectoProductoController::class, 'create'])->name('proyectos.productos.create');
+    Route::post('/proyectos/{proyectoId}/productos', [ProyectoProductoController::class, 'store'])->name('proyectos.productos.store');
+    Route::get('/proyectos/{proyectoId}/productos/{productoId}/editar', [ProyectoProductoController::class, 'edit'])->name('proyectos.productos.edit');
+    Route::put('/proyectos/{proyectoId}/productos/{productoId}', [ProyectoProductoController::class, 'update'])->name('proyectos.productos.update');
+    Route::delete('/proyectos/{proyectoId}/productos/{productoId}', [ProyectoProductoController::class, 'destroy'])->name('proyectos.productos.destroy');
+
+    // ============================================
+    // USUARIOS (ADMIN ONLY)
+    // ============================================
+    Route::resource('usuarios', UsuarioController::class);
+
+    // ============================================
+    // REPORTES (ADMIN ONLY)
+    // ============================================
+    Route::get('/reportes/estadisticas', [ReporteController::class, 'estadisticas'])->name('reportes.estadisticas');
+    Route::get('/reportes/ventas', [ReporteController::class, 'ventas'])->name('reportes.ventas');
+    Route::get('/reportes/inventario', [ReporteController::class, 'inventario'])->name('reportes.inventario');
+
+    // ============================================
+    // PAGOS
+    // ============================================
+    Route::resource('pagos', PagoController::class);
+    Route::post('/pagos/generar-qr', [PagoController::class, 'generarQR'])->name('pagos.generarQR');
+    Route::get('/pagos/{pago}/check-transaction-status', [PagoController::class, 'checkTransactionStatus'])->name('pagos.checkTransactionStatus');
+
     // Gestión de Inventario (redirige a Productos)
     Route::get('/inventario', function() {
         return redirect()->route('productos.index');
     })->name('inventario.index');
-
-    // Gestión de Cotizaciones por Proyecto (CU4)
-    Route::get('/proyectos/{proyecto}/cotizaciones', [CotizacionController::class, 'byProyecto'])->name('proyectos.cotizaciones.index');
-    Route::get('/proyectos/{proyecto}/cotizaciones/crear', [CotizacionController::class, 'createByProyecto'])->name('proyectos.cotizaciones.create');
-    Route::post('/proyectos/{proyecto}/cotizaciones', [CotizacionController::class, 'storeByProyecto'])->name('proyectos.cotizaciones.store');
-    Route::get('/proyectos/{proyecto}/cotizaciones/{cotizacion}/editar', [CotizacionController::class, 'editByProyecto'])->name('proyectos.cotizaciones.edit');
-    Route::put('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'updateByProyecto'])->name('proyectos.cotizaciones.update');
-    Route::delete('/proyectos/{proyecto}/cotizaciones/{cotizacion}', [CotizacionController::class, 'destroyByProyecto'])->name('proyectos.cotizaciones.destroy');
-
-    // Gestión de Diseños por Cotización (CU5)
-    Route::get('/cotizaciones/{cotizacion}/disenos', [DisenoController::class, 'byCotizacion'])->name('cotizaciones.disenos.index');
-    Route::get('/cotizaciones/{cotizacion}/disenos/crear', [DisenoController::class, 'createByCotizacion'])->name('cotizaciones.disenos.create');
-    Route::post('/cotizaciones/{cotizacion}/disenos', [DisenoController::class, 'storeByCotizacion'])->name('cotizaciones.disenos.store');
-    Route::get('/cotizaciones/{cotizacion}/disenos/{diseno}/editar', [DisenoController::class, 'editByCotizacion'])->name('cotizaciones.disenos.edit');
-    Route::put('/cotizaciones/{cotizacion}/disenos/{diseno}', [DisenoController::class, 'updateByCotizacion'])->name('cotizaciones.disenos.update');
-    Route::delete('/cotizaciones/{cotizacion}/disenos/{diseno}', [DisenoController::class, 'destroyByCotizacion'])->name('cotizaciones.disenos.destroy');
-
-    // Gestión de Diseños (CU5 - Admin)
-    Route::resource('disenos', DisenoController::class);
-
-    // Gestión de Cronogramas y Tareas (CU6)
-    Route::resource('cronogramas', CronogramaController::class);
-
-    // Gestión de Tareas anidadas en Cronogramas
-    Route::get('/cronogramas/{cronogramaId}/tareas', [TareaController::class, 'index'])->name('tareas.index');
-    Route::get('/cronogramas/{cronogramaId}/tareas/crear', [TareaController::class, 'create'])->name('tareas.create');
-    Route::post('/cronogramas/{cronogramaId}/tareas', [TareaController::class, 'store'])->name('tareas.store');
-    Route::get('/tareas/{id}/editar', [TareaController::class, 'edit'])->name('tareas.edit');
-    Route::put('/tareas/{id}', [TareaController::class, 'update'])->name('tareas.update');
-    Route::delete('/tareas/{id}', [TareaController::class, 'destroy'])->name('tareas.destroy');
-
-    // Gestión de Planes de Pago (CU6)
-    Route::resource('planesPago', PlanPagoController::class);
-    Route::get('/planesPago/{planPago}/pagos', [PlanPagoController::class, 'getPagos'])->name('planesPago.getPagos');
-
-    // Gestión de Pagos (CU7)
-    Route::resource('pagos', PagoController::class);
-    Route::post('/pagos/generar-qr', [PagoController::class, 'generarQR'])->name('pagos.generarQR');
-    Route::get('/pagos/{pago}/check-transaction-status', [PagoController::class, 'checkTransactionStatus'])->name('pagos.checkTransactionStatus');
-    Route::post('/pagos/callback', [PagoController::class, 'callback'])->name('pagos.callback');
-    Route::get('/pagos/return', [PagoController::class, 'return'])->name('pagos.return');
-
-    // Reportes y Estadísticas (CU8)
-    Route::get('/reportes/estadisticas', [ReporteController::class, 'estadisticas'])->name('reportes.estadisticas');
-    Route::get('/reportes/ventas', [ReporteController::class, 'ventas'])->name('reportes.ventas');
-    Route::get('/reportes/inventario', [ReporteController::class, 'inventario'])->name('reportes.inventario');
 
     // Perfil de usuario
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -16,7 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
-        //
+        // Registrar middleware personalizado para protecciones por rol
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRolePermission::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

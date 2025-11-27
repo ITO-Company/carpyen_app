@@ -10,6 +10,19 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Limpiar TODOS los caches de PostgreSQL antes de crear tablas
+        try {
+            DB::unprepared('DEALLOCATE ALL;');
+        } catch (\Exception $e) {
+            // Ignorar si no hay prepared statements
+        }
+        
+        try {
+            DB::unprepared('DISCARD PLANS;');
+        } catch (\Exception $e) {
+            // Ignorar si falla
+        }
+
         // Crear tabla users (debe existir primero para las FK)
         DB::unprepared('
             CREATE TABLE IF NOT EXISTS users (
@@ -84,6 +97,7 @@ return new class extends Migration
                 email VARCHAR(255) UNIQUE NOT NULL,
                 telefono VARCHAR(255) NOT NULL,
                 direccion VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
             );
@@ -291,6 +305,19 @@ return new class extends Migration
         DB::unprepared('CREATE INDEX IF NOT EXISTS cronogramas_proyecto_id_index ON cronogramas(proyecto_id);');
         DB::unprepared('CREATE INDEX IF NOT EXISTS cronogramas_usuario_id_index ON cronogramas(usuario_id);');
         DB::unprepared('CREATE INDEX IF NOT EXISTS cronogramas_estado_index ON cronogramas(estado);');
+
+        // Limpiar caches después de crear todas las tablas
+        try {
+            DB::unprepared('DEALLOCATE ALL;');
+        } catch (\Exception $e) {
+            // Ignorar
+        }
+        
+        try {
+            DB::unprepared('DISCARD PLANS;');
+        } catch (\Exception $e) {
+            // Ignorar
+        }
     }
 
     /**
@@ -298,6 +325,19 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Limpiar caches de PostgreSQL antes de borrar tablas
+        try {
+            DB::unprepared('DEALLOCATE ALL;');
+        } catch (\Exception $e) {
+            // Ignorar si no hay prepared statements
+        }
+        
+        try {
+            DB::unprepared('DISCARD PLANS;');
+        } catch (\Exception $e) {
+            // Ignorar si falla
+        }
+
         DB::unprepared('DROP TABLE IF EXISTS page_visits CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS menus CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS pagos CASCADE;');

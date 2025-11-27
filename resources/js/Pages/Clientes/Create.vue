@@ -195,6 +195,27 @@ const submit = () => {
     color: var(--theme-text-primary);
 }
 
+.input {
+    background-color: var(--theme-bg-primary);
+    color: var(--theme-text-primary);
+    border: 1px solid var(--theme-border);
+    padding: var(--spacing-3);
+    border-radius: 0.375rem;
+    font-size: var(--font-size-sm);
+    transition: all 0.2s ease;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 3px var(--theme-primary-alpha, rgba(168, 85, 247, 0.1));
+}
+
+.input::placeholder {
+    color: var(--theme-text-secondary);
+    opacity: 0.7;
+}
+
 .form-error {
     font-size: var(--font-size-sm);
     color: var(--theme-error);
@@ -212,6 +233,7 @@ const submit = () => {
 textarea.input {
     resize: vertical;
     min-height: 80px;
+    font-family: inherit;
 }
 
 @media (max-width: 768px) {

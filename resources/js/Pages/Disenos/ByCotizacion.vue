@@ -1,6 +1,9 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+
+const page = usePage();
+const user = page.props.auth.user;
 
 const props = defineProps({
     cotizacion: Object,
@@ -34,36 +37,35 @@ const getEstadoTexto = (estado) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
-                <div class="flex flex-col gap-1">
-                    <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
-                        Diseños de la Cotización
-                    </h2>
-                    <p class="text-sm" style="color: var(--theme-text-secondary)">
-                        {{ proyecto.nombre }} - Cotización #{{ cotizacion.id }}
-                    </p>
-                </div>
-                <div class="flex gap-3">
-                    <Link :href="route('cotizaciones.disenos.create', cotizacion.id)" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Nuevo Diseño
-                    </Link>
-                    <Link :href="route('proyectos.cotizaciones.index', proyecto.id)" class="btn btn-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="19" y1="12" x2="5" y2="12"></line>
-                            <polyline points="12 19 5 12 12 5"></polyline>
-                        </svg>
-                        Volver
-                    </Link>
-                </div>
+            <div class="flex flex-col gap-1">
+                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                    Diseños de la Cotización
+                </h2>
+                <p class="text-sm" style="color: var(--theme-text-secondary)">
+                    {{ proyecto.nombre }} - Cotización #{{ cotizacion.id }}
+                </p>
             </div>
         </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Botones arriba de la tabla -->
+                <div class="flex gap-3 mb-6">
+                    <button @click="$inertia.get(route('cotizaciones.disenos.create', cotizacion.id))" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Nuevo Diseño
+                    </button>
+                    <button @click="$inertia.get(route('proyectos.cotizaciones.index', proyecto.id))" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Volver
+                    </button>
+                </div>
                 <div class="card fade-in">
                     <div class="table-container">
                         <table class="table">
@@ -98,8 +100,10 @@ const getEstadoTexto = (estado) => {
                                     </td>
                                     <td>
                                         <div class="action-buttons">
+                                            <!-- Solo ADMIN puede editar y eliminar diseños -->
                                             <Link
-                                                :href="route('cotizaciones.disenos.edit', [cotizacion.id, diseno.id])"
+                                                v-if="user.rol === 'ADMIN'"
+                                                :href="route('disenos.edit', diseno.id)"
                                                 class="btn-icon btn-icon-edit"
                                                 title="Editar"
                                             >
@@ -109,7 +113,8 @@ const getEstadoTexto = (estado) => {
                                                 </svg>
                                             </Link>
                                             <Link
-                                                :href="route('cotizaciones.disenos.destroy', [cotizacion.id, diseno.id])"
+                                                v-if="user.rol === 'ADMIN'"
+                                                :href="route('disenos.destroy', diseno.id)"
                                                 method="delete"
                                                 as="button"
                                                 class="btn-icon btn-icon-delete"
@@ -119,6 +124,8 @@ const getEstadoTexto = (estado) => {
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <polyline points="3 6 5 6 21 6"></polyline>
                                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
                                                 </svg>
                                             </Link>
                                         </div>

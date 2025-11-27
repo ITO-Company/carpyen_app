@@ -9,16 +9,6 @@ use Inertia\Inertia;
 
 class CotizacionController extends Controller
 {
-    public function __construct()
-    {
-        // Solo ADMIN y VENDEDOR pueden acceder a cotizaciones
-        $this->middleware(function ($request, $next) {
-            if (!in_array(auth()->user()->rol, ['ADMIN', 'VENDEDOR'])) {
-                abort(403, 'No tienes permisos para acceder a cotizaciones.');
-            }
-            return $next($request);
-        });
-    }
 
     public function index()
     {
@@ -73,7 +63,7 @@ class CotizacionController extends Controller
         // VENDEDOR: solo puede editar sus propias cotizaciones
         if (auth()->user()->rol === 'VENDEDOR') {
             if ($cotizacion->proyecto->user_id !== auth()->id()) {
-                abort(403, 'Solo puedes editar tus propias cotizaciones.');
+                return redirect()->route('dashboard');
             }
         }
 
@@ -90,7 +80,7 @@ class CotizacionController extends Controller
         // VENDEDOR: solo puede editar sus propias cotizaciones
         if (auth()->user()->rol === 'VENDEDOR') {
             if ($cotizacion->proyecto->user_id !== auth()->id()) {
-                abort(403, 'Solo puedes editar tus propias cotizaciones.');
+                return redirect()->route('dashboard');
             }
         }
         $validated = $request->validate([
@@ -115,7 +105,7 @@ class CotizacionController extends Controller
     {
         // Solo ADMIN puede eliminar cotizaciones
         if (auth()->user()->rol !== 'ADMIN') {
-            abort(403, 'Solo administradores pueden eliminar cotizaciones.');
+            return redirect()->route('dashboard');
         }
 
         $cotizacion->delete();
@@ -151,7 +141,7 @@ class CotizacionController extends Controller
     {
         // VENDEDOR: solo puede crear cotizaciones en sus propios proyectos
         if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes crear cotizaciones en tus propios proyectos.');
+            return redirect()->route('dashboard');
         }
 
         $validated = $request->validate([
@@ -196,7 +186,7 @@ class CotizacionController extends Controller
 
         // VENDEDOR: solo puede editar sus propias cotizaciones
         if (auth()->user()->rol === 'VENDEDOR' && $proyecto->user_id !== auth()->id()) {
-            abort(403, 'Solo puedes editar cotizaciones de tus propios proyectos.');
+            return redirect()->route('dashboard');
         }
 
         $validated = $request->validate([

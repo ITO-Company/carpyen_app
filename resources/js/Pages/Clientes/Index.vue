@@ -1,12 +1,14 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { usePermisos } from "@/composables/usePermisos";
 import { ref, computed } from "vue";
 
 const props = defineProps({
     clientes: Object,
 });
 
+const { permisos } = usePermisos();
 const searchQuery = ref("");
 
 const filteredClientes = computed(() => {
@@ -53,7 +55,11 @@ const paginationLabel = (label) => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="mb-6">
-                    <Link :href="route('clientes.create')" class="btn btn-primary">
+                    <Link 
+                        v-if="permisos.cliente.crear"
+                        :href="route('clientes.create')" 
+                        class="btn btn-primary"
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="16"
@@ -110,6 +116,7 @@ const paginationLabel = (label) => {
                                     <td>
                                         <div class="flex gap-2">
                                             <Link
+                                                v-if="permisos.cliente.editar"
                                                 :href="
                                                     route(
                                                         'clientes.edit',
@@ -124,6 +131,7 @@ const paginationLabel = (label) => {
                                                 Editar
                                             </Link>
                                             <Link
+                                                v-if="permisos.cliente.eliminar"
                                                 :href="
                                                     route(
                                                         'clientes.destroy',

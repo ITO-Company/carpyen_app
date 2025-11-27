@@ -8,22 +8,14 @@ use Inertia\Inertia;
 
 class ProductoController extends Controller
 {
-    public function __construct()
-    {
-        // JEFE_INSTALADOR: puede ver y crear/editar productos
-        // INSTALADOR: puede ver productos
-        // ADMIN: acceso total
-        $this->middleware(function ($request, $next) {
-            $allowedRoles = ['ADMIN', 'JEFE_INSTALADOR', 'INSTALADOR'];
-            if (!in_array(auth()->user()->rol, $allowedRoles)) {
-                abort(403, 'No tienes permisos para acceder a productos.');
-            }
-            return $next($request);
-        });
-    }
 
     public function index()
     {
+        // ADMIN, JEFE_INSTALADOR e INSTALADOR pueden ver productos
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'JEFE_INSTALADOR', 'INSTALADOR'])) {
+            return redirect()->route('dashboard');
+        }
+
         $productos = Producto::latest()->paginate(15);
         
         return Inertia::render('Productos/Index', [
@@ -33,9 +25,9 @@ class ProductoController extends Controller
 
     public function create()
     {
-        // INSTALADOR: no puede crear productos
-        if (auth()->user()->rol === 'INSTALADOR') {
-            abort(403, 'Los instaladores no pueden crear productos.');
+        // ADMIN y JEFE_INSTALADOR pueden crear. INSTALADOR: no puede
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'JEFE_INSTALADOR'])) {
+            return redirect()->route('dashboard');
         }
 
         return Inertia::render('Productos/Create');
@@ -43,10 +35,11 @@ class ProductoController extends Controller
 
     public function store(Request $request)
     {
-        // INSTALADOR: no puede crear productos
-        if (auth()->user()->rol === 'INSTALADOR') {
-            abort(403, 'Los instaladores no pueden crear productos.');
+        // ADMIN y JEFE_INSTALADOR pueden crear. INSTALADOR: no puede
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'JEFE_INSTALADOR'])) {
+            return redirect()->route('dashboard');
         }
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'tipo' => 'nullable|string',
@@ -77,9 +70,9 @@ class ProductoController extends Controller
 
     public function edit(Producto $producto)
     {
-        // INSTALADOR: no puede editar productos
-        if (auth()->user()->rol === 'INSTALADOR') {
-            abort(403, 'Los instaladores no pueden editar productos.');
+        // ADMIN y JEFE_INSTALADOR pueden editar. INSTALADOR: no puede
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'JEFE_INSTALADOR'])) {
+            return redirect()->route('dashboard');
         }
 
         return Inertia::render('Productos/Edit', [
@@ -89,10 +82,11 @@ class ProductoController extends Controller
 
     public function update(Request $request, Producto $producto)
     {
-        // INSTALADOR: no puede editar productos
-        if (auth()->user()->rol === 'INSTALADOR') {
-            abort(403, 'Los instaladores no pueden editar productos.');
+        // ADMIN y JEFE_INSTALADOR pueden editar. INSTALADOR: no puede
+        if (!in_array(auth()->user()->rol, ['ADMIN', 'JEFE_INSTALADOR'])) {
+            return redirect()->route('dashboard');
         }
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'tipo' => 'nullable|string',
@@ -179,6 +173,11 @@ class ProductoController extends Controller
 
     public function destroy(Producto $producto)
     {
+        // Solo ADMIN puede eliminar productos
+        if (auth()->user()->rol !== 'ADMIN') {
+            return redirect()->route('dashboard');
+        }
+
         $producto->delete();
 
         return redirect()->route('productos.index')
