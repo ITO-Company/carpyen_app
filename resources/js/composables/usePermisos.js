@@ -28,7 +28,7 @@ export function usePermisos() {
 
     // Proyectos
     proyecto: {
-      ver: tiene(['ADMIN', 'VENDEDOR', 'JEFE_INSTALADOR']),
+      ver: tiene(['ADMIN', 'VENDEDOR']),
       crear: tiene(['ADMIN', 'VENDEDOR']),
       editar: (proyecto) => {
         if (tiene('ADMIN')) return true
@@ -98,6 +98,7 @@ export function usePermisos() {
       ver: (cotizacion) => {
         if (tiene('ADMIN')) return true
         if (tiene('VENDEDOR') && cotizacion?.proyecto?.user_id === user.id) return true
+        // JEFE_INSTALADOR no puede ver cotizaciones
         return false
       },
       crear: (proyecto) => {

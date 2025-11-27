@@ -166,6 +166,7 @@ const estadoLabels = {
                                                 Productos
                                             </Link>
                                             <Link
+                                                v-if="permisos.cotizacion.ver(proyecto)"
                                                 :href="
                                                     route(
                                                         'proyectos.cotizaciones.index',
@@ -178,6 +179,7 @@ const estadoLabels = {
                                                 Cotizaciones
                                             </Link>
                                             <Link
+                                                v-if="permisos.proyecto.ver"
                                                 :href="
                                                     route(
                                                         'proyectos.show',
@@ -190,6 +192,7 @@ const estadoLabels = {
                                                 Ver
                                             </Link>
                                             <Link
+                                                v-if="permisos.proyecto.editar(proyecto)"
                                                 :href="
                                                     route(
                                                         'proyectos.edit',

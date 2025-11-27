@@ -1,11 +1,14 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { usePermisos } from "@/composables/usePermisos";
 import { ref, computed } from "vue";
 
 const props = defineProps({
     cronogramas: Object,
 });
+
+const { permisos } = usePermisos();
 
 const searchQuery = ref("");
 
@@ -152,6 +155,7 @@ const getEstadoLabel = (estado) => {
                                                 Ver Tareas
                                             </Link>
                                             <Link
+                                                v-if="permisos.cronograma.editar(cronograma)"
                                                 :href="route('cronogramas.edit', cronograma.id)"
                                                 class="text-primary hover:underline"
                                                 style="color: var(--theme-primary);"
@@ -159,6 +163,7 @@ const getEstadoLabel = (estado) => {
                                                 Editar
                                             </Link>
                                             <Link
+                                                v-if="permisos.cronograma.eliminar"
                                                 :href="route('cronogramas.destroy', cronograma.id)"
                                                 method="delete"
                                                 as="button"
