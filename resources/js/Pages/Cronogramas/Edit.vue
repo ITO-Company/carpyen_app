@@ -173,7 +173,7 @@ const formatDateDisplay = (dateStr) => {
                             <div class="form-group">
                                 <label class="form-label">Usuario</label>
                                 <div class="input theme-input read-only" style="display: flex; align-items: center;">
-                                    {{ cronograma.usuario.name }}
+                                    {{ cronograma.usuario.nombre }}
                                 </div>
                             </div>
 

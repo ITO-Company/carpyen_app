@@ -9,20 +9,22 @@ class PageVisit extends Model
 {
     use HasFactory;
 
+    protected $table = 'paginas_visitadas';
+
     protected $fillable = [
-        'page_name',
-        'page_url',
-        'visit_count',
+        'nombre_pagina',
+        'pagina_url',
+        'contador_vistas',
     ];
 
     public static function incrementVisit($pageName, $pageUrl)
     {
         $visit = self::firstOrCreate(
-            ['page_url' => $pageUrl],
-            ['page_name' => $pageName, 'visit_count' => 0]
+            ['pagina_url' => $pageUrl],
+            ['nombre_pagina' => $pageName, 'contador_vistas' => 0]
         );
         
-        $visit->increment('visit_count');
+        $visit->increment('contador_vistas');
         
         return $visit;
     }

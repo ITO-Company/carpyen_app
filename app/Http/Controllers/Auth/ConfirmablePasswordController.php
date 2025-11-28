@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -25,12 +26,11 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if (! Auth::guard('web')->validate([
-            'email' => $request->user()->email,
-            'password' => $request->password,
-        ])) {
+        $user = $request->user();
+        
+        if (! Hash::check($request->contrasena, $user->contrasena)) {
             throw ValidationException::withMessages([
-                'password' => __('auth.password'),
+                'contrasena' => __('auth.failed'),
             ]);
         }
 

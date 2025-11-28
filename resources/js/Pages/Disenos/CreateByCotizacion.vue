@@ -93,7 +93,7 @@ const submit = () => {
                                 >
                                     <option value="">Sin asignar</option>
                                     <option v-for="diseñador in props.diseñadores" :key="diseñador.id" :value="diseñador.id">
-                                        {{ diseñador.name }}
+                                        {{ diseñador.nombre }}
                                     </option>
                                 </select>
                             </div>

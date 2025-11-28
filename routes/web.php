@@ -197,10 +197,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // API Routes (sin autenticación para callbacks)
 Route::post('/api/page-visit', function(Request $request) {
     $visit = \App\Models\PageVisit::incrementVisit(
-        $request->page_name,
-        $request->page_url
+        $request->nombre_pagina,
+        $request->pagina_url
     );
-    return response()->json(['visit_count' => $visit->visit_count]);
+    return response()->json(['contador_vistas' => $visit->contador_vistas]);
 });
 
 // Búsqueda global

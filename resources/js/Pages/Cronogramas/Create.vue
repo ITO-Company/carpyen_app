@@ -149,7 +149,7 @@ const submit = () => {
                                 >
                                     <option value="">Seleccione un usuario</option>
                                     <option v-for="usuario in usuariosFiltrados" :key="usuario.id" :value="usuario.id">
-                                        {{ usuario.name }} ({{ usuario.rol }})
+                                        {{ usuario.nombre }} ({{ usuario.rol }})
                                     </option>
                                 </select>
                                 <div v-if="form.errors.usuario_id" class="form-error">

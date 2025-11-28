@@ -62,7 +62,7 @@ const formatCurrency = (value) => {
                         <div>
                             <p class="text-sm" style="color: var(--theme-text-secondary);">Vendedor</p>
                             <p class="font-semibold" style="color: var(--theme-text-primary);">
-                                {{ proyecto.vendedor?.name || '-' }}
+                                {{ proyecto.vendedor?.nombre || '-' }}
                             </p>
                         </div>
                         <div>

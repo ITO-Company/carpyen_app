@@ -10,9 +10,9 @@ const passwordInput = ref(null);
 const currentPasswordInput = ref(null);
 
 const form = useForm({
-    current_password: '',
-    password: '',
-    password_confirmation: '',
+    current_contrasena: '',
+    contrasena: '',
+    contrasena_confirmation: '',
 });
 
 const updatePassword = () => {
@@ -20,12 +20,12 @@ const updatePassword = () => {
         preserveScroll: true,
         onSuccess: () => form.reset(),
         onError: () => {
-            if (form.errors.password) {
-                form.reset('password', 'password_confirmation');
+            if (form.errors.contrasena) {
+                form.reset('contrasena', 'contrasena_confirmation');
                 passwordInput.value.focus();
             }
-            if (form.errors.current_password) {
-                form.reset('current_password');
+            if (form.errors.current_contrasena) {
+                form.reset('current_contrasena');
                 currentPasswordInput.value.focus();
             }
         },
@@ -48,54 +48,54 @@ const updatePassword = () => {
 
         <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
             <div>
-                <InputLabel for="current_password" value="Current Password" />
+                <InputLabel for="current_contrasena" value="Contraseña Actual" />
 
                 <TextInput
-                    id="current_password"
+                    id="current_contrasena"
                     ref="currentPasswordInput"
-                    v-model="form.current_password"
+                    v-model="form.current_contrasena"
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
                 />
 
                 <InputError
-                    :message="form.errors.current_password"
+                    :message="form.errors.current_contrasena"
                     class="mt-2"
                 />
             </div>
 
             <div>
-                <InputLabel for="password" value="New Password" />
+                <InputLabel for="contrasena" value="Nueva Contraseña" />
 
                 <TextInput
-                    id="password"
+                    id="contrasena"
                     ref="passwordInput"
-                    v-model="form.password"
+                    v-model="form.contrasena"
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
                 />
 
-                <InputError :message="form.errors.password" class="mt-2" />
+                <InputError :message="form.errors.contrasena" class="mt-2" />
             </div>
 
             <div>
                 <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
+                    for="contrasena_confirmation"
+                    value="Confirmar Contraseña"
                 />
 
                 <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
+                    id="contrasena_confirmation"
+                    v-model="form.contrasena_confirmation"
                     type="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
                 />
 
                 <InputError
-                    :message="form.errors.password_confirmation"
+                    :message="form.errors.contrasena_confirmation"
                     class="mt-2"
                 />
             </div>

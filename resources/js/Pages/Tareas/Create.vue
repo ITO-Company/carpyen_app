@@ -50,7 +50,7 @@ const fechaMinima = computed(() => {
                     <div class="mb-8 pb-6 border-b" style="border-color: var(--theme-border)">
                         <p class="text-sm mb-2" style="color: var(--theme-text-secondary);">Cronograma</p>
                         <p class="font-semibold text-lg" style="color: var(--theme-text-primary);">
-                            {{ cronograma.proyecto?.nombre || "-" }} - {{ cronograma.usuario?.name || "-" }}
+                            {{ cronograma.proyecto?.nombre || "-" }} - {{ cronograma.usuario?.nombre || "-" }}
                         </p>
                         <p class="text-sm mt-2" style="color: var(--theme-text-secondary);">
                             Fecha de inicio: <span style="color: var(--theme-text-primary);">{{ new Date(cronograma.fecha_inicio).toLocaleDateString('es-ES') }}</span>
@@ -82,7 +82,7 @@ const fechaMinima = computed(() => {
                                     :key="usuario.id"
                                     :value="usuario.id"
                                 >
-                                    {{ usuario.name }}
+                                    {{ usuario.nombre }}
                                 </option>
                             </select>
                             <div v-if="form.errors.user_id" class="text-error text-sm mt-1">

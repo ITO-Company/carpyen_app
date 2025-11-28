@@ -17,7 +17,7 @@ const filteredUsuarios = computed(() => {
     const query = searchQuery.value.toLowerCase();
     const filtered = props.usuarios.data.filter(usuario => {
         return (
-            (usuario.name && usuario.name.toLowerCase().includes(query)) ||
+            (usuario.nombre && usuario.nombre.toLowerCase().includes(query)) ||
             (usuario.email && usuario.email.toLowerCase().includes(query)) ||
             (usuario.rol && usuario.rol.toLowerCase().includes(query))
         );
@@ -96,7 +96,7 @@ const paginationLabel = (label) => {
                                 >
                                     <td>{{ usuario.id }}</td>
                                     <td class="font-medium">
-                                        {{ usuario.name || "-" }}
+                                        {{ usuario.nombre || "-" }}
                                     </td>
                                     <td>{{ usuario.email || "-" }}</td>
                                     <td>

@@ -19,7 +19,7 @@ const filteredTareas = computed(() => {
     return props.tareas.filter(tarea => {
         return (
             (tarea.descripcion && tarea.descripcion.toLowerCase().includes(query)) ||
-            (tarea.instalador?.name && tarea.instalador.name.toLowerCase().includes(query))
+            (tarea.instalador?.nombre && tarea.instalador.nombre.toLowerCase().includes(query))
         );
     });
 });
@@ -78,7 +78,7 @@ const getEstadoLabel = (estado) => {
                         <div>
                             <p class="text-sm" style="color: var(--theme-text-secondary);">Usuario</p>
                             <p class="font-semibold" style="color: var(--theme-text-primary);">
-                                {{ cronograma.usuario?.name || '-' }}
+                                {{ cronograma.usuario?.nombre || '-' }}
                             </p>
                         </div>
                         <div>
@@ -149,7 +149,7 @@ const getEstadoLabel = (estado) => {
                                     <td class="font-medium">
                                         {{ tarea.descripcion || "-" }}
                                     </td>
-                                    <td>{{ tarea.instalador?.name || "-" }}</td>
+                                    <td>{{ tarea.instalador?.nombre || "-" }}</td>
                                     <td>{{ formatDate(tarea.fecha) }}</td>
                                     <td>{{ tarea.hora_inicio || "-" }}</td>
                                     <td>{{ tarea.hora_fin || "-" }}</td>

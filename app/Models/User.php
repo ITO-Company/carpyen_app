@@ -6,12 +6,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'usuarios';
 
     /**
      * The attributes that are mass assignable.
@@ -19,12 +26,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nombre',
         'email',
-        'password',
+        'contrasena',
         'telefono',
         'direccion',
-        'contrasena',
         'rol',
     ];
 
@@ -34,8 +40,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'contrasena',
+        'token',
     ];
 
     /**
@@ -45,23 +51,38 @@ class User extends Authenticatable
      */
     protected function casts(): array
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return [];
     }
 
     /**
-     * Accessor para obtener el nombre del primer rol del usuario
+     * Set the password/contrasena attribute.
+     *
+     * @param string $value
+     * @return void
      */
-    public function getRolAttribute()
+    public function setContrasenaAttribute($value)
     {
-        // Si tiene el atributo 'rol' en la BD, devolverlo
-        if ($this->attributes['rol'] ?? null) {
-            return $this->attributes['rol'];
-        }
-        // Si no, obtener del primer rol de Spatie
-        return $this->roles()->first()?->name ?? 'Sin rol';
+        $this->attributes['contrasena'] = \Illuminate\Support\Facades\Hash::make($value);
+    }
+
+    /**
+     * Get the password key for the model.
+     *
+     * @return string
+     */
+    public function getAuthPasswordName()
+    {
+        return 'contrasena';
+    }
+
+    /**
+     * Get the name of the "password" column for the model.
+     *
+     * @return string
+     */
+    public function getPasswordColumnName()
+    {
+        return 'contrasena';
     }
 
     /**

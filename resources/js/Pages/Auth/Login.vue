@@ -18,13 +18,13 @@ defineProps({
 
 const form = useForm({
     email: '',
-    password: '',
+    contrasena: '',
     remember: false,
 });
 
 const submit = () => {
     form.post(route('login'), {
-        onFinish: () => form.reset('password'),
+        onFinish: () => form.reset('contrasena'),
     });
 };
 </script>
@@ -55,18 +55,18 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="contrasena" value="Contraseña" />
 
                 <TextInput
-                    id="password"
+                    id="contrasena"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password"
+                    v-model="form.contrasena"
                     required
                     autocomplete="current-password"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="form.errors.contrasena" />
             </div>
 
             <div class="mt-4 block">

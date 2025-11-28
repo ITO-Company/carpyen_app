@@ -34,13 +34,13 @@ class UsuarioController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'nombre' => 'required|string|max:255',
+            'email' => 'required|email|unique:usuarios',
+            'contrasena' => 'required|string|min:8|confirmed',
             'rol' => 'required|in:ADMIN,VENDEDOR,JEFE_INSTALADOR,DISEÑADOR,INSTALADOR',
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
+        $validated['contrasena'] = bcrypt($validated['contrasena']);
         
         User::create($validated);
 
@@ -78,13 +78,13 @@ class UsuarioController extends Controller
         $usuario = User::findOrFail($id);
         
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $usuario->id,
+            'nombre' => 'required|string|max:255',
+            'email' => 'required|email|unique:usuarios,email,' . $usuario->id,
             'rol' => 'required|in:ADMIN,VENDEDOR,JEFE_INSTALADOR,DISEÑADOR,INSTALADOR',
         ]);
 
-        if ($request->filled('password')) {
-            $validated['password'] = bcrypt($request->input('password'));
+        if ($request->filled('contrasena')) {
+            $validated['contrasena'] = bcrypt($request->input('contrasena'));
         }
 
         $usuario->update($validated);

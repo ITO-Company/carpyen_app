@@ -460,7 +460,7 @@ const getIcon = (iconName) => {
                 <div class="top-bar-right">
                     <div class="user-menu">
                         <div class="user-info">
-                            <span class="user-name">{{ user.name }}</span>
+                            <span class="user-name">{{ user.nombre }}</span>
                             <span class="user-role">{{ user.rol }}</span>
                         </div>
                         <div class="user-actions">

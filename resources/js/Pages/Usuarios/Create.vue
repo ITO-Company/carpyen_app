@@ -3,10 +3,10 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
 const form = useForm({
-    name: '',
+    nombre: '',
     email: '',
-    password: '',
-    password_confirmation: '',
+    contrasena: '',
+    contrasena_confirmation: '',
     rol: ''
 });
 
@@ -41,19 +41,19 @@ const submit = () => {
                         <div class="form-grid">
                             <!-- Nombre -->
                             <div class="form-group">
-                                <label for="name" class="form-label">
+                                <label for="nombre" class="form-label">
                                     Nombre Completo <span class="text-error">*</span>
                                 </label>
                                 <input
-                                    id="name"
-                                    v-model="form.name"
+                                    id="nombre"
+                                    v-model="form.nombre"
                                     type="text"
                                     class="input theme-input"
                                     required
                                     placeholder="Ej: Juan Pérez"
                                 />
-                                <div v-if="form.errors.name" class="form-error">
-                                    {{ form.errors.name }}
+                                <div v-if="form.errors.nombre" class="form-error">
+                                    {{ form.errors.nombre }}
                                 </div>
                             </div>
 
@@ -77,30 +77,30 @@ const submit = () => {
 
                             <!-- Contraseña -->
                             <div class="form-group">
-                                <label for="password" class="form-label">
+                                <label for="contrasena" class="form-label">
                                     Contraseña <span class="text-error">*</span>
                                 </label>
                                 <input
-                                    id="password"
-                                    v-model="form.password"
+                                    id="contrasena"
+                                    v-model="form.contrasena"
                                     type="password"
                                     class="input theme-input"
                                     required
                                     placeholder="Mínimo 8 caracteres"
                                 />
-                                <div v-if="form.errors.password" class="form-error">
-                                    {{ form.errors.password }}
+                                <div v-if="form.errors.contrasena" class="form-error">
+                                    {{ form.errors.contrasena }}
                                 </div>
                             </div>
 
                             <!-- Confirmar Contraseña -->
                             <div class="form-group">
-                                <label for="password_confirmation" class="form-label">
+                                <label for="contrasena_confirmation" class="form-label">
                                     Confirmar Contraseña <span class="text-error">*</span>
                                 </label>
                                 <input
-                                    id="password_confirmation"
-                                    v-model="form.password_confirmation"
+                                    id="contrasena_confirmation"
+                                    v-model="form.contrasena_confirmation"
                                     type="password"
                                     class="input theme-input"
                                     required

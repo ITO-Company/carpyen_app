@@ -21,7 +21,7 @@ const filteredCronogramas = computed(() => {
     const filtered = props.cronogramas.data.filter(cronograma => {
         return (
             (cronograma.proyecto?.nombre && cronograma.proyecto.nombre.toLowerCase().includes(query)) ||
-            (cronograma.usuario?.name && cronograma.usuario.name.toLowerCase().includes(query))
+            (cronograma.usuario?.nombre && cronograma.usuario.nombre.toLowerCase().includes(query))
         );
     });
     
@@ -136,7 +136,7 @@ const getEstadoLabel = (estado) => {
                                     <td class="font-medium">
                                         {{ cronograma.proyecto?.nombre || "-" }}
                                     </td>
-                                    <td>{{ cronograma.usuario?.name || "-" }}</td>
+                                    <td>{{ cronograma.usuario?.nombre || "-" }}</td>
                                     <td>{{ formatDate(cronograma.fecha_inicio) }}</td>
                                     <td>{{ calcularFechaEstimada(cronograma.fecha_inicio, cronograma.dias_estimados) }}</td>
                                     <td>{{ cronograma.dias_estimados }} días</td>

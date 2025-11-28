@@ -23,69 +23,19 @@ return new class extends Migration
             // Ignorar si falla
         }
 
-        // Crear tabla users (debe existir primero para las FK)
+        // Crear tabla usuarios (debe existir primero para las FK)
         DB::unprepared('
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS usuarios (
                 id BIGSERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
+                nombre VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
-                email_verified_at TIMESTAMP NULL,
-                password VARCHAR(255) NOT NULL,
+                contrasena VARCHAR(255) NOT NULL,
                 rol VARCHAR(50) DEFAULT \'VENDEDOR\',
                 telefono VARCHAR(255) NULL,
                 direccion VARCHAR(255) NULL,
-                remember_token VARCHAR(100) NULL,
+                token VARCHAR(100) NULL,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
-            );
-        ');
-
-        // Tablas de Spatie Permission
-        DB::unprepared('
-            CREATE TABLE IF NOT EXISTS roles (
-                id BIGSERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                guard_name VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP NULL,
-                updated_at TIMESTAMP NULL,
-                UNIQUE(name, guard_name)
-            );
-        ');
-
-        DB::unprepared('
-            CREATE TABLE IF NOT EXISTS permissions (
-                id BIGSERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                guard_name VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP NULL,
-                updated_at TIMESTAMP NULL,
-                UNIQUE(name, guard_name)
-            );
-        ');
-
-        DB::unprepared('
-            CREATE TABLE IF NOT EXISTS model_has_roles (
-                role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-                model_id BIGINT NOT NULL,
-                model_type VARCHAR(255) NOT NULL,
-                PRIMARY KEY(role_id, model_id, model_type)
-            );
-        ');
-
-        DB::unprepared('
-            CREATE TABLE IF NOT EXISTS model_has_permissions (
-                permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
-                model_id BIGINT NOT NULL,
-                model_type VARCHAR(255) NOT NULL,
-                PRIMARY KEY(permission_id, model_id, model_type)
-            );
-        ');
-
-        DB::unprepared('
-            CREATE TABLE IF NOT EXISTS role_has_permissions (
-                permission_id BIGINT NOT NULL REFERENCES permissions(id) ON DELETE CASCADE,
-                role_id BIGINT NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-                PRIMARY KEY(permission_id, role_id)
             );
         ');
 
@@ -97,7 +47,7 @@ return new class extends Migration
                 email VARCHAR(255) UNIQUE NOT NULL,
                 telefono VARCHAR(255) NOT NULL,
                 direccion VARCHAR(255) NOT NULL,
-                password VARCHAR(255) NOT NULL,
+                contrasena VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
             );
@@ -112,7 +62,7 @@ return new class extends Migration
                 ubicacion VARCHAR(255) NULL,
                 estado VARCHAR(50) DEFAULT \'pendiente\' CHECK (estado IN (\'pendiente\', \'en_proceso\', \'completado\', \'cancelado\')),
                 cliente_id BIGINT NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
-                user_id BIGINT NULL REFERENCES users(id) ON DELETE SET NULL,
+                user_id BIGINT NULL REFERENCES usuarios(id) ON DELETE SET NULL,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
             );
@@ -142,7 +92,7 @@ return new class extends Migration
                 id BIGSERIAL PRIMARY KEY,
                 cotizacion_id BIGINT NULL REFERENCES cotizaciones(id) ON DELETE CASCADE,
                 proyecto_id BIGINT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
-                user_id BIGINT NULL REFERENCES users(id) ON DELETE SET NULL,
+                user_id BIGINT NULL REFERENCES usuarios(id) ON DELETE SET NULL,
                 url_render VARCHAR(500) NULL,
                 plano_iluminador VARCHAR(255) NULL,
                 aprovado BOOLEAN DEFAULT FALSE,
@@ -162,7 +112,7 @@ return new class extends Migration
             CREATE TABLE IF NOT EXISTS cronogramas (
                 id BIGSERIAL PRIMARY KEY,
                 proyecto_id BIGINT NOT NULL REFERENCES proyectos(id) ON DELETE CASCADE,
-                usuario_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                usuario_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
                 fecha_inicio DATE NOT NULL,
                 fecha_fin DATE NULL,
                 dias_estimados INTEGER NOT NULL,
@@ -177,7 +127,7 @@ return new class extends Migration
             CREATE TABLE IF NOT EXISTS tareas (
                 id BIGSERIAL PRIMARY KEY,
                 cronograma_id BIGINT NOT NULL REFERENCES cronogramas(id) ON DELETE CASCADE,
-                user_id BIGINT NULL REFERENCES users(id) ON DELETE SET NULL,
+                user_id BIGINT NULL REFERENCES usuarios(id) ON DELETE SET NULL,
                 fecha DATE NOT NULL,
                 hora_inicio TIME NULL,
                 hora_fin TIME NULL,
@@ -289,13 +239,13 @@ return new class extends Migration
             );
         ');
 
-        // Crear tabla page_visits
+        // Crear tabla paginas_visitadas
         DB::unprepared('
-            CREATE TABLE IF NOT EXISTS page_visits (
+            CREATE TABLE IF NOT EXISTS paginas_visitadas (
                 id BIGSERIAL PRIMARY KEY,
-                page_name VARCHAR(255) NOT NULL,
-                page_url VARCHAR(255) UNIQUE NOT NULL,
-                visit_count BIGINT DEFAULT 0,
+                nombre_pagina VARCHAR(255) NOT NULL,
+                pagina_url VARCHAR(255) UNIQUE NOT NULL,
+                contador_vistas BIGINT DEFAULT 0,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
             );
@@ -338,7 +288,7 @@ return new class extends Migration
             // Ignorar si falla
         }
 
-        DB::unprepared('DROP TABLE IF EXISTS page_visits CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS paginas_visitadas CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS menus CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS pagos CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS plan_pagos CASCADE;');
@@ -352,12 +302,8 @@ return new class extends Migration
         DB::unprepared('DROP TABLE IF EXISTS cotizaciones CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS proyectos CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS clientes CASCADE;');
-        DB::unprepared('DROP TABLE IF EXISTS role_has_permissions CASCADE;');
-        DB::unprepared('DROP TABLE IF EXISTS model_has_permissions CASCADE;');
-        DB::unprepared('DROP TABLE IF EXISTS model_has_roles CASCADE;');
-        DB::unprepared('DROP TABLE IF EXISTS permissions CASCADE;');
         DB::unprepared('DROP TABLE IF EXISTS roles CASCADE;');
-        DB::unprepared('DROP TABLE IF EXISTS users CASCADE;');
+        DB::unprepared('DROP TABLE IF EXISTS usuarios CASCADE;');
     }
 };
 

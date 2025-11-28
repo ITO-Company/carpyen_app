@@ -22,7 +22,7 @@ const filteredProyectos = computed(() => {
         return (
             (proyecto.nombre && proyecto.nombre.toLowerCase().includes(query)) ||
             (proyecto.cliente?.nombre && proyecto.cliente.nombre.toLowerCase().includes(query)) ||
-            (proyecto.vendedor?.name && proyecto.vendedor.name.toLowerCase().includes(query)) ||
+            (proyecto.vendedor?.nombre && proyecto.vendedor.nombre.toLowerCase().includes(query)) ||
             (proyecto.ubicacion && proyecto.ubicacion.toLowerCase().includes(query)) ||
             (proyecto.estado && proyecto.estado.toLowerCase().includes(query))
         );
@@ -124,7 +124,7 @@ const estadoLabels = {
                                     </td>
                                     <td>
                                         {{
-                                            proyecto.vendedor?.name ||
+                                            proyecto.vendedor?.nombre ||
                                             "Sin asignar"
                                         }}
                                     </td>

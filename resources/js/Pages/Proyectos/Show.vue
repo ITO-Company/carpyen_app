@@ -61,7 +61,7 @@ const props = defineProps({
                         <!-- Vendedor -->
                         <div class="detail-item">
                             <label class="detail-label">Vendedor Asignado</label>
-                            <p class="detail-value">{{ proyecto.vendedor?.name || 'Sin asignar' }}</p>
+                            <p class="detail-value">{{ proyecto.vendedor?.nombre || 'Sin asignar' }}</p>
                         </div>
 
                         <!-- Estado -->

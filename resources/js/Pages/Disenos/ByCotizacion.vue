@@ -90,7 +90,7 @@ const getEstadoTexto = (estado) => {
                                         </span>
                                     </td>
                                     <td>
-                                        {{ diseno.diseñador?.name || 'Sin asignar' }}
+                                        {{ diseno.diseñador?.nombre || 'Sin asignar' }}
                                     </td>
                                     <td>
                                         {{ diseno.fecha_inicio ? new Date(diseno.fecha_inicio).toLocaleDateString('es-ES') : '-' }}

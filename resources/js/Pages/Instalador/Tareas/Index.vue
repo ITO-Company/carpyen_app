@@ -123,7 +123,7 @@ const formatDate = (date) => {
                                     </td>
                                     <td>
                                         <div class="text-sm" style="color: var(--theme-text-secondary);">
-                                            Asignado: {{ tarea.cronograma?.usuario?.name || "-" }}
+                                            Asignado: {{ tarea.cronograma?.usuario?.nombre || "-" }}
                                         </div>
                                         <div class="text-xs mt-1" style="color: var(--theme-text-secondary);">
                                             {{ formatDate(tarea.cronograma?.fecha_inicio) }}

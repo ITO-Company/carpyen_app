@@ -7,7 +7,7 @@ import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
-    password: '',
+    contrasena: '',
 });
 
 const submit = () => {
@@ -28,17 +28,17 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="contrasena" value="Contraseña" />
                 <TextInput
-                    id="password"
+                    id="contrasena"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password"
+                    v-model="form.contrasena"
                     required
                     autocomplete="current-password"
                     autofocus
                 />
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="form.errors.contrasena" />
             </div>
 
             <div class="mt-4 flex justify-end">

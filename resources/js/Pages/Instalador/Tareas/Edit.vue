@@ -79,7 +79,7 @@ const getEstadoLabel = (estado) => {
                                     <div>
                                         <label class="label-text">Jefe a Cargo</label>
                                         <p class="text-sm font-medium" style="color: var(--theme-text-primary);">
-                                            {{ tarea.cronograma?.usuario?.name || '-' }}
+                                            {{ tarea.cronograma?.usuario?.nombre || '-' }}
                                         </p>
                                     </div>
                                     <div>

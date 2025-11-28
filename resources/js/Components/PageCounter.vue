@@ -14,12 +14,12 @@ onMounted(async () => {
 
         // Incrementar y obtener el contador
         const response = await axios.post(`/api/page-visit`, {
-            page_name: pageName.value,
-            page_url: window.location.pathname,
+            nombre_pagina: pageName.value,
+            pagina_url: window.location.pathname,
         });
 
-        if (response.data.visit_count) {
-            visitCount.value = response.data.visit_count;
+        if (response.data.contador_vistas) {
+            visitCount.value = response.data.contador_vistas;
         }
     } catch (error) {
         console.error("Error al registrar visita:", error);

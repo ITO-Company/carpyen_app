@@ -7,15 +7,15 @@ import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
-    name: '',
+    nombre: '',
     email: '',
-    password: '',
-    password_confirmation: '',
+    contrasena: '',
+    contrasena_confirmation: '',
 });
 
 const submit = () => {
     form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+        onFinish: () => form.reset('contrasena', 'contrasena_confirmation'),
     });
 };
 </script>
@@ -26,19 +26,19 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="name" value="Name" />
+                <InputLabel for="nombre" value="Name" />
 
                 <TextInput
-                    id="name"
+                    id="nombre"
                     type="text"
                     class="mt-1 block w-full"
-                    v-model="form.name"
+                    v-model="form.nombre"
                     required
                     autofocus
                     autocomplete="name"
                 />
 
-                <InputError class="mt-2" :message="form.errors.name" />
+                <InputError class="mt-2" :message="form.errors.nombre" />
             </div>
 
             <div class="mt-4">
@@ -57,38 +57,38 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="contrasena" value="Password" />
 
                 <TextInput
-                    id="password"
+                    id="contrasena"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password"
+                    v-model="form.contrasena"
                     required
                     autocomplete="new-password"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="form.errors.contrasena" />
             </div>
 
             <div class="mt-4">
                 <InputLabel
-                    for="password_confirmation"
+                    for="contrasena_confirmation"
                     value="Confirm Password"
                 />
 
                 <TextInput
-                    id="password_confirmation"
+                    id="contrasena_confirmation"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
+                    v-model="form.contrasena_confirmation"
                     required
                     autocomplete="new-password"
                 />
 
                 <InputError
                     class="mt-2"
-                    :message="form.errors.password_confirmation"
+                    :message="form.errors.contrasena_confirmation"
                 />
             </div>
 

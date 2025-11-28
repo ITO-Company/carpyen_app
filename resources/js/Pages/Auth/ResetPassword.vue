@@ -20,13 +20,13 @@ const props = defineProps({
 const form = useForm({
     token: props.token,
     email: props.email,
-    password: '',
-    password_confirmation: '',
+    contrasena: '',
+    contrasena_confirmation: '',
 });
 
 const submit = () => {
     form.post(route('password.store'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+        onFinish: () => form.reset('contrasena', 'contrasena_confirmation'),
     });
 };
 </script>
@@ -53,38 +53,38 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="contrasena" value="Contraseña" />
 
                 <TextInput
-                    id="password"
+                    id="contrasena"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password"
+                    v-model="form.contrasena"
                     required
                     autocomplete="new-password"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="form.errors.contrasena" />
             </div>
 
             <div class="mt-4">
                 <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
+                    for="contrasena_confirmation"
+                    value="Confirmar Contraseña"
                 />
 
                 <TextInput
-                    id="password_confirmation"
+                    id="contrasena_confirmation"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
+                    v-model="form.contrasena_confirmation"
                     required
                     autocomplete="new-password"
                 />
 
                 <InputError
                     class="mt-2"
-                    :message="form.errors.password_confirmation"
+                    :message="form.errors.contrasena_confirmation"
                 />
             </div>
 

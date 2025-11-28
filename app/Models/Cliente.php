@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
 
 class Cliente extends Model
 {
@@ -14,12 +15,23 @@ class Cliente extends Model
         'email',
         'telefono',
         'direccion',
-        'password',
+        'contrasena',
     ];
 
     protected $hidden = [
-        'password',
+        'contrasena',
     ];
+
+    /**
+     * Set the contrasena attribute.
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setContrasenaAttribute($value)
+    {
+        $this->attributes['contrasena'] = Hash::make($value);
+    }
 
     /**
      * Relaciones
