@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import ClienteAuthenticatedLayout from '@/Layouts/ClienteAuthenticatedLayout.vue';
+import { ref } from 'vue';
 
 const props = defineProps({
     cliente: {
@@ -20,6 +21,14 @@ const props = defineProps({
         required: true,
     },
 });
+
+// Modal state
+const mostrarModalPago = ref(false);
+const pagoSeleccionado = ref(null);
+const qrImage = ref(null);
+const transaccionId = ref(null);
+const generandoQR = ref(false);
+const errorQR = ref(null);
 
 const getEstadoBadgeClass = (estado) => {
     const classes = {
@@ -56,6 +65,83 @@ const formatDate = (date) => {
 
 const saldoPendiente = props.planPago.deuda_total - props.planPago.pagado_total;
 const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_total) * 100;
+
+// Payment functions
+const abrirModalPago = (pago) => {
+    pagoSeleccionado.value = pago;
+    qrImage.value = null;
+    transaccionId.value = null;
+    errorQR.value = null;
+    mostrarModalPago.value = true;
+};
+
+const cerrarModalPago = () => {
+    mostrarModalPago.value = false;
+    pagoSeleccionado.value = null;
+    qrImage.value = null;
+    transaccionId.value = null;
+    errorQR.value = null;
+};
+
+const generarQRPago = async () => {
+    if (!pagoSeleccionado.value || !props.planPago) return;
+
+    generandoQR.value = true;
+    errorQR.value = null;
+
+    console.log('📱 Generando QR para pago:', pagoSeleccionado.value.id);
+
+    try {
+        const datosEnvio = {
+            plan_pago_id: props.planPago.id,
+            pago_id: pagoSeleccionado.value.id,
+        };
+
+        console.log('📤 Enviando solicitud:', datosEnvio);
+
+        const response = await window.axios.post(
+            '/cliente/pagos/generar-qr',
+            datosEnvio
+        );
+
+        console.log('✅ Respuesta recibida:', response.data);
+
+        if (response.data.success) {
+            let qrDataUrl = response.data.qrBase64;
+            if (!qrDataUrl.startsWith('data:')) {
+                qrDataUrl = 'data:image/png;base64,' + qrDataUrl;
+            }
+
+            qrImage.value = qrDataUrl;
+            transaccionId.value = response.data.transactionId;
+            console.log('✨ QR generado correctamente');
+        } else {
+            const mensaje = response.data.message || 'Error al generar código QR';
+            console.warn('⚠️ Error:', mensaje);
+            errorQR.value = mensaje;
+        }
+    } catch (error) {
+        console.error('❌ Error al generar QR:', error);
+        
+        if (error.response) {
+            if (error.response.status === 400) {
+                errorQR.value = 'Datos inválidos: verifica que el pago sea válido';
+            } else if (error.response.status === 422) {
+                errorQR.value = 'Validación fallida';
+            } else if (error.response.status === 500) {
+                errorQR.value = error.response.data.message || 'Error al generar QR';
+            } else {
+                errorQR.value = 'Error al conectar con el servidor';
+            }
+        } else if (error.request) {
+            errorQR.value = 'Error de conectividad con el servidor';
+        } else {
+            errorQR.value = error.message;
+        }
+    } finally {
+        generandoQR.value = false;
+    }
+};
 </script>
 
 <template>
@@ -126,6 +212,7 @@ const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_tot
                                     <th>Método de Pago</th>
                                     <th>Estado</th>
                                     <th>ID Transacción</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -185,9 +272,19 @@ const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_tot
                                     <td>
                                         <code class="transaction-id">{{ pago.transaccion_id || 'N/A' }}</code>
                                     </td>
+                                    <td>
+                                        <button
+                                            v-if="pago.estado === 'pendiente'"
+                                            @click="abrirModalPago(pago)"
+                                            class="btn btn-primary btn-sm"
+                                        >
+                                            Pagar
+                                        </button>
+                                        <span v-else class="text-muted">—</span>
+                                    </td>
                                 </tr>
                                 <tr v-if="pagos.length === 0">
-                                    <td colspan="5" class="text-center py-12">
+                                    <td colspan="6" class="text-center py-12">
                                         <div class="empty-state">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -229,10 +326,131 @@ const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_tot
                 </div>
             </div>
         </div>
+
+        <!-- Payment Modal -->
+        <div v-if="mostrarModalPago" class="modal-overlay" @click="cerrarModalPago">
+            <div class="modal-content" @click.stop>
+                <div class="modal-header">
+                    <h3 class="modal-title">Realizar Pago</h3>
+                    <button @click="cerrarModalPago" class="modal-close">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div v-if="!qrImage && !errorQR" class="payment-info">
+                        <div class="payment-detail">
+                            <span class="payment-label">Monto a pagar:</span>
+                            <span class="payment-value">{{ formatCurrency(pagoSeleccionado?.total || 0) }}</span>
+                        </div>
+                        <div class="payment-detail">
+                            <span class="payment-label">Fecha de pago:</span>
+                            <span class="payment-value">{{ formatDate(pagoSeleccionado?.fecha) }}</span>
+                        </div>
+                        <div class="payment-detail">
+                            <span class="payment-label">Proyecto:</span>
+                            <span class="payment-value">{{ proyecto.nombre }}</span>
+                        </div>
+
+                        <button
+                            @click="generarQRPago"
+                            :disabled="generandoQR"
+                            class="btn btn-primary btn-block mt-6"
+                        >
+                            <svg
+                                v-if="!generandoQR"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span v-if="generandoQR">Generando QR...</span>
+                            <span v-else>Generar Código QR</span>
+                        </button>
+                    </div>
+
+                    <div v-if="qrImage" class="qr-container">
+                        <div class="qr-success-message">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <p>¡QR Generado Exitosamente!</p>
+                        </div>
+                        
+                        <div class="qr-image-wrapper">
+                            <img :src="qrImage" alt="Código QR de Pago" class="qr-image" />
+                        </div>
+
+                        <div class="qr-instructions">
+                            <p class="qr-instruction-title">Instrucciones:</p>
+                            <ol class="qr-instruction-list">
+                                <li>Abre tu aplicación bancaria</li>
+                                <li>Escanea el código QR</li>
+                                <li>Confirma el pago de {{ formatCurrency(pagoSeleccionado?.total || 0) }}</li>
+                                <li>Guarda el comprobante de transacción</li>
+                            </ol>
+                        </div>
+
+                        <div v-if="transaccionId" class="transaction-info">
+                            <p class="transaction-label">ID de Transacción:</p>
+                            <code class="transaction-code">{{ transaccionId }}</code>
+                        </div>
+                    </div>
+
+                    <div v-if="errorQR" class="error-container">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <p class="error-message">{{ errorQR }}</p>
+                        <button @click="generarQRPago" class="btn btn-secondary mt-4">
+                            Intentar Nuevamente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </ClienteAuthenticatedLayout>
 </template>
 
 <style scoped>
+/* Existing styles */
 .py-12 {
     padding-top: 3rem;
     padding-bottom: 3rem;
@@ -257,6 +475,14 @@ const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_tot
 
 .mt-8 {
     margin-top: 2rem;
+}
+
+.mt-6 {
+    margin-top: 1.5rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
 }
 
 .font-semibold {
@@ -408,6 +634,11 @@ const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_tot
     text-align: center;
 }
 
+.text-muted {
+    color: var(--theme-text-tertiary);
+    font-size: var(--font-size-sm);
+}
+
 .py-12 {
     padding-top: 3rem;
     padding-bottom: 3rem;
@@ -436,5 +667,194 @@ const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_tot
     font-size: var(--font-size-sm);
     color: var(--theme-text-tertiary);
     margin: 0;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background: var(--theme-bg-primary);
+    border: 1px solid var(--theme-border);
+    border-radius: var(--border-radius-xl);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-2xl);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--theme-border);
+}
+
+.modal-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--theme-text-primary);
+    margin: 0;
+}
+
+.modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--border-radius-md);
+    background: none;
+    border: none;
+    color: var(--theme-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--theme-bg-secondary);
+    color: var(--theme-text-primary);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.payment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.payment-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--theme-bg-secondary);
+    border-radius: var(--border-radius-md);
+}
+
+.payment-label {
+    font-size: var(--font-size-sm);
+    color: var(--theme-text-secondary);
+}
+
+.payment-value {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--theme-text-primary);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.qr-success-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--theme-success);
+}
+
+.qr-success-message p {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin: 0;
+}
+
+.qr-image-wrapper {
+    padding: 1rem;
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.qr-image {
+    display: block;
+    width: 250px;
+    height: 250px;
+}
+
+.qr-instructions {
+    width: 100%;
+    padding: 1rem;
+    background: var(--theme-bg-secondary);
+    border-radius: var(--border-radius-md);
+}
+
+.qr-instruction-title {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--theme-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.qr-instruction-list {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: var(--theme-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.qr-instruction-list li {
+    margin-bottom: 0.25rem;
+}
+
+.transaction-info {
+    text-align: center;
+}
+
+.transaction-label {
+    font-size: var(--font-size-sm);
+    color: var(--theme-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.transaction-code {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-sm);
+    color: var(--theme-primary);
+    background: var(--theme-bg-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--theme-border);
+}
+
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    color: var(--theme-danger);
+}
+
+.error-message {
+    font-size: var(--font-size-base);
+    text-align: center;
+    color: var(--theme-text-primary);
 }
 </style>

@@ -17,6 +17,11 @@ const menuItems = [
         icono: 'folder',
         ruta: route('cliente.dashboard'),
     },
+    {
+        nombre: 'Planes de Pago',
+        icono: 'credit-card',
+        ruta: route('cliente.planes-pago'),
+    },
 ];
 
 const logout = () => {
@@ -82,6 +87,23 @@ const logout = () => {
                             v-if="item.icono === 'folder'"
                             d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
                         ></path>
+
+                        <rect
+                            v-if="item.icono === 'credit-card'"
+                            x="1"
+                            y="4"
+                            width="22"
+                            height="16"
+                            rx="2"
+                            ry="2"
+                        ></rect>
+                        <line
+                            v-if="item.icono === 'credit-card'"
+                            x1="1"
+                            y1="10"
+                            x2="23"
+                            y2="10"
+                        ></line>
                     </svg>
                     <span v-if="showSidebar">{{ item.nombre }}</span>
                 </Link>

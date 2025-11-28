@@ -23,6 +23,15 @@ Route::middleware('auth:cliente')->prefix('cliente')->group(function () {
     Route::get('planes/{planPagoId}', [ClientePortalController::class, 'showPlanPago'])
         ->name('cliente.planes.show');
 
+    Route::get('planes-pago', [ClientePortalController::class, 'planesPago'])
+        ->name('cliente.planes-pago');
+
+    Route::get('pagos', [ClientePortalController::class, 'pagos'])
+        ->name('cliente.pagos');
+
+    Route::post('pagos/generar-qr', [ClientePortalController::class, 'generarQR'])
+        ->name('cliente.pagos.generar-qr');
+
     Route::post('logout', [ClienteAuthController::class, 'destroy'])
         ->name('cliente.logout');
 });
