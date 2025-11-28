@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { Link, usePage } from "@inertiajs/vue3";
+import { Link, usePage, router } from "@inertiajs/vue3";
 import ThemeSettings from "@/Components/ThemeSettings.vue";
 import PageCounter from "@/Components/PageCounter.vue";
 
@@ -111,6 +111,10 @@ function getMenuForRole(rol) {
 
     return allMenuItems.filter((item) => item.roles.includes(rol));
 }
+
+const logout = () => {
+    router.post(route("logout"));
+};
 
 const getIcon = (iconName) => {
     const icons = {
@@ -674,6 +678,32 @@ const getIcon = (iconName) => {
     background-color: var(--theme-bg-secondary);
     color: var(--theme-primary);
     border-color: var(--theme-primary);
+}
+
+.logout-btn-topbar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background-color: var(--theme-bg-secondary);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text-secondary);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.logout-btn-topbar:hover {
+    background-color: #ff4444;
+    color: white;
+    border-color: #ff4444;
+}
+
+.logout-btn-topbar svg {
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 .page-content {
