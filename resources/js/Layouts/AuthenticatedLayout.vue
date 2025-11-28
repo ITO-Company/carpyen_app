@@ -77,34 +77,34 @@ function getMenuForRole(rol) {
         {
             nombre: "Cronogramas",
             icono: "calendar",
-            ruta: "/cronogramas",
+            ruta: route("cronogramas.index"), // Cambiar por "/cronogramas"
             roles: ["ADMIN", "VENDEDOR", "JEFE_INSTALADOR"],
         },
         // INSTALADOR: Mis Tareas
         {
             nombre: "Mis Tareas",
             icono: "check-square",
-            ruta: "/mis-tareas",
+            ruta: route("instalador.tareas.index"),
             roles: ["INSTALADOR"],
         },
         // DISEÑADOR: Mis Diseños
         {
             nombre: "Mis Diseños",
             icono: "palette",
-            ruta: "/mis-disenos",
+            ruta: route("diseñador.disenos.index"),
             roles: ["DISEÑADOR"],
         },
         // VENDEDOR: Pagos y Reportes
         {
             nombre: "Pagos",
             icono: "credit-card",
-            ruta: "/pagos",
+            ruta: route("pagos.index"),
             roles: ["ADMIN", "VENDEDOR"],
         },
         {
             nombre: "Reportes",
             icono: "bar-chart",
-            ruta: "/reportes/estadisticas",
+            ruta: route("reportes.estadisticas"),
             roles: ["ADMIN", "VENDEDOR"],
         },
     ];
