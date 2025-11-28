@@ -211,7 +211,6 @@ const generarQRPago = async () => {
                                     <th>Monto</th>
                                     <th>Método de Pago</th>
                                     <th>Estado</th>
-                                    <th>ID Transacción</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -269,9 +268,7 @@ const generarQRPago = async () => {
                                             {{ getEstadoLabel(pago.estado) }}
                                         </span>
                                     </td>
-                                    <td>
-                                        <code class="transaction-id">{{ pago.transaccion_id || 'N/A' }}</code>
-                                    </td>
+
                                     <td>
                                         <button
                                             v-if="pago.estado === 'pendiente'"
