@@ -41,35 +41,35 @@ class DataSeeder extends Seeder
                 'email' => 'maria.gonzalez@email.com',
                 'telefono' => '70111222',
                 'direccion' => 'Av. Cristo Redentor #123, Santa Cruz',
-                'contrasena' => '12345'
+                'password' => '12345'
             ],
             [
                 'nombre' => 'Carlos Rodríguez',
                 'email' => 'carlos.rodriguez@email.com',
                 'telefono' => '70222333',
                 'direccion' => 'Calle Libertad #456, Santa Cruz',
-                'contrasena' => '12345'
+                'password' => '12345'
             ],
             [
                 'nombre' => 'Ana Martínez',
                 'email' => 'ana.martinez@email.com',
                 'telefono' => '70333444',
                 'direccion' => 'Av. Banzer #789, Santa Cruz',
-                'contrasena' => '12345'
+                'password' => '12345'
             ],
             [
                 'nombre' => 'Luis Fernández',
                 'email' => 'luis.fernandez@email.com',
                 'telefono' => '70444555',
                 'direccion' => 'Barrio Equipetrol, Santa Cruz',
-                'contrasena' => '12345'
+                'password' => '12345'
             ],
             [
                 'nombre' => 'Patricia López',
                 'email' => 'patricia.lopez@email.com',
                 'telefono' => '70555666',
                 'direccion' => 'Av. Roca y Coronado #321, Santa Cruz',
-                'contrasena' => '12345'
+                'password' => '12345'
             ]
         ];
 

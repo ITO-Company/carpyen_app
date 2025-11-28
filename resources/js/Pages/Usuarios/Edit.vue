@@ -9,8 +9,8 @@ const props = defineProps({
 const form = useForm({
     nombre: props.usuario.nombre,
     email: props.usuario.email,
-    contrasena: '',
-    contrasena_confirmation: '',
+    password: '',
+    password_confirmation: '',
     rol: props.usuario.rol
 });
 
@@ -81,29 +81,29 @@ const submit = () => {
 
                             <!-- Contraseña (opcional) -->
                             <div class="form-group">
-                                <label for="contrasena" class="form-label">
+                                <label for="password" class="form-label">
                                     Nueva Contraseña
                                 </label>
                                 <input
-                                    id="contrasena"
-                                    v-model="form.contrasena"
+                                    id="password"
+                                    v-model="form.password"
                                     type="password"
                                     class="input theme-input"
                                     placeholder="Dejar en blanco para mantener actual"
                                 />
-                                <div v-if="form.errors.contrasena" class="form-error">
-                                    {{ form.errors.contrasena }}
+                                <div v-if="form.errors.password" class="form-error">
+                                    {{ form.errors.password }}
                                 </div>
                             </div>
 
                             <!-- Confirmar Contraseña -->
                             <div class="form-group">
-                                <label for="contrasena_confirmation" class="form-label">
+                                <label for="password_confirmation" class="form-label">
                                     Confirmar Nueva Contraseña
                                 </label>
                                 <input
-                                    id="contrasena_confirmation"
-                                    v-model="form.contrasena_confirmation"
+                                    id="password_confirmation"
+                                    v-model="form.password_confirmation"
                                     type="password"
                                     class="input theme-input"
                                     placeholder="Repita la nueva contraseña"

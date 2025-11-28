@@ -46,7 +46,7 @@ class ClienteController extends Controller
             'email' => 'required|email|unique:clientes',
             'telefono' => 'required|string',
             'direccion' => 'required|string',
-            'contrasena' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ], [
             'nombre.required' => 'El nombre es obligatorio',
             'email.required' => 'El correo electrónico es obligatorio',
@@ -54,13 +54,13 @@ class ClienteController extends Controller
             'email.unique' => 'Este correo ya está registrado',
             'telefono.required' => 'El teléfono es obligatorio',
             'direccion.required' => 'La dirección es obligatoria',
-            'contrasena.required' => 'La contraseña es obligatoria',
-            'contrasena.min' => 'La contraseña debe tener al menos 8 caracteres',
-            'contrasena.confirmed' => 'Las contraseñas no coinciden',
+            'password.required' => 'La contraseña es obligatoria',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres',
+            'password.confirmed' => 'Las contraseñas no coinciden',
         ]);
 
         // Hashear la contraseña
-        $validated['contrasena'] = Hash::make($validated['contrasena']);
+        $validated['password'] = Hash::make($validated['password']);
 
         Cliente::create($validated);
 
@@ -91,7 +91,7 @@ class ClienteController extends Controller
             'email' => 'required|email|unique:clientes,email,' . $cliente->id,
             'telefono' => 'required|string',
             'direccion' => 'required|string',
-            'contrasena' => 'nullable|string|min:8',
+            'password' => 'nullable|string|min:8',
         ], [
             'nombre.required' => 'El nombre es obligatorio',
             'email.required' => 'El correo electrónico es obligatorio',
@@ -99,15 +99,15 @@ class ClienteController extends Controller
             'email.unique' => 'Este correo ya está registrado',
             'telefono.required' => 'El teléfono es obligatorio',
             'direccion.required' => 'La dirección es obligatoria',
-            'contrasena.min' => 'La contraseña debe tener al menos 8 caracteres',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres',
         ]);
 
         // Si se proporciona contraseña, hashearla
-        if (!empty($validated['contrasena'])) {
-            $validated['contrasena'] = Hash::make($validated['contrasena']);
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
         } else {
             // Si no se proporciona, no actualizar este campo
-            unset($validated['contrasena']);
+            unset($validated['password']);
         }
 
         $cliente->update($validated);

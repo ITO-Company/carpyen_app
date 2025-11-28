@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
         $admin = User::create([
             'nombre' => 'Administrador',
             'email' => 'admin@carpyen.com',
-            'contrasena' => '12345',
+            'password' => '12345',
             'telefono' => '70000000',
             'direccion' => 'Santa Cruz, Bolivia',
             'rol' => 'ADMIN',
@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
         $vendedor = User::create([
             'nombre' => 'Carlos Vendedor',
             'email' => 'vendedor@carpyen.com',
-            'contrasena' => '12345',
+            'password' => '12345',
             'telefono' => '70111111',
             'direccion' => 'Santa Cruz, Bolivia',
             'rol' => 'VENDEDOR',
@@ -35,7 +35,7 @@ class UserSeeder extends Seeder
         $jefeInstalador = User::create([
             'nombre' => 'Juan Jefe Instalador',
             'email' => 'jefe@carpyen.com',
-            'contrasena' => '12345',
+            'password' => '12345',
             'telefono' => '70222222',
             'direccion' => 'Santa Cruz, Bolivia',
             'rol' => 'JEFE_INSTALADOR',
@@ -45,7 +45,7 @@ class UserSeeder extends Seeder
         $disenador = User::create([
             'nombre' => 'María Diseñadora',
             'email' => 'disenador@carpyen.com',
-            'contrasena' => '12345',
+            'password' => '12345',
             'telefono' => '70333333',
             'direccion' => 'Santa Cruz, Bolivia',
             'rol' => 'DISEÑADOR',
@@ -55,7 +55,7 @@ class UserSeeder extends Seeder
         $instalador = User::create([
             'nombre' => 'Pedro Instalador',
             'email' => 'instalador@carpyen.com',
-            'contrasena' => '12345',
+            'password' => '12345',
             'telefono' => '70444444',
             'direccion' => 'Santa Cruz, Bolivia',
             'rol' => 'INSTALADOR',

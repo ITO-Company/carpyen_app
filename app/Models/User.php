@@ -28,7 +28,7 @@ class User extends Authenticatable
     protected $fillable = [
         'nombre',
         'email',
-        'contrasena',
+        'password',
         'telefono',
         'direccion',
         'rol',
@@ -40,7 +40,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'contrasena',
+        'password',
         'token',
     ];
 
@@ -55,34 +55,14 @@ class User extends Authenticatable
     }
 
     /**
-     * Set the password/contrasena attribute.
+     * Set the password attribute.
      *
      * @param string $value
      * @return void
      */
-    public function setContrasenaAttribute($value)
+    public function setPasswordAttribute($value)
     {
-        $this->attributes['contrasena'] = \Illuminate\Support\Facades\Hash::make($value);
-    }
-
-    /**
-     * Get the password key for the model.
-     *
-     * @return string
-     */
-    public function getAuthPasswordName()
-    {
-        return 'contrasena';
-    }
-
-    /**
-     * Get the name of the "password" column for the model.
-     *
-     * @return string
-     */
-    public function getPasswordColumnName()
-    {
-        return 'contrasena';
+        $this->attributes['password'] = \Illuminate\Support\Facades\Hash::make($value);
     }
 
     /**

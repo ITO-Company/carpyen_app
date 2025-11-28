@@ -97,34 +97,31 @@ const enviarStock = () => {
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="mb-6">
-                    <Link :href="route('productos.create')" class="btn btn-primary">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        Nuevo Producto
-                    </Link>
-                </div>
-
                 <div class="card fade-in">
-                    <!-- Barra de búsqueda -->
-                    <div class="mb-6">
+                    <!-- Barra de búsqueda con botón crear -->
+                    <div class="mb-6 flex justify-between items-center gap-4">
                         <input
                             v-model="searchQuery"
                             type="text"
                             placeholder="Buscar productos..."
                             class="input search-input"
-                            style="width: 100%; max-width: 500px"
+                            style="flex: 1; max-width: 500px"
                         />
+                        <Link :href="route('productos.create')" class="btn btn-primary btn-sm">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Nuevo Producto
+                        </Link>
                     </div>
 
                     <div class="overflow-x-auto">

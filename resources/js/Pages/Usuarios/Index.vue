@@ -61,7 +61,7 @@ const paginationLabel = (label) => {
                             class="input search-input"
                             style="flex: 1; max-width: 500px"
                         />
-                        <Link :href="route('usuarios.create')" class="btn btn-primary">
+                        <Link :href="route('usuarios.create')" class="btn btn-primary btn-sm">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="16"

@@ -29,7 +29,7 @@ return new class extends Migration
                 id BIGSERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
-                contrasena VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
                 rol VARCHAR(50) DEFAULT \'VENDEDOR\',
                 telefono VARCHAR(255) NULL,
                 direccion VARCHAR(255) NULL,
@@ -47,7 +47,7 @@ return new class extends Migration
                 email VARCHAR(255) UNIQUE NOT NULL,
                 telefono VARCHAR(255) NOT NULL,
                 direccion VARCHAR(255) NOT NULL,
-                contrasena VARCHAR(255) NOT NULL,
+                password VARCHAR(255) NOT NULL,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
             );

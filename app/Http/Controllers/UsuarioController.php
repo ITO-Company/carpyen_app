@@ -36,11 +36,11 @@ class UsuarioController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'email' => 'required|email|unique:usuarios',
-            'contrasena' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed',
             'rol' => 'required|in:ADMIN,VENDEDOR,JEFE_INSTALADOR,DISEÑADOR,INSTALADOR',
         ]);
 
-        $validated['contrasena'] = bcrypt($validated['contrasena']);
+        $validated['password'] = bcrypt($validated['password']);
         
         User::create($validated);
 
@@ -83,8 +83,8 @@ class UsuarioController extends Controller
             'rol' => 'required|in:ADMIN,VENDEDOR,JEFE_INSTALADOR,DISEÑADOR,INSTALADOR',
         ]);
 
-        if ($request->filled('contrasena')) {
-            $validated['contrasena'] = bcrypt($request->input('contrasena'));
+        if ($request->filled('password')) {
+            $validated['password'] = bcrypt($request->input('password'));
         }
 
         $usuario->update($validated);

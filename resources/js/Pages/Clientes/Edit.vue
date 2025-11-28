@@ -11,7 +11,7 @@ const form = useForm({
     email: props.cliente.email,
     telefono: props.cliente.telefono,
     direccion: props.cliente.direccion,
-    contrasena: ''
+    password: ''
 });
 
 const submit = () => {
@@ -114,18 +114,18 @@ const submit = () => {
 
                             <!-- Contraseña (opcional) -->
                             <div class="form-group full-width">
-                                <label for="contrasena" class="form-label">
+                                <label for="password" class="form-label">
                                     Cambiar Contraseña (opcional)
                                 </label>
                                 <input
-                                    id="contrasena"
-                                    v-model="form.contrasena"
+                                    id="password"
+                                    v-model="form.password"
                                     type="password"
                                     class="input"
                                     placeholder="Dejar vacío para mantener la contraseña actual. Mínimo 8 caracteres si se cambia"
                                 />
-                                <div v-if="form.errors.contrasena" class="form-error">
-                                    {{ form.errors.contrasena }}
+                                <div v-if="form.errors.password" class="form-error">
+                                    {{ form.errors.password }}
                                 </div>
                             </div>
                         </div>

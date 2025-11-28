@@ -15,22 +15,22 @@ class Cliente extends Model
         'email',
         'telefono',
         'direccion',
-        'contrasena',
+        'password',
     ];
 
     protected $hidden = [
-        'contrasena',
+        'password',
     ];
 
     /**
-     * Set the contrasena attribute.
+     * Set the password attribute.
      *
      * @param string $value
      * @return void
      */
-    public function setContrasenaAttribute($value)
+    public function setPasswordAttribute($value)
     {
-        $this->attributes['contrasena'] = Hash::make($value);
+        $this->attributes['password'] = Hash::make($value);
     }
 
     /**
