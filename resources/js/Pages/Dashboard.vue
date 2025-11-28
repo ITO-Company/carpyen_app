@@ -82,6 +82,23 @@ const mesesNombres = [
     "Dic",
 ];
 
+// Computed property for greeting based on time of day
+const greeting = computed(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Buenos días";
+    if (hour < 19) return "Buenas tardes";
+    return "Buenas noches";
+});
+
+const currentDate = computed(() => {
+    return new Date().toLocaleDateString("es-BO", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+});
+
 onMounted(() => {
     // Gráfico de proyectos por estado
     if (estadosChart.value) {
@@ -193,6 +210,34 @@ onMounted(() => {
         </template>
 
         <div class="dashboard-container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <div class="welcome-content">
+                    <div class="welcome-text">
+                        <h1 class="welcome-title">
+                            {{ greeting }}, {{ $page.props.auth.user.nombre }}!
+                        </h1>
+                        <p class="welcome-subtitle">{{ currentDate }}</p>
+                    </div>
+                    <div class="welcome-stats">
+                        <div class="quick-stat">
+                            <div class="quick-stat-value">
+                                {{ stats.proyectos_activos }}
+                            </div>
+                            <div class="quick-stat-label">
+                                Proyectos Activos
+                            </div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="quick-stat-value">
+                                {{ formatCurrency(stats.total_ingresos) }}
+                            </div>
+                            <div class="quick-stat-label">Ingresos Totales</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Stats Grid -->
             <div class="stats-grid">
                 <!-- Proyectos -->
@@ -472,6 +517,66 @@ onMounted(() => {
     color: var(--theme-text-primary);
 }
 
+/* Welcome Section */
+.welcome-section {
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #a78bfa 0%, #818cf8 100%);
+    border-radius: var(--border-radius-xl);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.welcome-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.welcome-text {
+    flex: 1;
+}
+
+.welcome-title {
+    font-size: var(--font-size-3xl);
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-subtitle {
+    font-size: var(--font-size-base);
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: capitalize;
+}
+
+.welcome-stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.quick-stat {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-lg);
+    min-width: 150px;
+    text-align: center;
+}
+
+.quick-stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.quick-stat-label {
+    font-size: var(--font-size-sm);
+    color: rgba(255, 255, 255, 0.9);
+}
+
 /* Stats Grid */
 .stats-grid {
     display: grid;
@@ -679,6 +784,28 @@ onMounted(() => {
 @media (max-width: 768px) {
     .dashboard-container {
         padding: 1rem;
+    }
+
+    .welcome-section {
+        padding: 1.5rem;
+    }
+
+    .welcome-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .welcome-title {
+        font-size: var(--font-size-2xl);
+    }
+
+    .welcome-stats {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .quick-stat {
+        width: 100%;
     }
 
     .stats-grid,

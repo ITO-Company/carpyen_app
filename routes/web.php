@@ -111,6 +111,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         }
         
         return Inertia::render('Dashboard', [
+            'auth' => [
+                'user' => auth()->user(),
+            ],
             'stats' => $stats,
             'proyectosPorEstado' => $proyectosPorEstado,
             'proyectosRecientes' => $proyectosRecientes,

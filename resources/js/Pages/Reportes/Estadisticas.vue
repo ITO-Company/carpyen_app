@@ -1,11 +1,11 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head } from "@inertiajs/vue3";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 
 defineProps({
     stats: Object,
     proyectosPorEstado: Array,
-    ingresosPorMes: Array
+    ingresosPorMes: Array,
 });
 </script>
 
@@ -14,7 +14,10 @@ defineProps({
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+            <h2
+                class="font-semibold text-xl leading-tight"
+                style="color: var(--theme-text-primary)"
+            >
                 Reportes y Estadísticas
             </h2>
         </template>
@@ -27,15 +30,27 @@ defineProps({
                     <div class="stats-grid">
                         <div class="stat-item">
                             <p class="stat-label">Total Proyectos</p>
-                            <p class="stat-value">{{ stats.total_proyectos }}</p>
+                            <p class="stat-value">
+                                {{ stats.total_proyectos }}
+                            </p>
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Proyectos Activos</p>
-                            <p class="stat-value" style="color: var(--theme-success)">{{ stats.proyectos_activos }}</p>
+                            <p
+                                class="stat-value"
+                                style="color: var(--theme-success)"
+                            >
+                                {{ stats.proyectos_activos }}
+                            </p>
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Proyectos Completados</p>
-                            <p class="stat-value" style="color: var(--theme-primary)">{{ stats.proyectos_completados }}</p>
+                            <p
+                                class="stat-value"
+                                style="color: var(--theme-primary)"
+                            >
+                                {{ stats.proyectos_completados }}
+                            </p>
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Total Clientes</p>
@@ -43,20 +58,26 @@ defineProps({
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Total Productos</p>
-                            <p class="stat-value">{{ stats.total_productos }}</p>
+                            <p class="stat-value">
+                                {{ stats.total_productos }}
+                            </p>
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Stock Bajo</p>
-                            <p class="stat-value" style="color: var(--theme-warning)">{{ stats.stock_bajo }}</p>
+                            <p
+                                class="stat-value"
+                                style="color: var(--theme-warning)"
+                            >
+                                {{ stats.stock_bajo }}
+                            </p>
                         </div>
                         <div class="stat-item">
                             <p class="stat-label">Pagos Pendientes</p>
-                            <p class="stat-value" style="color: var(--theme-error)">{{ stats.pagos_pendientes }}</p>
-                        </div>
-                        <div class="stat-item">
-                            <p class="stat-label">Ingresos del Mes</p>
-                            <p class="stat-value" style="color: var(--theme-success)">
-                                Bs. {{ Number(stats.ingresos_mes).toFixed(2) }}
+                            <p
+                                class="stat-value"
+                                style="color: var(--theme-error)"
+                            >
+                                {{ stats.pagos_pendientes }}
                             </p>
                         </div>
                     </div>
@@ -75,18 +96,35 @@ defineProps({
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="item in proyectosPorEstado" :key="item.estado">
-                                    <td class="font-medium">{{ item.estado }}</td>
+                                <tr
+                                    v-for="item in proyectosPorEstado"
+                                    :key="item.estado"
+                                >
+                                    <td class="font-medium">
+                                        {{ item.estado }}
+                                    </td>
                                     <td>{{ item.total }}</td>
                                     <td>
                                         <div class="progress-bar">
-                                            <div 
-                                                class="progress-fill" 
-                                                :style="{ width: (item.total / stats.total_proyectos * 100) + '%' }"
+                                            <div
+                                                class="progress-fill"
+                                                :style="{
+                                                    width:
+                                                        (item.total /
+                                                            stats.total_proyectos) *
+                                                            100 +
+                                                        '%',
+                                                }"
                                             ></div>
                                         </div>
                                         <span class="percentage">
-                                            {{ ((item.total / stats.total_proyectos) * 100).toFixed(1) }}%
+                                            {{
+                                                (
+                                                    (item.total /
+                                                        stats.total_proyectos) *
+                                                    100
+                                                ).toFixed(1)
+                                            }}%
                                         </span>
                                     </td>
                                 </tr>
@@ -107,14 +145,28 @@ defineProps({
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="item in ingresosPorMes" :key="item.mes">
+                                <tr
+                                    v-for="item in ingresosPorMes"
+                                    :key="item.mes"
+                                >
                                     <td class="font-medium">{{ item.mes }}</td>
                                     <td style="color: var(--theme-success)">
                                         Bs. {{ Number(item.total).toFixed(2) }}
                                     </td>
                                 </tr>
-                                <tr v-if="!ingresosPorMes || ingresosPorMes.length === 0">
-                                    <td colspan="2" class="text-center py-8" style="color: var(--theme-text-secondary)">
+                                <tr
+                                    v-if="
+                                        !ingresosPorMes ||
+                                        ingresosPorMes.length === 0
+                                    "
+                                >
+                                    <td
+                                        colspan="2"
+                                        class="text-center py-8"
+                                        style="
+                                            color: var(--theme-text-secondary);
+                                        "
+                                    >
                                         No hay datos de ingresos
                                     </td>
                                 </tr>
@@ -179,7 +231,11 @@ defineProps({
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--theme-primary), var(--theme-primary-light));
+    background: linear-gradient(
+        90deg,
+        var(--theme-primary),
+        var(--theme-primary-light)
+    );
     transition: width var(--transition-base);
 }
 
