@@ -35,23 +35,88 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
         try {
+            // Estadísticas generales
             $stats = [
                 'total_proyectos' => \App\Models\Proyecto::count(),
                 'proyectos_activos' => \App\Models\Proyecto::where('estado', 'en_proceso')->count(),
+                'proyectos_completados' => \App\Models\Proyecto::where('estado', 'completado')->count(),
                 'total_clientes' => \App\Models\Cliente::count(),
+                'total_productos' => \App\Models\Producto::count(),
                 'productos_stock_bajo' => \App\Models\Producto::where('stock', '<', 10)->count(),
+                'total_cotizaciones' => \App\Models\Cotizacion::count(),
+                'cotizaciones_pendientes' => \App\Models\Cotizacion::where('estado', 'pendiente')->count(),
+                'total_disenos' => \App\Models\Diseno::count(),
+                'disenos_aprobados' => \App\Models\Diseno::where('aprovado', true)->count(),
             ];
+
+            // Estadísticas de pagos
+            $totalPagos = \App\Models\Pago::where('estado', 'completado')->sum('total');
+            $pagosPendientes = \App\Models\Pago::where('estado', 'pendiente')->sum('total');
+            $stats['total_ingresos'] = $totalPagos;
+            $stats['pagos_pendientes'] = $pagosPendientes;
+
+            // Proyectos por estado
+            $proyectosPorEstado = \App\Models\Proyecto::select('estado', \DB::raw('count(*) as total'))
+                ->groupBy('estado')
+                ->get()
+                ->mapWithKeys(function ($item) {
+                    return [$item->estado => $item->total];
+                });
+
+            // Proyectos recientes
+            $proyectosRecientes = \App\Models\Proyecto::with(['cliente', 'vendedor'])
+                ->latest()
+                ->take(5)
+                ->get();
+
+            // Ingresos por mes (últimos 6 meses)
+            $ingresosPorMes = \App\Models\Pago::where('estado', 'completado')
+                ->where('created_at', '>=', now()->subMonths(6))
+                ->select(
+                    \DB::raw('EXTRACT(MONTH FROM created_at) as mes'),
+                    \DB::raw('EXTRACT(YEAR FROM created_at) as año'),
+                    \DB::raw('SUM(total) as total')
+                )
+                ->groupBy('año', 'mes')
+                ->orderBy('año')
+                ->orderBy('mes')
+                ->get();
+
+            // Productos más usados
+            $productosPopulares = \App\Models\Producto::withCount('proyectos')
+                ->orderBy('proyectos_count', 'desc')
+                ->take(5)
+                ->get();
+
         } catch (\Exception $e) {
             // Si las tablas no existen, usar valores por defecto
             $stats = [
                 'total_proyectos' => 0,
                 'proyectos_activos' => 0,
+                'proyectos_completados' => 0,
                 'total_clientes' => 0,
+                'total_productos' => 0,
                 'productos_stock_bajo' => 0,
+                'total_cotizaciones' => 0,
+                'cotizaciones_pendientes' => 0,
+                'total_disenos' => 0,
+                'disenos_aprobados' => 0,
+                'total_ingresos' => 0,
+                'pagos_pendientes' => 0,
             ];
+            $proyectosPorEstado = collect();
+            $proyectosRecientes = collect();
+            $ingresosPorMes = collect();
+            $productosPopulares = collect();
         }
         
-        return Inertia::render('Dashboard', ['stats' => $stats]);
+        return Inertia::render('Dashboard', [
+            'stats' => $stats,
+            'proyectosPorEstado' => $proyectosPorEstado,
+            'proyectosRecientes' => $proyectosRecientes,
+            'ingresosPorMes' => $ingresosPorMes,
+            'productosPopulares' => $productosPopulares,
+        ]);
     })->name('dashboard');
 
     // ============================================

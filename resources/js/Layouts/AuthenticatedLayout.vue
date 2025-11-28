@@ -67,12 +67,12 @@ function getMenuForRole(rol) {
             roles: ["ADMIN", "JEFE_INSTALADOR", "INSTALADOR"],
         },
         // VENDEDOR: Diseños
-        {
-            nombre: "Diseños",
-            icono: "layout",
-            ruta: route("disenos.index"),
-            roles: ["ADMIN", "VENDEDOR"],
-        },
+        // {
+        //     nombre: "Diseños",
+        //     icono: "layout",
+        //     ruta: route("disenos.index"),
+        //     roles: ["ADMIN", "VENDEDOR"],
+        // },
         // JEFE_INSTALADOR: Cronogramas y Tareas
         {
             nombre: "Cronogramas",
