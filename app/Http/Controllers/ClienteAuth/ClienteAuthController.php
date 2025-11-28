@@ -15,8 +15,13 @@ class ClienteAuthController extends Controller
     /**
      * Display the client login view.
      */
-    public function create(): Response
+    public function create(): Response|RedirectResponse
     {
+        // Redirect if already authenticated
+        if (Auth::guard('cliente')->check()) {
+            return redirect()->route('cliente.dashboard');
+        }
+
         return Inertia::render('ClienteAuth/Login', [
             'status' => session('status'),
         ]);

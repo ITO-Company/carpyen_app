@@ -4,8 +4,8 @@ use App\Http\Controllers\ClienteAuth\ClienteAuthController;
 use App\Http\Controllers\ClienteAuth\ClientePortalController;
 use Illuminate\Support\Facades\Route;
 
-// Guest routes for clients
-Route::middleware('guest:cliente')->prefix('cliente')->group(function () {
+// Guest routes for clients (no middleware to avoid redirect)
+Route::prefix('cliente')->group(function () {
     Route::get('login', [ClienteAuthController::class, 'create'])
         ->name('cliente.login');
 
