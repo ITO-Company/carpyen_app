@@ -225,3 +225,4 @@ Route::middleware(['auth'])->get('/api/search', function(Request $request) {
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/cliente-auth.php';

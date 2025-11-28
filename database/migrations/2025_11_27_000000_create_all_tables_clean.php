@@ -218,6 +218,11 @@ return new class extends Migration
                 estado VARCHAR(50) DEFAULT \'pendiente\' CHECK (estado IN (\'pendiente\', \'completado\', \'fallido\')),
                 metodo_pago VARCHAR(255) NULL,
                 transaccion_id VARCHAR(255) NULL,
+                pagofacil_transaction_id VARCHAR(255),
+                company_transaction_id VARCHAR(255),
+                qr_base64 TEXT,
+                qr_status VARCHAR(50) DEFAULT \'PENDING\',
+                qr_expiration TIMESTAMP NULL,
                 created_at TIMESTAMP NULL,
                 updated_at TIMESTAMP NULL
             );

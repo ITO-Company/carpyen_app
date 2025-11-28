@@ -142,6 +142,14 @@ class DataSeeder extends Seeder
                 'estado' => 'completado',
                 'cliente_id' => 4,
                 'user_id' => $vendedor ? $vendedor->id : null
+            ],
+            [
+                'nombre' => 'Dormitorio Completo',
+                'descripcion' => 'Juego de dormitorio con cama, ropero y cómoda',
+                'ubicacion' => 'Barrio Equipetrol, Santa Cruz',
+                'estado' => 'en_proceso',
+                'cliente_id' => 5,
+                'user_id' => $vendedor ? $vendedor->id : null
             ]
         ];
 
@@ -223,6 +231,15 @@ class DataSeeder extends Seeder
                     'metodo_pago' => 'efectivo',
                     'estado' => 'completado'
                 ]);
+            } else {
+                // Crear pago pendiente
+                Pago::create([
+                    'plan_pago_id' => $planPago->id,
+                    'fecha' => now()->addDays(15),
+                    'total' => 4000.00,
+                    'metodo_pago' => 'pendiente',
+                    'estado' => 'pendiente'
+                ]);
             }
 
             // Crear Cronograma
@@ -275,6 +292,6 @@ class DataSeeder extends Seeder
         echo "   - " . count($productos) . " Productos\n";
         echo "   - " . count($proveedores) . " Proveedores\n";
         echo "   - " . count($proyectos) . " Proyectos\n";
-        echo "   - Con cotizaciones, diseños, cronogramas, tareas, planes de pago y pagos\n";
+        echo "   - Con cotizaciones, diseños, cronogramas, tareas, planes de pago con pagos pendientes\n";
     }
 }
