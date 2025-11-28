@@ -42,6 +42,7 @@ class ClientePortalController extends Controller
             ->firstOrFail();
 
         return Inertia::render('ClienteAuth/ProyectoPlanes', [
+            'cliente' => $cliente,
             'proyecto' => $proyecto,
             'planPagos' => $proyecto->planPagos,
         ]);
@@ -62,6 +63,7 @@ class ClientePortalController extends Controller
             ->firstOrFail();
 
         return Inertia::render('ClienteAuth/PlanPagos', [
+            'cliente' => $cliente,
             'planPago' => $planPago,
             'proyecto' => $planPago->proyecto,
             'pagos' => $planPago->pagos,

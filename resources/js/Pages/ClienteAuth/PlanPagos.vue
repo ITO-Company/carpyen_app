@@ -1,7 +1,12 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import ClienteAuthenticatedLayout from '@/Layouts/ClienteAuthenticatedLayout.vue';
 
 const props = defineProps({
+    cliente: {
+        type: Object,
+        required: true,
+    },
     planPago: {
         type: Object,
         required: true,
@@ -18,11 +23,11 @@ const props = defineProps({
 
 const getEstadoBadgeClass = (estado) => {
     const classes = {
-        'pendiente': 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30',
-        'completado': 'bg-green-500/20 text-green-300 border-green-400/30',
-        'fallido': 'bg-red-500/20 text-red-300 border-red-400/30',
+        'pendiente': 'badge-warning',
+        'completado': 'badge-success',
+        'fallido': 'badge-danger',
     };
-    return classes[estado] || 'bg-gray-500/20 text-gray-300 border-gray-400/30';
+    return classes[estado] || 'badge-secondary';
 };
 
 const getEstadoLabel = (estado) => {
@@ -56,166 +61,380 @@ const porcentajePagado = (props.planPago.pagado_total / props.planPago.deuda_tot
 <template>
     <Head :title="`Pagos - ${proyecto.nombre}`" />
 
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <!-- Header -->
-        <header class="backdrop-blur-xl bg-white/5 border-b border-white/10 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <Link
-                            :href="route('cliente.proyectos.show', proyecto.id)"
-                            class="flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all duration-200"
-                        >
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                        </Link>
-                        <div>
-                            <h1 class="text-xl font-bold text-white">Detalle de Pagos</h1>
-                            <p class="text-sm text-purple-200">{{ proyecto.nombre }}</p>
+    <ClienteAuthenticatedLayout>
+        <template #header>
+            <div class="flex items-center gap-4">
+                <Link :href="route('cliente.proyectos.show', proyecto.id)" class="back-btn">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </Link>
+                <h2 class="font-semibold text-xl leading-tight" style="color: var(--theme-text-primary)">
+                    Detalle de Pagos - {{ proyecto.nombre }}
+                </h2>
+            </div>
+        </template>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Payment Plan Summary -->
+                <div class="card mb-8 fade-in">
+                    <h3 class="section-title mb-6">Resumen del Plan de Pago</h3>
+                    
+                    <div class="stats-grid mb-6">
+                        <div class="stat-box">
+                            <p class="stat-label">Deuda Total</p>
+                            <p class="stat-value">{{ formatCurrency(planPago.deuda_total) }}</p>
+                        </div>
+                        <div class="stat-box stat-success">
+                            <p class="stat-label">Total Pagado</p>
+                            <p class="stat-value">{{ formatCurrency(planPago.pagado_total) }}</p>
+                        </div>
+                        <div class="stat-box stat-warning">
+                            <p class="stat-label">Saldo Pendiente</p>
+                            <p class="stat-value">{{ formatCurrency(saldoPendiente) }}</p>
+                        </div>
+                        <div class="stat-box stat-info">
+                            <p class="stat-label">Progreso</p>
+                            <p class="stat-value">{{ porcentajePagado.toFixed(1) }}%</p>
                         </div>
                     </div>
-                </div>
-            </div>
-        </header>
 
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Payment Plan Summary -->
-            <div class="mb-8 backdrop-blur-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-white/20 shadow-xl">
-                <h2 class="text-2xl font-bold text-white mb-6">Resumen del Plan de Pago</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                    <div class="backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10">
-                        <p class="text-purple-200 text-sm mb-1">Deuda Total</p>
-                        <p class="text-white text-2xl font-bold">{{ formatCurrency(planPago.deuda_total) }}</p>
-                    </div>
-                    <div class="backdrop-blur-sm bg-green-500/10 rounded-xl p-4 border border-green-400/20">
-                        <p class="text-green-200 text-sm mb-1">Total Pagado</p>
-                        <p class="text-green-100 text-2xl font-bold">{{ formatCurrency(planPago.pagado_total) }}</p>
-                    </div>
-                    <div class="backdrop-blur-sm bg-yellow-500/10 rounded-xl p-4 border border-yellow-400/20">
-                        <p class="text-yellow-200 text-sm mb-1">Saldo Pendiente</p>
-                        <p class="text-yellow-100 text-2xl font-bold">{{ formatCurrency(saldoPendiente) }}</p>
-                    </div>
-                    <div class="backdrop-blur-sm bg-blue-500/10 rounded-xl p-4 border border-blue-400/20">
-                        <p class="text-blue-200 text-sm mb-1">Progreso</p>
-                        <p class="text-blue-100 text-2xl font-bold">{{ porcentajePagado.toFixed(1) }}%</p>
+                    <!-- Progress Bar -->
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" :style="{ width: `${porcentajePagado}%` }"></div>
                     </div>
                 </div>
 
-                <!-- Progress Bar -->
-                <div class="w-full bg-white/10 rounded-full h-4 overflow-hidden border border-white/20">
-                    <div
-                        class="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-500 rounded-full shadow-lg"
-                        :style="{ width: `${porcentajePagado}%` }"
-                    ></div>
+                <!-- Payments Table -->
+                <div class="card fade-in" style="animation-delay: 0.1s">
+                    <h3 class="section-title mb-6">Historial de Pagos</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                    <th>Método de Pago</th>
+                                    <th>Estado</th>
+                                    <th>ID Transacción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="pago in pagos" :key="pago.id">
+                                    <td>
+                                        <div class="flex items-center gap-2">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                                style="color: var(--theme-text-tertiary)"
+                                            >
+                                                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span style="color: var(--theme-text-primary)">{{ formatDate(pago.fecha) }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold" style="color: var(--theme-text-primary)">
+                                            {{ formatCurrency(pago.total) }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex items-center gap-2">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                                style="color: var(--theme-text-tertiary)"
+                                            >
+                                                <path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                            </svg>
+                                            <span style="color: var(--theme-text-secondary)">{{ pago.metodo_pago || 'No especificado' }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span :class="['badge', getEstadoBadgeClass(pago.estado)]">
+                                            <span
+                                                class="badge-dot"
+                                                :class="{
+                                                    'badge-dot-success': pago.estado === 'completado',
+                                                    'badge-dot-warning': pago.estado === 'pendiente',
+                                                    'badge-dot-danger': pago.estado === 'fallido',
+                                                }"
+                                            ></span>
+                                            {{ getEstadoLabel(pago.estado) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <code class="transaction-id">{{ pago.transaccion_id || 'N/A' }}</code>
+                                    </td>
+                                </tr>
+                                <tr v-if="pagos.length === 0">
+                                    <td colspan="5" class="text-center py-12">
+                                        <div class="empty-state">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="64"
+                                                height="64"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.5"
+                                            >
+                                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                            </svg>
+                                            <p class="empty-state-title">No hay pagos registrados</p>
+                                            <p class="empty-state-text">Este plan de pago aún no tiene pagos asociados</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Payments Table -->
-            <div class="backdrop-blur-xl bg-white/5 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                <div class="px-6 py-4 bg-white/5 border-b border-white/10">
-                    <h3 class="text-lg font-semibold text-white">Historial de Pagos</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="bg-white/5 border-b border-white/10">
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wider">
-                                    Fecha
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wider">
-                                    Monto
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wider">
-                                    Método de Pago
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wider">
-                                    Estado
-                                </th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-purple-200 uppercase tracking-wider">
-                                    ID Transacción
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            <tr
-                                v-for="pago in pagos"
-                                :key="pago.id"
-                                class="hover:bg-white/5 transition-colors duration-150"
-                            >
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 text-purple-300 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <span class="text-sm text-white">{{ formatDate(pago.fecha) }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-semibold text-white">
-                                        {{ formatCurrency(pago.total) }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 text-purple-300 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                        </svg>
-                                        <span class="text-sm text-purple-100">{{ pago.metodo_pago || 'No especificado' }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span
-                                        :class="getEstadoBadgeClass(pago.estado)"
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm"
-                                    >
-                                        <span
-                                            class="w-2 h-2 rounded-full mr-2"
-                                            :class="{
-                                                'bg-green-400': pago.estado === 'completado',
-                                                'bg-yellow-400': pago.estado === 'pendiente',
-                                                'bg-red-400': pago.estado === 'fallido',
-                                            }"
-                                        ></span>
-                                        {{ getEstadoLabel(pago.estado) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-purple-100 font-mono">
-                                        {{ pago.transaccion_id || 'N/A' }}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr v-if="pagos.length === 0">
-                                <td colspan="5" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="w-16 h-16 text-purple-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                        </svg>
-                                        <p class="text-purple-200 text-lg font-medium">No hay pagos registrados</p>
-                                        <p class="text-purple-300 text-sm mt-2">Este plan de pago aún no tiene pagos asociados</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Back to Dashboard Button -->
+                <div class="mt-8 flex justify-center">
+                    <Link :href="route('cliente.dashboard')" class="btn btn-secondary">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Volver al Dashboard
+                    </Link>
                 </div>
             </div>
-
-            <!-- Back to Dashboard Button -->
-            <div class="mt-8 flex justify-center">
-                <Link
-                    :href="route('cliente.dashboard')"
-                    class="inline-flex items-center px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-xl border border-white/20 transition-all duration-200 hover:scale-105 active:scale-95"
-                >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Volver al Dashboard
-                </Link>
-            </div>
-        </main>
-    </div>
+        </div>
+    </ClienteAuthenticatedLayout>
 </template>
+
+<style scoped>
+.py-12 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.max-w-7xl {
+    max-width: 80rem;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mb-8 {
+    margin-bottom: 2rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.text-xl {
+    font-size: var(--font-size-xl);
+}
+
+.leading-tight {
+    line-height: 1.25;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--border-radius-md);
+    background: none;
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background-color: var(--theme-bg-secondary);
+    color: var(--theme-primary);
+    border-color: var(--theme-primary);
+}
+
+.section-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--theme-text-primary);
+    margin-bottom: var(--spacing-3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-4);
+}
+
+.stat-box {
+    padding: var(--spacing-4);
+    background: var(--theme-bg-secondary);
+    border: 1px solid var(--theme-border);
+    border-radius: var(--border-radius-md);
+}
+
+.stat-box.stat-success {
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.stat-box.stat-warning {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.stat-box.stat-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--theme-text-secondary);
+    margin-bottom: var(--spacing-2);
+}
+
+.stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--theme-text-primary);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 1rem;
+    background: var(--theme-bg-secondary);
+    border-radius: var(--border-radius-full);
+    overflow: hidden;
+    border: 1px solid var(--theme-border);
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--theme-success), #34d399);
+    transition: width 0.5s ease;
+    border-radius: var(--border-radius-full);
+}
+
+.transaction-id {
+    font-family: 'Courier New', monospace;
+    font-size: var(--font-size-sm);
+    color: var(--theme-text-secondary);
+    background: var(--theme-bg-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-sm);
+}
+
+.badge-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.badge-dot-success {
+    background-color: var(--theme-success);
+}
+
+.badge-dot-warning {
+    background-color: var(--theme-warning);
+}
+
+.badge-dot-danger {
+    background-color: var(--theme-danger);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.py-12 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.empty-state svg {
+    color: var(--theme-text-tertiary);
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    color: var(--theme-text-secondary);
+    margin: 0;
+}
+
+.empty-state-text {
+    font-size: var(--font-size-sm);
+    color: var(--theme-text-tertiary);
+    margin: 0;
+}
+</style>
